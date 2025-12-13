@@ -19,12 +19,13 @@ import {
 } from "@/components/ui/sidebar"
 
 import logo from "@/assets/logo.svg"
+import img from "@/assets/loginImg.jpg"
 
 const data = {
   user: {
-    name: "shadcn",
+    name: "Yash",
     email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    avatar: img,
   },
   navMain: [
     {

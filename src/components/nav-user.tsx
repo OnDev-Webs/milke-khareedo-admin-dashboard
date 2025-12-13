@@ -22,7 +22,7 @@ export function NavUser({
   user: {
     name: string
     email: string
-    avatar: string
+    avatar: any
   }
 }) {
   const { isMobile } = useSidebar()
@@ -34,13 +34,16 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className=""
+              className=" flex items-center"
               // className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-full border">
+              {/* <Avatar className="h-8 w-8 rounded-full border">
                 <AvatarImage src={user.avatar} alt={user.name} />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-              </Avatar>
+              </Avatar> */}
+              <div className="size-8 rounded-full bg-white flex items-center justify-center overflow-hidden">
+                <img src={user?.avatar?.src} alt="profile" className="object-cover h-full w-full "/>
+              </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
