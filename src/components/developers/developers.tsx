@@ -1,10 +1,11 @@
 "use client";
 import { useMemo, useState } from "react";
 import CustomTableSearchBar from "../custom/searchBar";
-import NotFound from "@/app/properties/not-found";
-import PropertiesTable from "./propertyTable";
+import NotFound from "@/app/developers/not-found";
+import DevelopersTable from "./developersTable";
+import DeveloperSheet from "./developersSheet";
 
-type Iproperties = {
+type IDevelopers = {
   id: number;
   propertyName: string;
   developer: string;
@@ -15,7 +16,7 @@ type Iproperties = {
 };
 
 type Header = {
-  key: keyof Iproperties | "actions";
+  key: keyof IDevelopers | "actions";
   label: string;
   minW: string;
 };
@@ -25,8 +26,8 @@ type SortState<T> = {
   dir: "asc" | "desc" | null;
 };
 
-export default function Properties() {
-  const initialData: Iproperties[] = [
+export default function Developers() {
+  const initialData: IDevelopers[] = [
     {
       id: 1,
       propertyName: "SK Villas",
@@ -38,8 +39,8 @@ export default function Properties() {
     },
   ];
 
-  const [data, setData] = useState<Iproperties[]>(initialData);
-  const [sort, setSort] = useState<SortState<Iproperties>>({
+  const [data, setData] = useState<IDevelopers[]>(initialData);
+  const [sort, setSort] = useState<SortState<IDevelopers>>({
     key: null,
     dir: null,
   });
@@ -58,27 +59,29 @@ export default function Properties() {
     () =>
       headers
         .filter((column) => column.key !== "actions")
-        .map((c) => c.key) as (keyof Iproperties)[],
+        .map((c) => c.key) as (keyof IDevelopers)[],
     [headers]
   );
 
   return (
     <div>
-      <CustomTableSearchBar<Iproperties>
+      <CustomTableSearchBar<IDevelopers>
         data={initialData}
         setFilteredData={setData}
         searchKeys={searchKeys}
         placeholder="Search by property, developer, city, amount or status"
         addButton={{
-            buttonName:"Add New Property",
-            url:"/properties/add-property"
+            buttonName:"Add New Developer",
+            url:""
         }}
       />
 
       <div className="h-179 p-4">
         {/* <NotFound/> */}
-        <PropertiesTable/>
+        <DevelopersTable/>
       </div>
+
+      <DeveloperSheet/>
     </div>
   );
 }

@@ -13,6 +13,10 @@ type TableSearchProps<T> = {
   minQueryLength?: number;
   className?: string;
   resetSort?: () => void;
+  addButton?:{
+    buttonName:string;
+    url:string;
+  }
 };
 
 function useDebounce<T>(value: T, delay = 300) {
@@ -34,6 +38,7 @@ export default function CustomTableSearchBar<T extends Record<string, any>>({
   minQueryLength = 1,
   className = "",
   resetSort,
+  addButton
 }: TableSearchProps<T>) {
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -79,7 +84,7 @@ export default function CustomTableSearchBar<T extends Record<string, any>>({
 
   return (
     <div
-      className={` px-3 border-b py-1 flex gap-3 items-center ${className} `}
+      className={` px-3 border-b py-1 flex gap-3 items-center ${className} ${addButton ?"" : "py-3"} `}
       role="search"
     >
       <Search className="w-4 h-4 text-neutral-400" />
@@ -93,15 +98,15 @@ export default function CustomTableSearchBar<T extends Record<string, any>>({
       {query && (
         <button
           onClick={clear}
-          className="hover:bg-black/20 rounded  pr-2"
+          className="hover:cursor-pointer  rounded-full flex items-center justify-center mr-2"
           aria-label="Clear search "
         >
-          <X className="w-4 h-4" />
+          <X className="size-4" />
         </button>
       )}
-      <button className="p-1 border rounded bg-foreground text-white">
-        <a href="/properties/add-property" className="whitespace-nowrap px-1">
-          Add new property
+      <button className={`${addButton ?"" : "hidden"} p-1 border rounded bg-foreground text-white`}>
+        <a href={`${addButton?.url}`} className="whitespace-nowrap px-1">
+         {addButton?.buttonName}
         </a>
       </button>
     </div>
