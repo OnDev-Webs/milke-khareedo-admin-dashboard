@@ -1,7 +1,26 @@
+"use client";
 import loginImg from "@/assets/loginImg.jpg";
 import logo from "@/assets/logo.svg";
+import { loginFrom, loginSchema } from "@/schema/login/loginSchema";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function Login() {
+  const {
+    register,
+    handleSubmit,
+    formState: { isDirty, isLoading, isSubmitSuccessful, errors },
+  } = useForm<loginFrom>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = (payload: loginFrom) => {
+    console.log(payload);
+  };
   return (
     <div className="flex ">
       <div className="max-lg:hidden relative w-2/3 h-dvh">
@@ -26,8 +45,8 @@ export default function Login() {
 
       <div className=" bg-[#F5F5FA] w-full h-svh lg:w-1/3 lg:px-12.5 flex items-center justify-center">
         <div className="w-md h-90 bg-white border-black rounded-4xl py-8  px-6 text-black flex flex-col">
-          <form className="space-y-6">
-            <img src={logo.src} alt="login" className="h-16 mx-auto" />
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <img src={logo.src} alt="login-img" className="h-16 mx-auto" />
             <fieldset className="border border-black px-3 rounded-md">
               <legend className="text-sm px-1">
                 Email Address <span className="text-red-500">*</span>
@@ -35,7 +54,7 @@ export default function Login() {
               <input
                 type="email"
                 id="email"
-                name="email"
+                {...register("email")}
                 placeholder="Enter email"
                 className="w-full outline-none pb-2"
               />
@@ -46,9 +65,9 @@ export default function Login() {
                 Password <span className="text-red-500">*</span>
               </legend>
               <input
-                type="email"
-                id="email"
-                name="email"
+                type="text"
+                id="password"
+                {...register("password")}
                 placeholder="Enter password"
                 className="w-full outline-none pb-2"
               />

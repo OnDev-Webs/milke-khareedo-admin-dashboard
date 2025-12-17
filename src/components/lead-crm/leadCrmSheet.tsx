@@ -235,18 +235,18 @@ export default function LeadCRMSheet() {
       <SheetContent className="w-[420px]">
         <SheetHeader>
           <SheetTitle>
-           <div className="flex items-center justify-between">
-             {mode === "view" && "Lead Details"}
-            {/* {mode === "edit" && "Edit Lead"}
+            <div className="flex items-center justify-between">
+              {mode === "view" && "Lead Details"}
+              {/* {mode === "edit" && "Edit Lead"}
             {mode === "create" && "Create Lead"} */}
-            <button
+              <button
                 type="button"
                 className="rounded-full bg-gray-100 p-2 text-sm text-gray-600"
                 onClick={handleClose}
               >
                 <X size={16} className="text-red-500" />
               </button>
-           </div>
+            </div>
           </SheetTitle>
         </SheetHeader>
 
