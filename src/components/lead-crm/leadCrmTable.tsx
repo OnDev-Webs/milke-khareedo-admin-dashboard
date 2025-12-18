@@ -1,58 +1,78 @@
+"use client";
+
 import {
   ChevronLeft,
   ChevronRight,
   Dot,
+  EllipsisVertical,
   EllipsisVerticalIcon,
 } from "lucide-react";
-import { HeaderLeadCRM } from "./leadCrm";
+import { useEffect, useRef, useState } from "react";
 
-type Lead = {
+interface ILeadCRM {
+  id: number;
   userName: string;
   email: string;
   phone: string;
   date: string;
   projectId: string;
-  status: "Active" | "Inactive";
-};
+  status: string;
+}
 
-const headers: HeaderLeadCRM[] = [
-  { key: "userName", label: "USER NAME", minW: "min-w-[200px]" },
-  { key: "email", label: "EMAIL", minW: "min-w-[160px]" },
-  { key: "phone", label: "PHONE", minW: "min-w-[140px]" },
-  { key: "date", label: "DATE & TIME", minW: "min-w-[160px]" },
-  { key: "projectId", label: "PROJECT ID", minW: "min-w-[140px]" },
-  { key: "status", label: "STATUS", minW: "min-w-[120px]" },
-  { key: "actions", label: "ACTIONS", minW: "min-w-[100px]" },
-];
+interface LeadCRMTableProps {
+  leads: ILeadCRM[];
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  getPageNumbers: () => number[];
+  dataLength: number;
+  indexOfFirstItem: number;
+  indexOfLastItem: number;
+}
 
-const leads: Lead[] = [
-  {
-    userName: "Mohal Hasm",
-    email: "mohal@gmail.com",
-    phone: "+91 98765 43210",
-    date: "12 Sep 2025, 10:30 AM",
-    projectId: "PRJ-001",
-    status: "Active",
-  },
-  {
-    userName: "Rogue Dev",
-    email: "rogue@gmail.com",
-    phone: "+91 91234 56789",
-    date: "13 Sep 2025, 02:15 PM",
-    projectId: "PRJ-002",
-    status: "Inactive",
-  },
-  {
-    userName: "Nomad Singh",
-    email: "nomad@gmail.com",
-    phone: "+91 99887 66554",
-    date: "14 Sep 2025, 09:00 AM",
-    projectId: "PRJ-003",
-    status: "Active",
-  },
-];
+const headers = [
+  { key: "userName", label: "User Name", minW: "min-w-[200px]" },
+  { key: "email", label: "Email", minW: "min-w-[160px]" },
+  { key: "phone", label: "Phone", minW: "min-w-[140px]" },
+  { key: "date", label: "Date & Time", minW: "min-w-[160px]" },
+  { key: "projectId", label: "Project ID", minW: "min-w-[140px]" },
+  { key: "status", label: "Status", minW: "min-w-[120px]" },
+  { key: "actions", label: "Actions", minW: "min-w-[100px]" },
+] as const;
 
-export default function LeadCRMTable() {
+export default function LeadCRMTable({
+  leads,
+  currentPage,
+  totalPages,
+  onPageChange,
+  getPageNumbers,
+  dataLength,
+  indexOfFirstItem,
+  indexOfLastItem,
+}: LeadCRMTableProps) {
+  const pageNumbers = getPageNumbers();
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const actionMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        actionMenuRef.current &&
+        !actionMenuRef.current.contains(event.target as Node)
+      ) {
+        setOpenMenuId(null);
+      }
+    };
+
+    if (openMenuId !== null) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openMenuId]);
+
   return (
     <div className="w-full bg-white">
       <div className="w-full rounded-xl border bg-white">
@@ -63,8 +83,8 @@ export default function LeadCRMTable() {
                 {headers.map((header) => (
                   <th
                     key={header.key}
-                    className={`px-4 py-3  text-sm font-bold ${header.minW} ${
-                      header?.key == "status" || header?.key == "actions"
+                    className={`px-4 py-3 text-sm font-bold ${header.minW} ${
+                      header.key === "status" || header.key === "actions"
                         ? " text-center"
                         : "text-left"
                     }`}
@@ -76,67 +96,161 @@ export default function LeadCRMTable() {
             </thead>
 
             <tbody className="divide-y">
-              {leads.map((row, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-gray-200" />
-                      <span className="font-semibold">
-                        {row.userName}
-                      </span>
-                    </div>
-                  </td>
+              {leads.map((row, index) => {
+                const isLastTwo = index >= leads.length - 2;
 
-                  <td className="px-4 py-3 font-semibold">{row.email}</td>
+                return (
+                  <tr key={row.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-gray-200" />
+                        <span className="font-semibold">{row.userName}</span>
+                      </div>
+                    </td>
 
-                  <td className="px-4 py-3 font-semibold">{row.phone}</td>
+                    <td className="px-4 py-3 font-semibold">{row.email}</td>
 
-                  <td className="px-4 py-3 font-semibold">{row.date}</td>
+                    <td className="px-4 py-3 font-semibold">{row.phone}</td>
 
-                  <td className="px-4 py-3 font-semibold">{row.projectId}</td>
+                    <td className="px-4 py-3 font-semibold">{row.date}</td>
 
-                  <td className="px-4 py-3">
-                    <div className="flex justify-center">
-                      <span
-                        className={`flex items-center rounded-full px-3 py-1 text-sm font-semibold ${
-                          row.status === "Active"
-                            ? "bg-[#BCE288] text-[#2E6B2B]"
-                            : "bg-[#FAA2A4] text-[#B44445]"
-                        }`}
+                    <td className="px-4 py-3 font-semibold">{row.projectId}</td>
+
+                    <td className="px-4 py-3">
+                      <div className="flex justify-center">
+                        <span
+                          className={`flex items-center rounded-full px-3 py-1 text-sm font-semibold ${
+                            row.status.toLowerCase() === "active"
+                              ? "bg-[#BCE288] text-[#2E6B2B]"
+                              : "bg-[#FAA2A4] text-[#B44445]"
+                          }`}
+                        >
+                          <Dot />
+                          {row.status.charAt(0).toUpperCase() +
+                            row.status.slice(1)}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className="relative px-4 py-3 mx-auto w-8">
+                      <div
+                        ref={openMenuId === row.id ? actionMenuRef : null}
+                        className="relative col-span-2 flex justify-end"
                       >
-                        <Dot />
-                        {row.status}
-                      </span>
-                    </div>
-                  </td>
+                        <button
+                          onClick={() =>
+                            setOpenMenuId(openMenuId === row.id ? null : row.id)
+                          }
+                          className="rounded-full bg-gray-100 p-2"
+                        >
+                          <EllipsisVertical size={16} />
+                        </button>
 
-                  <td className="px-4 py-3">
-                    <div className="flex justify-center">
-                      <button className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100">
-                        <EllipsisVerticalIcon size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        {openMenuId === row.id && (
+                          <div
+                            className={`absolute right-0 z-10 w-36 rounded-lg border bg-white shadow ${
+                              isLastTwo ? "bottom-8" : "top-8"
+                            }`}
+                          >
+                            <button
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                // setData(row);
+                                // setMode("edit");
+                                // setOpen(true);
+                              }}
+                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 `}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                // setData(row);
+                                // setMode("view");
+                                // setOpen(true);
+                              }}
+                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
+                            
+                        `}
+                            >
+                              Veiw
+                            </button>
+                            <button
+                              onClick={() => {
+                                // setIsDeleteOpen(true);
+                              }}
+                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
+                            text-red-600
+                            
+                        `}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
 
         <div className="flex items-center justify-center gap-2 border-t p-4 text-sm text-gray-600">
-          <button className="flex items-center gap-2 rounded-full border px-3 py-1">
+          <button
+            className="flex items-center gap-2 rounded-full border px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
             <ChevronLeft size={16} /> Back
           </button>
 
-          <button className="h-7 w-7 rounded-full bg-gray-100">1</button>
-          <button className="h-7 w-7 rounded-full bg-black text-white">
-            2
-          </button>
-          <button className="h-7 w-7 rounded-full bg-gray-100">3</button>
+          {pageNumbers.map((page) => (
+            <button
+              key={page}
+              className={`h-7 w-7 rounded-full flex items-center justify-center ${
+                page === currentPage
+                  ? "bg-black text-white"
+                  : "bg-gray-100 hover:bg-gray-200"
+              }`}
+              onClick={() => onPageChange(page)}
+            >
+              {page}
+            </button>
+          ))}
 
-          <button className="flex items-center gap-2 rounded-full border px-3 py-1">
+          {totalPages > 5 && currentPage < totalPages - 2 && (
+            <button className="h-7 w-7 rounded-full bg-gray-100 flex items-center justify-center">
+              <EllipsisVerticalIcon size={16} className="rotate-90" />
+            </button>
+          )}
+
+          {totalPages > 5 && currentPage < totalPages - 1 && (
+            <button
+              className={`h-7 w-7 rounded-full flex items-center justify-center ${
+                currentPage === totalPages
+                  ? "bg-black text-white"
+                  : "bg-gray-100 hover:bg-gray-200"
+              }`}
+              onClick={() => onPageChange(totalPages)}
+            >
+              {totalPages}
+            </button>
+          )}
+
+          <button
+            className="flex items-center gap-2 rounded-full border px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
             Next <ChevronRight size={16} />
           </button>
+
+          {/* <div className="ml-4 text-sm text-gray-500">
+            Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, dataLength)} of {dataLength} entries
+          </div> */}
         </div>
       </div>
     </div>

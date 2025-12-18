@@ -51,7 +51,6 @@ export default function AddProjectPhotoUpload({
 
   return (
     <div className="h-[85svh]  text-white p-4">
-      {/* EMPTY STATE */}
       {files.length === 0 && (
         <div className="w-full h-full flex items-center justify-center ">
           <div
@@ -70,7 +69,6 @@ export default function AddProjectPhotoUpload({
         </div>
       )}
 
-      {/* IMAGE GRID */}
       {files.length > 0 && (
         <div className=" w-full grid grid-cols-4 gap-4 ">
           {files.map((file, idx) => {
@@ -79,7 +77,7 @@ export default function AddProjectPhotoUpload({
             return (
               <div
                 key={idx}
-                className="relative rounded-md overflow-hidden h-35 w-58 group"
+                className="relative rounded-md overflow-hidden max-h-62 group"
               >
                 <img
                   src={previewUrl}
@@ -103,10 +101,9 @@ export default function AddProjectPhotoUpload({
             );
           })}
 
-          {/* ADD MORE */}
           <div
             onClick={pickFiles}
-            className="w-full flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-blue-400 bg-blue-50/40 px-10 py-8 text-center hover:bg-blue-50"
+            className="w-full h-62 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-blue-400 bg-blue-50/40 px-10 py-8 text-center hover:bg-blue-50"
           >
             <img src={upload.src} alt="" className="mb-4" />
             <p className="text-sm font-medium text-gray-800">
@@ -120,7 +117,6 @@ export default function AddProjectPhotoUpload({
         </div>
       )}
 
-      {/* SINGLE HIDDEN INPUT (ONLY ONE) */}
       <input
         ref={inputRef}
         type="file"

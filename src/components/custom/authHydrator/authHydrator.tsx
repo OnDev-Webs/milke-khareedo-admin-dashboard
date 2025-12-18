@@ -2,25 +2,25 @@
 
 import { useEffect } from "react";
 import { useAppDispatch } from "@/lib/store/hooks";
-import { resetAuth, setAuthFromStorage } from "@/lib/features/auth/authSlice";
+import { IAdmin, resetAuth, setAuthFromStorage } from "@/lib/features/auth/adminAuthSlice";
 
 export default function AuthHydrator() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const host = localStorage.getItem("host");
+    const user = localStorage.getItem("user");
 
-    if (!token || !host) return;
+    if (!token || !user) return;
 
     try {
-      const parsedHost = JSON.parse(host);
+      const parsedHost:IAdmin = JSON.parse(user);
 
       if (!parsedHost?.id || !parsedHost?.email) {
         throw new Error("Invalid host");
       }
 
-      dispatch(setAuthFromStorage({ token, host: parsedHost }));
+      dispatch(setAuthFromStorage({ token, admin: parsedHost }));
     } catch (e) {
       localStorage.removeItem("token");
       localStorage.removeItem("host");

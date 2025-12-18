@@ -4,23 +4,44 @@ import logo from "@/assets/logo.svg";
 import { loginFrom, loginSchema } from "@/schema/login/loginSchema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAppDispatch } from "@/lib/store/hooks";
+import { AppDispatch } from "@/lib/store/store";
+import { useCallback } from "react";
+import { adminLogin } from "@/lib/features/auth/adminAuthApi";
+import { fetchDashboard } from "@/lib/features/dashboard/dashboardApi";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
+  const dispatch = useAppDispatch<AppDispatch>();
+  const router = useRouter();
   const {
     register,
     handleSubmit,
-    formState: { isDirty, isLoading, isSubmitSuccessful, errors },
+    formState: {  isSubmitting, errors },
   } = useForm<loginFrom>({
     resolver: zodResolver(loginSchema),
+    mode: "onSubmit",
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  const onSubmit = (payload: loginFrom) => {
-    console.log(payload);
-  };
+  const onSubmit = useCallback(
+    async (payload: loginFrom) => {
+      const response = await dispatch(adminLogin(payload));
+      if (adminLogin.fulfilled.match(response)) {
+        localStorage.setItem("token", response?.payload?.token);
+        localStorage.setItem("userId", JSON.stringify(response?.payload?.id));
+
+        await dispatch(fetchDashboard());
+
+        router.replace("/dashboard");
+      }
+    },
+    [dispatch]
+  );
+
   return (
     <div className="flex ">
       <div className="max-lg:hidden relative w-2/3 h-dvh">
@@ -75,9 +96,10 @@ export default function Login() {
 
             <button
               type="submit"
-              className="bg-black w-full text-white rounded-md py-3 font-medium"
+              disabled={isSubmitting}
+              className="bg-black w-full text-white rounded-md py-3 font-medium disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Continue
+              {isSubmitting ? "Submitting..." : "Continue"}
             </button>
           </form>
         </div>

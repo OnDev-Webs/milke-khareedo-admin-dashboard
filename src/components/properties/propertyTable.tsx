@@ -1,86 +1,68 @@
+"use client";
+
 import {
   ChevronLeft,
   ChevronRight,
   Dot,
+  EllipsisVertical,
   EllipsisVerticalIcon,
-  ListIcon,
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
-export default function PropertiesTable() {
-  const properties = [
-    {
-      name: "Sisara Dev",
-      developer: "Mohal Hasm",
-      city: "Ahamdabad",
-      count: "00",
-      status: "Active",
-    },
-    {
-      name: "Godrej Properties",
-      developer: "Rogue",
-      city: "Rajkot",
-      count: "02",
-      status: "Active",
-    },
-    {
-      name: "Brigade Group",
-      developer: "Nomad",
-      city: "Mavdi",
-      count: "03",
-      status: "Inactive",
-    },
-    {
-      name: "DLF",
-      developer: "Adrian",
-      city: "Navagam",
-      count: "00",
-      status: "Active",
-    },
-    {
-      name: "Lodha Group",
-      developer: "Barrett",
-      city: "Surat",
-      count: "05",
-      status: "Active",
-    },
-    {
-      name: "Avadh Group",
-      developer: "Cedric",
-      city: "Ahamdabad",
-      count: "06",
-      status: "Active",
-    },
-    {
-      name: "Avadh Group",
-      developer: "Cedric",
-      city: "Ahamdabad",
-      count: "06",
-      status: "Active",
-    },
-    {
-      name: "Avadh Group",
-      developer: "Cedric",
-      city: "Ahamdabad",
-      count: "06",
-      status: "Active",
-    },
-    {
-      name: "Avadh Group",
-      developer: "Cedric",
-      city: "Ahamdabad",
-      count: "06",
-      status: "Active",
-    },
-    {
-      name: "Avadh Group",
-      developer: "Cedric",
-      city: "Ahamdabad",
-      count: "06",
-      status: "Active",
-    },
-  ];
+interface Property {
+  id: number;
+  propertyName: string;
+  developer: string;
+  city: string;
+  groupCount: string;
+  amount: number;
+  status: string;
+}
 
-  const max = 10;
+interface PropertiesTableProps {
+  properties: Property[];
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  getPageNumbers: () => number[];
+  dataLength: number;
+  indexOfFirstItem: number;
+  indexOfLastItem: number;
+}
+
+export default function PropertiesTable({
+  properties,
+  currentPage,
+  totalPages,
+  onPageChange,
+  getPageNumbers,
+  dataLength,
+  indexOfFirstItem,
+  indexOfLastItem,
+}: PropertiesTableProps) {
+  const pageNumbers = getPageNumbers();
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const actionMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        actionMenuRef.current &&
+        !actionMenuRef.current.contains(event.target as Node)
+      ) {
+        setOpenMenuId(null);
+      }
+    };
+
+    if (openMenuId !== null) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openMenuId]);
+
   return (
     <div className="w-full bg-white">
       <div className="w-full rounded-xl border bg-white overflow-x-hidden">
@@ -91,89 +73,191 @@ export default function PropertiesTable() {
                 <th className="px-4 py-3 font-bold text-sm">Property Name</th>
                 <th className="px-4 py-3 font-bold text-sm">Developer</th>
                 <th className="px-4 py-3 font-bold text-sm">City</th>
-                <th className="px-4 py-3 font-bold text-sm text-center">Group’s Count</th>
-                <th className="px-4 py-3 font-bold text-sm text-center">Status</th>
-                <th className="px-4 py-3 font-bold text-sm text-center">Actions</th>
+                <th className="px-4 py-3 font-bold text-sm text-center">
+                  Group's Count
+                </th>
+                <th className="px-4 py-3 font-bold text-sm text-center">
+                  Amount
+                </th>
+                <th className="px-4 py-3 font-bold text-sm text-center">
+                  Status
+                </th>
+                <th className="px-4 py-3 font-bold text-sm text-center">
+                  Actions
+                </th>
               </tr>
             </thead>
 
             <tbody className="divide-y">
-              {properties.map((row, i) => (
-                <tr key={i} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="min-h-8 min-w-8 rounded-full bg-gray-200" />
-                      <span className="font-semibold text-sm text-gray-800">
-                        {row.name}
-                      </span>
-                    </div>
-                  </td>
+              {properties.map((row, index) => {
+                const isLastTwo = index >= properties.length - 2;
 
-                  <td className="px-4 py-3 font-semibold text-sm text-gray-600">
-                    {row.developer}
-                  </td>
+                return (
+                  <tr key={row.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="min-h-8 min-w-8 rounded-full bg-gray-200" />
+                        <span className="font-semibold text-sm text-gray-800">
+                          {row.propertyName}
+                        </span>
+                      </div>
+                    </td>
 
-                  <td className=" px-4 py-3 font-semibold text-sm text-gray-600">
-                    {row.city}
-                  </td>
+                    <td className="px-4 py-3 font-semibold text-sm text-gray-600">
+                      {row.developer}
+                    </td>
 
-                  <td className="px-4 py-3 text-gray-400 flex items-center justify-center">
-                    <div><span className="font-semibold text-sm text-gray-700">
-                      {row.count}
-                    </span>{" "}
-                    / 10</div>
-                  </td>
+                    <td className="px-4 py-3 font-semibold text-sm text-gray-600">
+                      {row.city}
+                    </td>
 
-                  <td className="px-2 py-3">
-                    <div className="flex items-center justify-center">
+                    <td className="px-4 py-3 text-gray-400 flex items-center justify-center">
+                      <div>
+                        <span className="font-semibold text-sm text-gray-700">
+                          {row.groupCount}
+                        </span>{" "}
+                        / 10
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-3 font-semibold text-sm text-gray-600 text-center">
+                      ${row.amount.toLocaleString()}
+                    </td>
+
+                    <td className="px-2 py-3">
+                      <div className="flex items-center justify-center">
+                        <div
+                          className={`rounded-full flex px-2 py-1 font-semibold text-sm ${
+                            row.status.toLowerCase() === "active"
+                              ? "bg-[#BCE288] text-[#2E6B2B]"
+                              : "bg-[#FAA2A4] text-[#B44445]"
+                          }`}
+                        >
+                          <Dot /> <span className="pr-3">{row.status}</span>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="relative px-4 py-3 mx-auto w-8">
                       <div
-                      className={`rounded-full flex  px-2 py-1 font-semibold text-sm ${
-                        row.status === "Active"
-                          ? "bg-[#BCE288] text-[#2E6B2B]"
-                          : "bg-[#FAA2A4] text-[#B44445]"
-                      }`}
-                    >
-                      <Dot /> <span className="pr-3">{row.status}</span>
-                    </div>
-                    </div>
-                  </td>
+                        ref={openMenuId === row.id ? actionMenuRef : null}
+                        className="relative col-span-2 flex justify-end"
+                      >
+                        <button
+                          onClick={() =>
+                            setOpenMenuId(openMenuId === row.id ? null : row.id)
+                          }
+                          className="rounded-full bg-gray-100 p-2"
+                        >
+                          <EllipsisVertical size={16} />
+                        </button>
 
-                  <td className="relative px-4 py-3 mx-auto w-8
-                   ">
-                    <div className="flex items-center justify-center">
-                      <button className="rounded-full bg-gray-100 w-7 h-7 flex items-center justify-center">
-                      <EllipsisVerticalIcon size={16} />
-                    </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        {openMenuId === row.id && (
+                          <div
+                            className={`absolute right-0 z-10 w-36 rounded-lg border bg-white shadow ${
+                              isLastTwo ? "bottom-8" : "top-8"
+                            }`}
+                          >
+                            <button
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                // setData(row);
+                                // setMode("edit");
+                                // setOpen(true);
+                              }}
+                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 `}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                // setData(row);
+                                // setMode("view");
+                                // setOpen(true);
+                              }}
+                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
+                            
+                        `}
+                            >
+                              Veiw
+                            </button>
+                            <button
+                              onClick={() => {
+                                // setIsDeleteOpen(true);
+                              }}
+                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
+                            text-red-600
+                            
+                        `}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
 
         <div className="flex items-center justify-center gap-2 border-t p-4 text-sm text-gray-600">
-          <button className=" border rounded-full px-3 py-1 flex items-center justify-center gap-2">
+          <button
+            className="border rounded-full px-3 py-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
             <ChevronLeft size={16} /> Back
           </button>
-          <button className="rounded-full bg-gray-100 w-7 h-7 flex items-center justify-center">
-            1
-          </button>
-          <button className="rounded-full bg-black w-7 h-7 flex items-center justify-center text-white">
-            2
-          </button>
-          <button className="rounded-full bg-gray-100 w-7 h-7 flex items-center justify-center">
-             <EllipsisVerticalIcon size={16} className="rotate-90" />
-          </button>
-          <button className="rounded-full bg-gray-100 w-7 h-7 flex items-center justify-center">
-            4
-          </button>
-          <button className="rounded-full bg-gray-100 w-7 h-7 flex items-center justify-center">
-            5
-          </button>
-          <button className="border rounded-full px-3 py-1 flex items-center justify-center gap-2">
+
+          {pageNumbers.map((page) => (
+            <button
+              key={page}
+              className={`rounded-full w-7 h-7 flex items-center justify-center ${
+                currentPage === page
+                  ? "bg-black text-white"
+                  : "bg-gray-100 hover:bg-gray-200"
+              }`}
+              onClick={() => onPageChange(page)}
+            >
+              {page}
+            </button>
+          ))}
+
+          {totalPages > 5 && currentPage < totalPages - 2 && (
+            <button className="rounded-full bg-gray-100 w-7 h-7 flex items-center justify-center">
+              <EllipsisVerticalIcon size={16} className="rotate-90" />
+            </button>
+          )}
+
+          {totalPages > 5 && currentPage < totalPages - 1 && (
+            <button
+              className={`rounded-full w-7 h-7 flex items-center justify-center ${
+                currentPage === totalPages
+                  ? "bg-black text-white"
+                  : "bg-gray-100 hover:bg-gray-200"
+              }`}
+              onClick={() => onPageChange(totalPages)}
+            >
+              {totalPages}
+            </button>
+          )}
+
+          <button
+            className="border rounded-full px-3 py-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
             Next <ChevronRight size={16} />
           </button>
+
+          {/* <div className="ml-4 text-sm text-gray-500">
+            Showing {indexOfFirstItem + 1} to{" "}
+            {Math.min(indexOfLastItem, dataLength)} of {dataLength} entries
+          </div> */}
         </div>
       </div>
     </div>

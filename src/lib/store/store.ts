@@ -1,17 +1,36 @@
-import {configureStore} from "@reduxjs/toolkit"
+import {
+  Action,
+  combineSlices,
+  configureStore,
+  ThunkAction,
+} from "@reduxjs/toolkit";
+import adminAuthReducer from "@/lib/features/auth/adminAuthSlice";
+import dashboard from "@/lib/features/dashboard/dashboardSlice";
 
+const rootReducer = combineSlices({
+  auth: adminAuthReducer,
+  dashboard:dashboard
+});
 
+export const makeStore = () => {
+  return configureStore({
+    reducer: rootReducer,
 
+    middleware: (getDefaultMiddleware) => {
+      return getDefaultMiddleware().concat();
+    },
+  });
+};
 
+export type RootState = ReturnType<typeof rootReducer>;
 
-export const makeStore = ()=>{
-    return configureStore({
-        reducer:{}
-    })
-}
+export type AppStore = ReturnType<typeof makeStore>;
 
-// Infer the type of makeStore
-export type AppStore = ReturnType<typeof makeStore>
-// Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<AppStore['getState']>
-export type AppDispatch = AppStore['dispatch']
+export type AppDispatch = AppStore["dispatch"];
+
+export type AppThunk<ThunkReturnType = void> = ThunkAction<
+  ThunkReturnType,
+  RootState,
+  unknown,
+  Action
+>;

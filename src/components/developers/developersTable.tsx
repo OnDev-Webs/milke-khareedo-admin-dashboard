@@ -2,17 +2,29 @@ import {
   ChevronLeft,
   ChevronRight,
   Dot,
+  EllipsisVertical,
   EllipsisVerticalIcon,
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 type Developer = {
+  id: number;
   name: string;
   projectCount: string;
   city: string;
   status: "Active" | "Inactive";
 };
 
-const MAX_COUNT = 10;
+interface DevelopersTableProps {
+  developers: Developer[];
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  getPageNumbers: () => number[];
+  dataLength: number;
+  indexOfFirstItem: number;
+  indexOfLastItem: number;
+}
 
 const TABLE_HEADERS = [
   { key: "name", label: "Developer Name" },
@@ -22,25 +34,39 @@ const TABLE_HEADERS = [
   { key: "actions", label: "Actions" },
 ] as const;
 
-const developers: Developer[] = [
-  { name: "Sisara Dev", projectCount: "00", city: "Rajkot", status: "Active" },
-  {
-    name: "Godrej Properties",
-    projectCount: "02",
-    city: "Rajkot",
-    status: "Active",
-  },
-  {
-    name: "Brigade Group",
-    projectCount: "03",
-    city: "Mavdi",
-    status: "Inactive",
-  },
-  { name: "DLF", projectCount: "00", city: "Navagam", status: "Active" },
-  { name: "Lodha Group", projectCount: "05", city: "Surat", status: "Active" },
-];
+export default function DevelopersTable({
+  developers,
+  currentPage,
+  totalPages,
+  onPageChange,
+  getPageNumbers,
+  dataLength,
+  indexOfFirstItem,
+  indexOfLastItem,
+}: DevelopersTableProps) {
+  const pageNumbers = getPageNumbers();
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const actionMenuRef = useRef<HTMLDivElement | null>(null);
 
-export default function DevelopersTable() {
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        actionMenuRef.current &&
+        !actionMenuRef.current.contains(event.target as Node)
+      ) {
+        setOpenMenuId(null);
+      }
+    };
+
+    if (openMenuId !== null) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openMenuId]);
+
   return (
     <div className="w-full bg-white">
       <div className="w-full rounded-xl border bg-white overflow-x-hidden">
@@ -50,12 +76,7 @@ export default function DevelopersTable() {
             <thead className="bg-[#f3f6ff] text-left text-gray-700">
               <tr>
                 {TABLE_HEADERS.map((header) => (
-                  <th
-                    key={header.key}
-                    className={`px-4 py-3 text-sm font-bold ${
-                      header.key == "actions" ? "text-center" : ""
-                    }`}
-                  >
+                  <th key={header.key} className="px-4 py-3 text-sm font-bold">
                     {header.label}
                   </th>
                 ))}
@@ -64,69 +85,172 @@ export default function DevelopersTable() {
 
             {/* TABLE BODY */}
             <tbody className="divide-y">
-              {developers.map((row, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  {/* NAME */}
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-gray-200" />
-                      <span className="font-semibold text-gray-800">
-                       <div> {row.name}</div>
-                      </span>
-                    </div>
-                  </td>
+              {developers.map((row, index) => {
+                const isLastTwo = index >= developers.length - 2;
 
-                  {/* COUNT */}
-                  <td className="px-4 py-3">
-                    <div>
-                      <span className="font-semibold text-gray-700">
-                        {row?.projectCount ? row.projectCount : "-"}
-                      </span>
-                    </div>
-                  </td>
+                return (
+                  <tr key={row.id} className="hover:bg-gray-50">
+                    {/* NAME */}
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-gray-200" />
+                        <span className="font-semibold text-gray-800">
+                          <div> {row.name}</div>
+                        </span>
+                      </div>
+                    </td>
 
-                  {/* CITY */}
-                  <td className="px-4 py-3 font-medium text-gray-600">
-                    <div>{row.city}</div>
-                  </td>
+                    {/* COUNT */}
+                    <td className="px-4 py-3">
+                      <div>
+                        <span className="font-semibold text-gray-700">
+                          {row?.projectCount ? row.projectCount : "-"}
+                        </span>
+                      </div>
+                    </td>
 
-                  <td className=" px-4 py-3">
+                    {/* CITY */}
+                    <td className="px-4 py-3 font-medium text-gray-600">
+                      <div>{row.city}</div>
+                    </td>
+
+                    {/* STATUS */}
+                    {/* <td className="px-2 py-3">
                     <div className="flex items-center justify-center">
-                      <button className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100">
-                        <EllipsisVerticalIcon size={16} />
-                      </button>
+                      <div
+                        className={`rounded-full flex px-2 py-1 font-semibold text-sm ${
+                          row.status.toLowerCase() === "active"
+                            ? "bg-[#BCE288] text-[#2E6B2B]"
+                            : "bg-[#FAA2A4] text-[#B44445]"
+                        }`}
+                      >
+                        <Dot /> <span className="pr-3">{row.status}</span>
+                      </div>
                     </div>
-                  </td>
-                </tr>
-              ))}
+                  </td> */}
+
+                    {/* ACTIONS */}
+                    <td className="relative px-4 py-3 mx-auto w-8">
+                      <div
+                        ref={openMenuId === row.id ? actionMenuRef : null}
+                        className="relative col-span-2 flex justify-end"
+                      >
+                        <button
+                          onClick={() =>
+                            setOpenMenuId(openMenuId === row.id ? null : row.id)
+                          }
+                          className="rounded-full bg-gray-100 p-2"
+                        >
+                          <EllipsisVertical size={16} />
+                        </button>
+
+                        {openMenuId === row.id && (
+                          <div
+                            className={`absolute right-0 z-10 w-36 rounded-lg border bg-white shadow ${
+                              isLastTwo ? "bottom-8" : "top-8"
+                            }`}
+                          >
+                            <button
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                // setData(row);
+                                // setMode("edit");
+                                // setOpen(true);
+                              }}
+                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 `}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                // setData(row);
+                                // setMode("view");
+                                // setOpen(true);
+                              }}
+                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
+                            
+                        `}
+                            >
+                              Veiw
+                            </button>
+                            <button
+                              onClick={() => {
+                                // setIsDeleteOpen(true);
+                              }}
+                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
+                            text-red-600
+                            
+                        `}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
 
         {/* PAGINATION */}
         <div className="flex items-center justify-center gap-2 border-t p-4 text-sm text-gray-600">
-          <button className="flex items-center gap-2 rounded-full border px-3 py-1">
+          <button
+            className="flex items-center gap-2 rounded-full border px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
             <ChevronLeft size={16} /> Back
           </button>
 
-          {[1, 2, "...", 4, 5].map((page, i) => (
+          {pageNumbers.map((page) => (
             <button
-              key={i}
+              key={page}
               className={`flex h-7 w-7 items-center justify-center rounded-full ${
-                page === 2 ? "bg-black text-white" : "bg-gray-100 text-gray-700"
+                page === currentPage
+                  ? "bg-black text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
+              onClick={() => onPageChange(page)}
             >
-              {page === "..." ? (
-                <EllipsisVerticalIcon size={16} className="rotate-90" />
-              ) : (
-                page
-              )}
+              {page}
             </button>
           ))}
 
-          <button className="flex items-center gap-2 rounded-full border px-3 py-1">
+          {totalPages > 5 && currentPage < totalPages - 2 && (
+            <button className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100">
+              <EllipsisVerticalIcon size={16} className="rotate-90" />
+            </button>
+          )}
+
+          {totalPages > 5 && currentPage < totalPages - 1 && (
+            <button
+              className={`flex h-7 w-7 items-center justify-center rounded-full ${
+                currentPage === totalPages
+                  ? "bg-black text-white"
+                  : "bg-gray-100 hover:bg-gray-200"
+              }`}
+              onClick={() => onPageChange(totalPages)}
+            >
+              {totalPages}
+            </button>
+          )}
+
+          <button
+            className="flex items-center gap-2 rounded-full border px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
             Next <ChevronRight size={16} />
           </button>
+
+          <div className="ml-4 text-sm text-gray-500">
+            Showing {indexOfFirstItem + 1} to{" "}
+            {Math.min(indexOfLastItem, dataLength)} of {dataLength} entries
+          </div>
         </div>
       </div>
     </div>

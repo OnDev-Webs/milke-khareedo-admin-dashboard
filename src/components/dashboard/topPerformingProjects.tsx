@@ -1,3 +1,6 @@
+import cardImg from "@/assets/cardImg.jpg"
+import Image from "next/image";
+
 export default function TopPerformingProjects() {
   type Project = {
     id: string;
@@ -21,33 +24,28 @@ export default function TopPerformingProjects() {
       </div>
 
       <div className="overflow-x-auto md:overflow-visible">
-        <div className="flex gap-4 px-2 overflow-x-auto ">
+        <div className="flex gap-4 overflow-x-auto hide-scrollbar">
           {cardData.map((proj) => (
             <div
               key={proj.id}
-              className="min-w-52  rounded-xl bg-[#f7f5ff] p-4 shadow-sm "
+              className="min-w-52 rounded-xl overflow-hidden bg-[#f7f5ff] shadow-sm "
             >
-              <div className="rounded-lg p-3">
-                <div className="h-28 w-full rounded-md flex items-center justify-center">
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-14 w-14 text-[#d7d3eb]"
-                    fill="currentColor"
-                  >
-                    <path d="M21 19l-5.5-7-3.5 4.5-2.5-3L3 19z" />
-                  </svg>
+              <div className="relative rounded-lg ">
+                <div className="h-56 w-full rounded-md flex items-center justify-center">
+                  <Image src={cardImg} alt="" className="w-full h-full"/>
                 </div>
-              </div>
-
-              <div className="mt-3 text-sm flex justify-between items-center">
+              <div className="absolute bottom-0 space-y-2 text-sm px-4 bg-black/70 inset-0 flex flex-col justify-end pb-2">
+                <Image src={cardImg} alt="" className="w-10 h-10 bg-gray-200 rounded-full" />
                 <div>
-                  <div className="font-semibold text-gray-800">{proj.name}</div>
-                  <div className="mt-1 text-xs text-gray-500">
+                  <div className=" text-white text-sm">{proj.name}</div>
+                  <div className=" text-base text-orange-500 font-semibold">
                     {proj.newLeads} New Leads
                   </div>
                 </div>
-                <div className="w-10 h-10 bg-gray-200 rounded-full" />
               </div>
+              <div className=" inset-0 z-0 absolute"></div>
+              </div>
+
             </div>
           ))}
         </div>

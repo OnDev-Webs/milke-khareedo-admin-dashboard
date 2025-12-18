@@ -60,7 +60,7 @@ const cardData: Project[] = [
 export default function DashboardLeads() {
   return (
     <section className="w-full">
-      <div className="mx-auto  w-full grid gap-6 md:grid-cols-3">
+      <div className="mx-auto  w-full grid gap-4 md:grid-cols-3">
         <div className="col-span-2">
           <Leads/>
         </div>

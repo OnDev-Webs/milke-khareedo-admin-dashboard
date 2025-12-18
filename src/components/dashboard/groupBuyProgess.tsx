@@ -15,7 +15,7 @@ export default function GroupBuyProgess() {
   return (
     <section
       id="groupBuyProgress"
-      className="w-full shadow-[0_10px_30px_rgba(0,0,0,0.04)] bg-white border rounded-xl"
+      className="w-full shadow-[0_10px_30px_rgba(0,0,0,0.04)] bg-white border rounded-xl h-full"
     >
       <div className="p-5 space-y-5">
         <h1 className="text-xl font-bold text-[#474747]">Group-Buy Progress</h1>
@@ -23,10 +23,10 @@ export default function GroupBuyProgess() {
           {arr?.map((row) => (
             <div
               key={row?.id}
-              className="p-5 border rounded-lg bg-linear-to-r from-black/40  to-transparent"
+              className="p-5 rounded-lg bg-linear-to-r from-card via-card to-transparent"
             >
-              <div className="font-semibold text-lg">{row?.title}</div>
-              <div>{row?.description}</div>
+              <div className="font-semibold text-xl">{row?.title}</div>
+              <div className="text-gray-500">{row?.description}</div>
             </div>
           ))}
         </div>

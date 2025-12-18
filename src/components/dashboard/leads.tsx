@@ -1,162 +1,92 @@
 "use client";
-import { ChevronDown, ChevronDownCircle, ChevronRight } from "lucide-react";
-import { useState } from "react";
 
-type Lead = {
+type Performance = {
   id: string;
   name: string;
-  email: string;
-  phone: string;
-  date: string;
-  project: string;
-  price: string;
+  totalLead: number;
+  contacted: string;
+  responseTime: string;
 };
 
-const data: Lead[] = [
+const data: Performance[] = [
   {
     id: "1",
-    name: "Hello, John Deo!",
-    email: "Email address",
-    phone: "+91 695 265 2651",
-    date: "12 dec 2025",
-    project: "Project name",
-    price: "₹ 20.00 Cr",
+    name: "John Deo",
+    totalLead: 26,
+    contacted: "80%",
+    responseTime: "6H",
   },
   {
     id: "2",
-    name: "Hello, John Deo!",
-    email: "Email address",
-    phone: "+91 695 265 2651",
-    date: "12 dec 2025",
-    project: "Project name",
-    price: "₹ 20.00 Cr",
+    name: "Simran Jose",
+    totalLead: 26,
+    contacted: "50%",
+    responseTime: "6H",
   },
   {
     id: "3",
-    name: "Hello, John Deo!",
-    email: "Email address",
-    phone: "+91 695 265 2651",
-    date: "12 dec 2025",
-    project: "Project name",
-    price: "₹ 20.00 Cr",
+    name: "Dusyant Singh",
+    totalLead: 26,
+    contacted: "80%",
+    responseTime: "6H",
   },
   {
     id: "4",
-    name: "Hello, John Deo!",
-    email: "Email address",
-    phone: "+91 695 265 2651",
-    date: "12 dec 2025",
-    project: "Project name",
-    price: "₹ 20.00 Cr",
+    name: "Chirag Trada",
+    totalLead: 26,
+    contacted: "80%",
+    responseTime: "6H",
   },
 ];
 
-const arr = [
-  {
-    id: 1,
-    title: "Today",
-  },
-  {
-    id: 2,
-    title: "Yesterday",
-  },
-];
-
-export default function Leads() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [current, setCurrent] = useState("Select");
-  const handleClose = () => setIsOpen(false);
+export default function SalesTeamPerformance() {
   return (
     <section>
-      <div className="rounded-2xl border bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
-        <div className="flex items-start justify-between">
-          <h3 className="text-xl font-bold text-[#474747]">Leads</h3>
+      <div className="rounded-2xl border bg-white p-5">
+        <h3 className="mb-4 text-lg font-bold text-gray-900">
+          Sales Team Performance
+        </h3>
 
-          <div className="flex items-center gap-4 text-sm text-gray-600">
-            <div className="relative w-32">
-              <div
-                onClick={() => setIsOpen((pre) => !pre)}
-                className="border  rounded-md px-4 py-1 flex items-center justify-between"
-              >
-                {current}
-                <ChevronDown
-                  className={`size-4 transition-transform ease-in-out ${
-                    isOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </div>
-              {isOpen && (
-                <div className="absolute w-full top-8 border px-4 space-y-1 rounded-md bg-[#F9F9F9]">
-                  {arr?.map((row) => (
-                    <div
-                      onClick={() => {
-                        setCurrent(row?.title);
-                        handleClose();
-                      }}
-                      className="py-1"
-                    >
-                      {row?.title}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="rounded-lg bg-[#F4F6FF] text-left font-medium text-gray-600">
+                <th className="px-4 py-3">User Name</th>
+                <th className="px-4 py-3 text-center">Total Lead</th>
+                <th className="px-4 py-3 text-center">
+                  Lead Contacted
+                </th>
+                <th className="px-4 py-3 text-center">
+                  Response Time
+                </th>
+              </tr>
+            </thead>
 
-            <button className="hover:underline">View All</button>
-            <button className="hover:underline">Export Data</button>
-          </div>
-        </div>
-
-        <div className="mt-6 overflow-x-auto">
-          <table className="min-w-full border-separate border-spacing-y-3">
             <tbody>
-              {data.map((lead) => (
-                <tr key={lead.id} className=" ">
-                  <td className=" ">
+              {data.map((row) => (
+                <tr
+                  key={row.id}
+                  className="border-b last:border-none"
+                >
+                  <td className="px-4 py-1">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200">
-                        <svg
-                          viewBox="0 0 24 24"
-                          className="h-5 w-5 text-gray-500"
-                          fill="currentColor"
-                        >
-                          <path d="M12 12a4 4 0 10-4-4 4 4 0 004 4zm0 2c-3.33 0-6 1.34-6 3v1h12v-1c0-1.66-2.67-3-6-3z" />
-                        </svg>
-                      </div>
-
-                      <div>
-                        <div className="text-sm font-semibold text-gray-800">
-                          {lead.name}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {lead.email}
-                        </div>
-                      </div>
+                      <div className="h-8 w-8 rounded-full bg-gray-200" />
+                      <span className="font-medium text-gray-900">
+                        {row.name}
+                      </span>
                     </div>
                   </td>
 
-                  <td className="px-4 text-sm text-gray-700">{lead.phone}</td>
-                  <td className="px-4 text-sm text-gray-700">{lead.date}</td>
-
-                  <td className="px-4 text-sm font-medium text-gray-800">
-                    {lead.project}
+                  <td className="px-4 py-3 text-center text-gray-800">
+                    {row.totalLead}
                   </td>
-                  <td className="px-4">
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm font-semibold text-gray-900">
-                        {lead.price}
-                      </div>
 
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200">
-                        <svg
-                          viewBox="0 0 24 24"
-                          className="h-4 w-4 text-gray-500"
-                          fill="currentColor"
-                        >
-                          <path d="M21 19l-5.5-7-3.5 4.5-2.5-3L3 19z" />
-                        </svg>
-                      </div>
-                    </div>
+                  <td className="px-4 py-3 text-center font-semibold text-red-500">
+                    {row.contacted}
+                  </td>
+
+                  <td className="px-4 py-3 text-center text-gray-800">
+                    {row.responseTime}
                   </td>
                 </tr>
               ))}
