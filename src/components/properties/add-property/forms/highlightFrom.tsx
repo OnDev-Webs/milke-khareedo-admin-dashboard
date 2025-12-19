@@ -1,29 +1,41 @@
 "use client";
 
-import { useState } from "react";
 import { Check, Plus, X } from "lucide-react";
+import { useState } from "react";
+import { useFormContext } from "react-hook-form";
 
 export default function AddHighlightsForm() {
-  const [value, setValue] = useState("");
-  const [showHighlight, setShowHightlight] = useState(false);
-  const [highlights, setHighlights] = useState([
+  const { watch, setValue } = useFormContext<any>();
+
+  const highlights: string[] = watch("highlights") || [
     "Landscaped park with children’s play area",
     "Futuristically Planned Sewage & Solid waste disposal",
     "Under Ground Electrical Cabling",
     "Project Approved By CUDA, Municipal E Katha With RERA Approved",
-  ]);
+  ];
+
+  const [value, setValueLocal] = useState("");
+  const [showHighlight, setShowHightlight] = useState(false);
 
   const addHighlight = () => {
     const v = value.trim();
     if (!v) return;
     if (highlights.includes(v)) return;
 
-    setHighlights([...highlights, v]);
-    setValue("");
+    setValue("highlights", [...highlights, v], {
+      shouldValidate: true,
+    });
+
+    setValueLocal("");
+    setShowHightlight(false);
   };
 
-  const removeHighlight = (item:string) => {
-    setHighlights(highlights.filter((h) => h !== item));
+  const removeHighlight = (item: string) => {
+    setValue(
+      "highlights",
+      highlights.filter((h) => h !== item),
+      { shouldValidate: true }
+    );
   };
 
   return (
@@ -51,21 +63,21 @@ export default function AddHighlightsForm() {
             <input
               type="text"
               value={value}
-              onChange={(e) => setValue(e.target.value)}
+              onChange={(e) => setValueLocal(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addHighlight()}
               placeholder="Enter here"
               className="flex-1 text-sm outline-none"
             />
 
             {value ? (
-              <button type="button" onClick={addHighlight} className="ml-2  ">
+              <button type="button" onClick={addHighlight} className="ml-2">
                 <Check className="size-4 text-green-500 hover:text-green-700" />
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => setShowHightlight(false)}
-                className="ml-2  "
+                className="ml-2"
               >
                 <X className="size-4 text-red-500 hover:text-red-700" />
               </button>

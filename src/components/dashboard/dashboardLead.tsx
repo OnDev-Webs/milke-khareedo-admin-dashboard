@@ -1,5 +1,5 @@
 import GroupBuyProgess from "./groupBuyProgess";
-import Leads from "./leads";
+import Leads from "./salesTeamPerformance";
 
 type Lead = {
   id: string;

@@ -1,17 +1,13 @@
 "use client";
 
-import { Upload, X } from "lucide-react";
-import React, { useRef, useState } from "react";
+import { X } from "lucide-react";
+import React, { useRef } from "react";
+import { useFormContext } from "react-hook-form";
 import upload from "@/assets/upload.svg";
 
-export default function AddProjectPhotoUpload({
-  onBack,
-  onContinue,
-}: {
-  onBack?: () => void;
-  onContinue?: () => void;
-}) {
-  const [files, setFiles] = useState<File[]>([]);
+export default function AddProjectPhotoUpload() {
+  const { setValue, watch } = useFormContext<any>();
+  const files: File[] = watch("projectImages") || [];
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   /** OPEN FILE PICKER */
@@ -27,35 +23,27 @@ export default function AddProjectPhotoUpload({
     );
 
     if (validImages.length) {
-      setFiles((prev) => [...prev, ...validImages]);
+      setValue("projectImages", [...files, ...validImages], {
+        shouldValidate: true,
+      });
     }
 
-    // Reset input so same file can be selected again
     e.target.value = "";
   };
 
   /** REMOVE IMAGE */
   const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  /** CONTINUE */
-  const handleSubmit = () => {
-    if (!files.length) {
-      alert("Please upload at least one photo.");
-      return;
-    }
-
-    if (onContinue) onContinue();
+    const updated = files.filter((_, i) => i !== index);
+    setValue("projectImages", updated, { shouldValidate: true });
   };
 
   return (
-    <div className="h-[85svh]  text-white p-4">
+    <div className="h-[85svh] p-4">
       {files.length === 0 && (
-        <div className="w-full h-full flex items-center justify-center ">
+        <div className="w-full h-full flex items-center justify-center">
           <div
             onClick={pickFiles}
-            className="w-full max-w-100 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-blue-400 bg-blue-50/40 px-10 py-8 text-center hover:bg-blue-50"
+            className="w-full max-w-100 cursor-pointer flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-blue-400 bg-blue-50/40 px-10 py-8 text-center hover:bg-blue-50"
           >
             <img src={upload.src} alt="" className="mb-4" />
             <p className="text-sm font-medium text-gray-800">
@@ -70,14 +58,14 @@ export default function AddProjectPhotoUpload({
       )}
 
       {files.length > 0 && (
-        <div className=" w-full grid grid-cols-4 gap-4 ">
+        <div className="grid grid-cols-4 gap-4">
           {files.map((file, idx) => {
             const previewUrl = URL.createObjectURL(file);
 
             return (
               <div
                 key={idx}
-                className="relative rounded-md overflow-hidden max-h-62 group"
+                className="relative rounded-md overflow-hidden group"
               >
                 <img
                   src={previewUrl}
@@ -86,14 +74,15 @@ export default function AddProjectPhotoUpload({
                 />
 
                 <button
+                  type="button"
                   onClick={() => removeFile(idx)}
-                  className="absolute top-2 right-2 bg-black/60 p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
+                  className="absolute top-2 right-2 bg-black/60 p-1 rounded-full opacity-0 group-hover:opacity-100"
                 >
-                  <X size={14} />
+                  <X size={14} className="text-white" />
                 </button>
 
                 {idx === 0 && (
-                  <div className="absolute bottom-2 left-2 bg-black/60 text-xs px-2 py-1 rounded">
+                  <div className="absolute bottom-2 left-2 bg-black/60 text-xs px-2 py-1 rounded text-white">
                     Cover photo
                   </div>
                 )}
@@ -103,15 +92,12 @@ export default function AddProjectPhotoUpload({
 
           <div
             onClick={pickFiles}
-            className="w-full h-62 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-blue-400 bg-blue-50/40 px-10 py-8 text-center hover:bg-blue-50"
+            className="cursor-pointer flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-blue-400 bg-blue-50/40 px-10 py-8 text-center hover:bg-blue-50"
           >
             <img src={upload.src} alt="" className="mb-4" />
             <p className="text-sm font-medium text-gray-800">
               Upload Project Photo{" "}
               <span className="font-semibold text-[#1849D6]">browse</span>
-            </p>
-            <p className="mt-1 text-xs text-gray-500">
-              Max 10 MB files are allowed
             </p>
           </div>
         </div>

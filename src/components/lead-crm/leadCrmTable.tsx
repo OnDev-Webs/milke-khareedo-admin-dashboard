@@ -8,6 +8,8 @@ import {
   EllipsisVerticalIcon,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import LeadCRMSheet, { SheetMode } from "./leadCrmSheet";
+import DeletePopUp from "../custom/popups/delete";
 
 interface ILeadCRM {
   id: number;
@@ -52,6 +54,11 @@ export default function LeadCRMTable({
 }: LeadCRMTableProps) {
   const pageNumbers = getPageNumbers();
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [open, setOpen] = useState<boolean>(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
+
+  const [data, setData] = useState<any>(null);
+  const [mode, setMode] = useState<SheetMode>("");
   const actionMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -75,7 +82,9 @@ export default function LeadCRMTable({
 
   return (
     <div className="w-full bg-white">
-      <div className="w-full rounded-xl border bg-white">
+      <LeadCRMSheet mode={mode} data={data} open={open} setOpen={setOpen} />
+      <DeletePopUp open={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} />
+      <div className="w-full rounded-xl overflow-hidden border bg-white">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-[#f3f6ff] text-gray-700">
@@ -148,27 +157,16 @@ export default function LeadCRMTable({
 
                         {openMenuId === row.id && (
                           <div
-                            className={`absolute right-0 z-10 w-36 rounded-lg border bg-white shadow ${
+                            className={`absolute right-0 z-10 w-36 rounded-lg overflow-hidden border bg-white shadow ${
                               isLastTwo ? "bottom-8" : "top-8"
                             }`}
                           >
                             <button
                               onClick={() => {
                                 setOpenMenuId(null);
-                                // setData(row);
-                                // setMode("edit");
-                                // setOpen(true);
-                              }}
-                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 `}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => {
-                                setOpenMenuId(null);
-                                // setData(row);
-                                // setMode("view");
-                                // setOpen(true);
+                                setData(row);
+                                setMode("view");
+                                setOpen(true);
                               }}
                               className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
                             
@@ -178,7 +176,7 @@ export default function LeadCRMTable({
                             </button>
                             <button
                               onClick={() => {
-                                // setIsDeleteOpen(true);
+                                setIsDeleteOpen(true);
                               }}
                               className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
                             text-red-600
@@ -186,6 +184,17 @@ export default function LeadCRMTable({
                         `}
                             >
                               Delete
+                            </button>
+                            <button
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                // setData(row);
+                                // setMode("edit");
+                                // setOpen(true);
+                              }}
+                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 `}
+                            >
+                              Export PDF
                             </button>
                           </div>
                         )}

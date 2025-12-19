@@ -15,7 +15,7 @@ export default function TopPerformingProjects() {
   return (
     <div className="border rounded-2xl bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
       <div className="flex items-start justify-between mb-6.5">
-        <h3 className="text-xl font-bold text-[#474747]">
+        <h3 className="text-xl font-bold">
           Top Performing Projects
         </h3>
         <div className="text-sm text-gray-600">

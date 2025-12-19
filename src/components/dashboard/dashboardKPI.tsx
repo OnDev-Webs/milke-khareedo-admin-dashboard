@@ -16,7 +16,7 @@ export default function DashboardKPI() {
   return (
     <section className="w-full">
       <div className="mx-auto rounded-2xl bg-white p-6 border border-gray-200">
-        <h3 className="mb-4 text-xl font-semibold text-gray-800">Dashboard</h3>
+        <h3 className="mb-4 text-xl font-bold">Dashboard</h3>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {/* cards */}

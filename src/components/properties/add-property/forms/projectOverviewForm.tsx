@@ -1,182 +1,11 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import { useForm } from "react-hook-form";
-
-type ProjectOverviewFormValues = {
-  projectName: string;
-  developer: string;
-  location: string;
-  projectSize: string;
-  landParcel: string;
-  possessionDate: string;
-  startingDeveloperPrice: string;
-  startingOfferPrice: string;
-  requiredMembers: string;
-  reraId: string;
-  possessionStatus: string;
-  overview: string;
-  reraQr?: FileList;
-};
-
-export default function AddProjectOverviewForm() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ProjectOverviewFormValues>({
-    defaultValues: {
-      projectName: "Maarq Vista",
-      developer: "Maarq Realty",
-      location: "Nandi Hills",
-      projectSize: "1 Tower / 195 units",
-      landParcel: "4.3 Acres",
-      possessionDate: "Dec, 2027",
-      startingDeveloperPrice: "₹ 5.31 Crore",
-      startingOfferPrice: "₹ 4.68 Crore",
-      requiredMembers: "10",
-      reraId: "PHJ125826426326",
-      possessionStatus: "Ready To Move",
-      overview:
-        "Nestled between Sathya Sai Grama and Chikkaballapur town, VISTA is RERA approved project...",
-    },
-  });
-
-  const onSubmit = (data: ProjectOverviewFormValues) => {
-    console.log("Form Data:", data);
-  };
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <main className="p-4">
-        <div className="grid gap-6 md:grid-cols-3">
-          <Field label="Project Name*" error={errors.projectName}>
-            <input
-              className="outline-none w-full"
-              {...register("projectName", { required: true })}
-            />
-          </Field>
-
-          <Field label="Developer*" error={errors.developer}>
-            <select {...register("developer", { required: true })}>
-              <option>Maarq Realty</option>
-            </select>
-          </Field>
-
-          <Field label="Location*" error={errors.location}>
-            <input
-              className="outline-none w-full"
-              {...register("location", { required: true })}
-            />
-          </Field>
-
-          <Field label="Project Size*" error={errors.projectSize}>
-            <input
-              className="outline-none w-full"
-              {...register("projectSize", { required: true })}
-            />
-          </Field>
-
-          <Field label="Land Parcel*" error={errors.landParcel}>
-            <input
-              className="outline-none w-full"
-              {...register("landParcel", { required: true })}
-            />
-          </Field>
-
-          <Field label="Possession*" error={errors.possessionDate}>
-            <input
-              className="outline-none w-full"
-              {...register("possessionDate", { required: true })}
-            />
-          </Field>
-
-          <Field
-            label="Starting Developer Price*"
-            error={errors.startingDeveloperPrice}
-          >
-            <input
-              className="outline-none w-full"
-              {...register("startingDeveloperPrice", { required: true })}
-            />
-          </Field>
-
-          <Field
-            label="Starting Offer Price*"
-            error={errors.startingOfferPrice}
-          >
-            <input
-              className="outline-none w-full"
-              {...register("startingOfferPrice", { required: true })}
-            />
-          </Field>
-
-          <Field label="Required Group Member*" error={errors.requiredMembers}>
-            <input
-              className="outline-none w-full"
-              {...register("requiredMembers", { required: true })}
-            />
-          </Field>
-
-          <Field label="RERA ID*" error={errors.reraId}>
-            <input
-              className="outline-none w-full"
-              {...register("reraId", { required: true })}
-            />
-          </Field>
-
-          <fieldset className="border border-dashed px-4 rounded-md">
-            <legend className="text-xs font-semibold text-gray-700">
-              RERA QR Code
-            </legend>
-            <input
-              type="file"
-              {...register("reraQr")}
-              className="w-full text-sm text-gray-500 outline-none"
-            />
-          </fieldset>
-
-          <Field label="Possession Status*" error={errors.possessionStatus}>
-            <select {...register("possessionStatus", { required: true })}>
-              <option>Ready To Move</option>
-              <option>Under Construction</option>
-            </select>
-          </Field>
-        </div>
-
-        <div className="mt-5">
-          <fieldset className="border rounded-md px-3 py-2">
-            <legend className="text-xs font-semibold text-gray-700 px-1">
-              Overview<span className="text-red-400 ">*</span>
-            </legend>
-            <textarea
-              rows={4}
-              {...register("overview", { required: true })}
-              className="w-full  outline-none text-sm resize-none"
-            />
-          </fieldset>
-          {errors.overview && (
-            <p className="text-[11px] text-red-500">Overview is required</p>
-          )}
-        </div>
-
-        <div className="mt-8 rounded-xl border border-[#1849D6] border-dashed bg-[#F4F8FF] py-5 text-center flex flex-col items-center justify-center">
-          <Plus />
-          <p className="mt-2 text-sm text-gray-500">Add Configuration</p>
-        </div>
-
-        {/* <div className="mt-5 flex justify-end">
-          <button
-            type="submit"
-            className="bg-black text-white px-6 py-2 rounded"
-          >
-            Save & Continue
-          </button>
-        </div> */}
-      </main>
-    </form>
-  );
-}
+import { Plus, Trash } from "lucide-react";
+import { useFormContext } from "react-hook-form";
+import { PropertyFormValues } from "@/schema/property/propertySchema";
+import { useState } from "react";
+import Home from "@/app/page";
+import CustomDropdown from "@/components/custom/dropdawn";
 
 function Field({
   label,
@@ -197,5 +26,226 @@ function Field({
         <p className="text-[11px] text-red-500">This field is required</p>
       )}
     </div>
+  );
+}
+
+export default function AddProjectOverviewForm() {
+  const {
+    register,
+    setValue,
+    formState: { errors },
+  } = useFormContext<PropertyFormValues>();
+
+  const handleReraFile = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setValue("reraQRcode", {
+      url: URL.createObjectURL(files[0]),
+      isCover: true,
+      order: 1,
+    });
+  };
+
+  const [configuration, setConfiguration] = useState(false);
+
+  const bhkOptions = [
+    "1 BHK",
+    "1.5 BHK",
+    "2 BHK",
+    "2.5 BHK",
+    "3 BHK",
+    "3.5 BHK",
+    "4 BHK",
+    "4.5 BHK",
+    "5.5 BHK",
+    "6 BHK",
+    "6.5 BHK",
+    "7 BHK",
+  ];
+  const [open, setOpen] = useState(false);
+  const [selectOptionValue, setSelectOptionValue] = useState("");
+  console.log(selectOptionValue)
+
+  return (
+    <main className="p-4 border border-red-400 h-[87vh]  overflow-y-auto">
+      <div className="grid gap-6 md:grid-cols-3">
+        <Field label="Project Name*" error={errors.projectName}>
+          <input className="w-full" {...register("projectName", { required: true })} />
+        </Field>
+
+        <Field label="Developer*" error={errors.developerId}>
+          <select {...register("developerId", { required: true })}>
+            <option value="Maarq Realty">Maarq Realty</option>
+          </select>
+        </Field>
+
+        <Field label="Location*" error={errors.location}>
+          <input className="w-full"  {...register("location", { required: true })} />
+        </Field>
+
+        <Field label="Project Size*" error={errors.projectSize}>
+          <input className="w-full"  {...register("projectSize", { required: true })} />
+        </Field>
+
+        <Field label="Land Parcel*" error={errors.landParcel}>
+          <input className="w-full"  {...register("landParcel", { required: true })} />
+        </Field>
+
+        <Field label="Possession Date*" error={errors.possessionDate}>
+          <input
+            type="date"
+            className="w-full" 
+            {...register("possessionDate", { required: true })}
+          />
+        </Field>
+
+        <Field label="Developer Price*" error={errors.developerPrice}>
+          <input className="w-full"  {...register("developerPrice", { required: true })} />
+        </Field>
+
+        <Field label="Offer Price*" error={errors.offerPrice}>
+          <input className="w-full"  {...register("offerPrice", { required: true })} />
+        </Field>
+
+        <Field label="Required Group Members*" error={errors.minGroupMembers}>
+          <input
+            type="number"
+            className="w-full" 
+            {...register("minGroupMembers", { required: true })}
+          />
+        </Field>
+
+        <Field label="RERA ID*" error={errors.reraId}>
+          <input className="w-full"  {...register("reraId", { required: true })} />
+        </Field>
+
+        <div className="">
+          <Field label="RERA QR Code" error={errors.reraQRcode}>
+            <input
+              type="file"
+              className="w-full"
+              onChange={(e) => handleReraFile(e.target.files)}
+            />
+          </Field>
+        </div>
+
+        <Field label="Possession Status*" error={errors.possessionStatus}>
+          <select  {...register("possessionStatus", { required: true })}>
+            <option value="Ready To Move">Ready To Move</option>
+            <option value="Under Construction">Under Construction</option>
+          </select>
+        </Field>
+      </div>
+
+      <div className="mt-5">
+        <Field label="Overview*" error={errors.overview}>
+          <textarea
+            rows={4}
+            {...register("overview", { required: true })}
+            className="w-full resize-none"
+          />
+        </Field>
+      </div>
+
+      {configuration && (
+        <div className="mt-5 border rounded-xl p-4 space-y-4">
+          <div className="flex justify-between items-center w-full">
+            <div className="border rounded-md border-black px-4 py-1 text-sm font-medium">
+             {selectOptionValue}
+            </div>
+
+            <div className="flex gap-2 items-center">
+              <button
+                type="button"
+                className="px-4 py-1 border border-dashed flex items-center gap-2 rounded-md text-sm"
+              >
+                Add Sub-Configuration
+                <Plus size={16} />
+              </button>
+
+              <button
+                onClick={() => setConfiguration(false)}
+                className="bg-orange-500 p-2 rounded-md text-white"
+              >
+                <Trash size={16} />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="border rounded-lg p-3 space-y-3">
+              <div className="grid grid-cols-2 gap-3 items-end">
+                <fieldset className="border rounded-md px-3 py-2">
+                  <legend className="text-xs font-semibold text-gray-700 px-1">
+                    Carpet area <span className="text-red-400">*</span>
+                  </legend>
+                  <input
+                    className="w-full outline-none text-sm"
+                    placeholder="3500.00 ft²"
+                    value={3500}
+                  />
+                </fieldset>
+
+                <div className="bg-gray-100 h-12 rounded-md px-3 py-2 text-sm font-semibold text-gray-700">
+                  ₹ 1.6 Cr
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 items-end">
+                <fieldset className="border rounded-md px-3 py-2">
+                  <legend className="text-xs font-semibold text-gray-700 px-1">
+                    Carpet area <span className="text-red-400">*</span>
+                  </legend>
+                  <input
+                    className="w-full outline-none text-sm"
+                    placeholder="4100.00 ft²"
+                    value={4100}
+                  />
+                </fieldset>
+
+                <div className="bg-gray-100 h-12 rounded-md px-3 py-2 text-sm font-semibold text-gray-700">
+                  ₹ 6.53 Lak
+                </div>
+              </div>
+            </div>
+
+            <div className="border rounded-lg p-3 space-y-3">
+              <div className="grid grid-cols-2 gap-3 items-end">
+                <fieldset className="border rounded-md px-3 py-2">
+                  <legend className="text-xs font-semibold text-gray-700 px-1">
+                    Carpet area <span className="text-red-400">*</span>
+                  </legend>
+                  <input
+                    className="w-full outline-none text-sm"
+                    placeholder="3640.00 ft²"
+                    value={3640}
+                  />
+                </fieldset>
+
+                <div className="bg-gray-100 h-12 rounded-md px-3 py-2 text-sm font-semibold text-gray-700">
+                  ₹ 55.31 Lak
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className=" pt-2"
+          >
+            <CustomDropdown
+            items={bhkOptions}
+            placeholder="Select Configuration"
+            onSelect={(item)=>setSelectOptionValue(item)}
+            /> 
+          </div>
+        </div>
+      )}
+      <div
+        onClick={() => setConfiguration(true)}
+        className="mt-8 rounded-xl border border-[#1849D6] border-dashed bg-[#F4F8FF] py-5 text-center flex flex-col items-center justify-center"
+      >
+        <Plus />
+        <p className="mt-2 text-sm text-gray-500">Add Configuration</p>
+      </div>
+    </main>
   );
 }

@@ -22,7 +22,6 @@ export default function CustomDropdown({
   const [selected, setSelected] = useState(defaultValue || placeholder);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // ✅ Close when clicked outside – safe for Next.js hydration
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -44,15 +43,13 @@ export default function CustomDropdown({
   };
 
   return (
-    <div  ref={wrapperRef} className={`relative w-fit min-w-44 ${className}`}>
-      {/* Trigger */}
+    <div ref={wrapperRef} className={`relative w-fit min-w-44 ${className}`}>
       <div
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center justify-between gap-2 border p-2  cursor-pointer bg-neutral-900 select-none"
+        className="rounded-md flex items-center justify-between gap-2 border p-2  cursor-pointer  select-none"
       >
         <div className="flex gap-2 items-center overflow-hidden">
-          {/* <div className="size-6 bg-white rounded shrink-0" /> */}
-          <span className="text-white truncate">{selected}</span>
+          <span className=" truncate">{selected}</span>
         </div>
 
         <ChevronDown
@@ -62,14 +59,13 @@ export default function CustomDropdown({
         />
       </div>
 
-      {/* List */}
       {open && (
-        <div className="absolute top-full mt-2 left-0 w-full bg-[#262626] border rounded shadow-md z-999">
+        <div className="absolute h-36 overflow-y-auto top-full mt-2 left-0 w-full border rounded shadow-md z-999 bg-white">
           {items.map((item) => (
             <div
               key={item}
               onClick={() => handleSelect(item)}
-              className="px-3 py-2 text-white hover:bg-neutral-700 cursor-pointer"
+              className="px-3 py-2 hover:bg-neutral-100 cursor-pointer"
             >
               {item}
             </div>

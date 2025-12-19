@@ -1,16 +1,9 @@
+import { useAppSelector } from "@/lib/store/hooks";
+import { RootState } from "@/lib/store/store";
+
 export default function GroupBuyProgess() {
-  const arr = [
-    {
-      id: 1,
-      title: "Target Units",
-      description: "250 Units",
-    },
-    {
-      id: 2,
-      title: "Confirmed Units",
-      description: "80 Units",
-    },
-  ];
+
+  const {groupBuyProgress} = useAppSelector((state:RootState)=>state.dashboard)
 
   return (
     <section
@@ -18,17 +11,30 @@ export default function GroupBuyProgess() {
       className="w-full shadow-[0_10px_30px_rgba(0,0,0,0.04)] bg-white border rounded-xl h-full"
     >
       <div className="p-5 space-y-5">
-        <h1 className="text-xl font-bold text-[#474747]">Group-Buy Progress</h1>
+        <h1 className="text-xl font-bold ">Group-Buy Progress</h1>
         <div className="space-y-5">
-          {arr?.map((row) => (
+          
             <div
-              key={row?.id}
               className="p-5 rounded-lg bg-linear-to-r from-card via-card to-transparent"
             >
-              <div className="font-semibold text-xl">{row?.title}</div>
-              <div className="text-gray-500">{row?.description}</div>
+              <div className="font-semibold text-xl">{"Target Units"}</div>
+              <div className="text-gray-500">{groupBuyProgress?.targetUnits} {" Units"}</div>
             </div>
-          ))}
+
+            <div
+              className="p-5 rounded-lg bg-linear-to-r from-card via-card to-transparent"
+            >
+              <div className="font-semibold text-xl">{"Confirmed Units"}</div>
+              <div className="text-gray-500">{groupBuyProgress?.confirmedUnits}{" Units"}</div>
+            </div>
+
+            <div
+              className="hidden p-5 rounded-lg bg-linear-to-r from-card via-card to-transparent"
+            >
+              <div className="font-semibold text-xl">{"Progress Percentage"}</div>
+              <div className="text-gray-500">{groupBuyProgress?.progressPercentage}{"%"}</div>
+            </div>
+
         </div>
       </div>
     </section>

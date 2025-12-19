@@ -1,11 +1,13 @@
-"use client"
+"use client";
 
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
+import { useFormContext } from "react-hook-form";
 
 export default function AddAmenitiesForm() {
-  const [amenity, setAmenity] = useState("");
-  const [amenities, setAmenities] = useState([
+  const { watch, setValue } = useFormContext<any>();
+
+  const amenities: string[] = watch("amenities") || [
     "Fitness Center",
     "Library",
     "Security Guard",
@@ -17,19 +19,28 @@ export default function AddAmenitiesForm() {
     "Parking",
     "Swimming Pool",
     "24/7 Power Backup",
-  ]);
+  ];
+
+  const [amenity, setAmenity] = useState("");
 
   const addAmenity = () => {
     const value = amenity.trim();
     if (!value) return;
     if (amenities.includes(value)) return;
 
-    setAmenities([...amenities, value]);
+    setValue("amenities", [...amenities, value], {
+      shouldValidate: true,
+    });
+
     setAmenity("");
   };
 
-  const removeAmenity = (item:string) => {
-    setAmenities(amenities.filter((a) => a !== item));
+  const removeAmenity = (item: string) => {
+    setValue(
+      "amenities",
+      amenities.filter((a) => a !== item),
+      { shouldValidate: true }
+    );
   };
 
   return (
@@ -45,7 +56,12 @@ export default function AddAmenitiesForm() {
               type="text"
               value={amenity}
               onChange={(e) => setAmenity(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addAmenity()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addAmenity();
+                }
+              }}
               placeholder="Ex: Swimming Pool"
               className="flex-1 rounded-lg py-2 text-sm outline-none"
             />
@@ -55,8 +71,8 @@ export default function AddAmenitiesForm() {
               onClick={addAmenity}
               className="rounded-lg bg-gray-100 px-4 py-1.5 text-sm font-medium text-black flex gap-2 items-center"
             >
-              Add 
-              <Plus size={16} strokeWidth={1}/>
+              Add
+              <Plus size={16} strokeWidth={1} />
             </button>
           </div>
         </fieldset>
@@ -80,7 +96,7 @@ export default function AddAmenitiesForm() {
                   onClick={() => removeAmenity(item)}
                   className="text-black"
                 >
-                  <X size={16} strokeWidth={1}/>
+                  <X size={16} strokeWidth={1} />
                 </button>
               </span>
             ))}

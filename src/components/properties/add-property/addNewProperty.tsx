@@ -8,6 +8,8 @@ import AddAmenitiesForm from "./forms/amenitiesForm";
 import AddLayoutPlanForm from "./forms/layoutPlanForm";
 import AddRelationshipManagerForm from "./forms/relationshipManager";
 import ConnectivityForm from "./forms/connectivityForm";
+import { usePropertyForm } from "@/hooks/usePropertyForm";
+import { FormProvider } from "react-hook-form";
 
 type Step = {
   id: number;
@@ -141,7 +143,7 @@ export default function AddNewProperty() {
       title: "connectivity",
       description:
         "Add the project’s main location and surrounding points of interest. This helps buyers understand access, convenience, and overall livability.",
-      component: <ConnectivityForm/>,
+      component: <ConnectivityForm />,
       guidelines: [
         {
           title: "Project Location",
@@ -192,70 +194,90 @@ export default function AddNewProperty() {
 
   const currentStep = newProperty.find((item) => item.step === activeStep);
 
+  const methods = usePropertyForm();
+
+  const { handleSubmit } = methods;
+
+  const onSubmit = (data: any) => {
+    console.log("FINAL PAYLOAD", data);
+    // dispatch(createProperty(data))
+  };
+
   return (
-    <div className=" h-full  grid grid-cols-24">
-      <aside className="col-span-5 border-r h-full  bg-white p-4 flex flex-col justify-between">
-        <div>
-          <h3 className="mb-4 text-sm font-semibold text-gray-900">
-            {currentStep?.title}
-          </h3>
-
-          <ul className=" mb-4 space-y-2 text-xs text-gray-500 list-disc pl-4">
-            <li>{currentStep?.description}</li>
-          </ul>
-
-          <div className="border-t pt-4 space-y-2">
-            {currentStep?.guidelines?.map((data) => (
+    <div>
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className=" h-full  grid grid-cols-24">
+            <aside className="col-span-5 border-r h-full  bg-white p-4 flex flex-col justify-between">
               <div>
-                <h4 className="mb-2 text-xs font-semibold text-gray-700">
-                  {data?.title}
-                </h4>
+                <h3 className="mb-4 text-sm font-semibold text-gray-900">
+                  {currentStep?.title}
+                </h3>
 
-                <ul className="space-y-1 text-xs text-gray-500 list-disc pl-4">
-                  {data?.list?.map((i) => (
-                    <li key={i}
-                    >{i}</li>
-                  ))}
+                <ul className=" mb-4 space-y-2 text-xs text-gray-500 list-disc pl-4">
+                  <li>{currentStep?.description}</li>
                 </ul>
+
+                <div className="border-t pt-4 space-y-2">
+                  {currentStep?.guidelines?.map((data,index) => (
+                    <div
+                    key={`key ${index}`}
+                    >
+                      <h4 className="mb-2 text-xs font-semibold text-gray-700">
+                        {data?.title}
+                      </h4>
+
+                      <ul className="space-y-1 text-xs text-gray-500 list-disc pl-4">
+                        {data?.list?.map((i) => (
+                          <li key={i}>{i}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
 
-        <div className="flex items-center justify-center">
-          <button className="whitespace-nowrap border px-16 rounded py-1 bg-black text-white">
-            Save Property
-          </button>
-        </div>
-      </aside>
+              <div className="flex items-center justify-center">
+                <button
+                  type="submit"
+                  className="whitespace-nowrap border px-16 rounded py-1 bg-black text-white"
+                >
+                  Save Property
+                </button>
+              </div>
+            </aside>
 
-      <div className="col-span-19 ">
-        <div className="flex gap-4 border-b px-4">
-          {newProperty.map((item) => {
-            const isActive = item.step === activeStep;
+            <div className="col-span-19 ">
+              <div className="flex gap-4 border-b px-4">
+                {newProperty.map((item) => {
+                  const isActive = item.step === activeStep;
 
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveStep(item.step)}
-                className={`px-4 py-2  text-sm font-medium transition
+                  return (
+                    <button
+                    type="button"
+                      key={item.id}
+                      onClick={() => setActiveStep(item.step)}
+                      className={`px-4 py-2  text-sm font-medium transition
                 ${
                   isActive
                     ? "border-b-2 border-black"
                     : "text-[#7B7B7B] hover:bg-[#F4F8FF]"
                 }`}
-              >
-                {item.title}
-              </button>
-            );
-          })}
-        </div>
+                    >
+                      {item.title}
+                    </button>
+                  );
+                })}
+              </div>
 
-        {/* Step Content */}
-        <div className="">
-          <div className="">{currentStep?.component}</div>
-        </div>
-      </div>
+              {/* Step Content */}
+              <div className="">
+                <div className="">{currentStep?.component}</div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </FormProvider>
     </div>
   );
 }

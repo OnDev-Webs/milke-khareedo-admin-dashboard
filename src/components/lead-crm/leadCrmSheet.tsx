@@ -28,7 +28,14 @@ export type Lead = {
   status: "active" | "inactive";
 };
 
-export type SheetMode = "view" | "edit" | "create";
+type LeadSheetProps = {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  data?: Lead;
+  mode: SheetMode;
+};
+
+export type SheetMode = "view" | "edit" | "";
 
 function LeadView() {
   // function LeadView({ lead }: { lead: Lead }) {
@@ -221,11 +228,12 @@ function Info({ label, value }: { label: string; value: string }) {
   );
 }
 
-export default function LeadCRMSheet() {
-  const [open, setOpen] = useState<boolean>(true);
-  let selectedLead = null;
-  //   if (!open || !selectedLead) return null;
-  const [mode, setMode] = useState<SheetMode>("view");
+export default function LeadCRMSheet({
+  open,
+  setOpen,
+  data,
+  mode,
+}: LeadSheetProps) {
   const handleClose = () => {
     setOpen(false);
   };

@@ -6,6 +6,9 @@ import {
   EllipsisVerticalIcon,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import DeveloperSheet, { SheetMode } from "./developersSheet";
+import PropertiesSheet from "../properties/propertiesSheet";
+import DeletePopUp from "../custom/popups/delete";
 
 type Developer = {
   id: number;
@@ -46,6 +49,11 @@ export default function DevelopersTable({
 }: DevelopersTableProps) {
   const pageNumbers = getPageNumbers();
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [open, setOpen] = useState<boolean>(true);
+  const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
+
+  const [data, setData] = useState<any>(null);
+  const [mode, setMode] = useState<SheetMode>("create");
   const actionMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -69,6 +77,8 @@ export default function DevelopersTable({
 
   return (
     <div className="w-full bg-white">
+      <DeveloperSheet mode={mode} data={data} open={open} setOpen={setOpen} />
+      <DeletePopUp open={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} />
       <div className="w-full rounded-xl border bg-white overflow-x-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -153,9 +163,9 @@ export default function DevelopersTable({
                             <button
                               onClick={() => {
                                 setOpenMenuId(null);
-                                // setData(row);
-                                // setMode("edit");
-                                // setOpen(true);
+                                setData(row);
+                                setMode("edit");
+                                setOpen(true);
                               }}
                               className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 `}
                             >
@@ -164,9 +174,9 @@ export default function DevelopersTable({
                             <button
                               onClick={() => {
                                 setOpenMenuId(null);
-                                // setData(row);
-                                // setMode("view");
-                                // setOpen(true);
+                                setData(row);
+                                setMode("view");
+                                setOpen(true);
                               }}
                               className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
                             
@@ -176,7 +186,7 @@ export default function DevelopersTable({
                             </button>
                             <button
                               onClick={() => {
-                                // setIsDeleteOpen(true);
+                                setIsDeleteOpen(true);
                               }}
                               className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
                             text-red-600
