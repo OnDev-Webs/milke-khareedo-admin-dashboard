@@ -6,10 +6,14 @@ import {
 } from "@reduxjs/toolkit";
 import adminAuthReducer from "@/lib/features/auth/adminAuthSlice";
 import dashboard from "@/lib/features/dashboard/dashboardSlice";
+import properties from "@/lib/features/properties/propertiesSlice"
+import developers from "@/lib/features/developers/developerSlice"
 
 const rootReducer = combineSlices({
   auth: adminAuthReducer,
-  dashboard:dashboard
+  dashboard:dashboard,
+  properties:properties,
+  developers:developers
 });
 
 export const makeStore = () => {

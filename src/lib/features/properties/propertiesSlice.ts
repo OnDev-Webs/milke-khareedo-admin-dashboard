@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { fetchProperties, fetchPropertyById } from "./propertiesApi";
+import { deletePropertyById, fetchProperties, fetchPropertyById } from "./propertiesApi";
 
 export interface Developer {
   _id: string;
@@ -82,7 +82,7 @@ export interface Property {
 }
 
 
-interface PropertyState {
+export interface PropertyState {
   PropertiesList: Property[];
   selected: Property | null;
   loading: boolean;
@@ -137,6 +137,19 @@ const propertySlice = createSlice({
         state.selected = action.payload;
       })
       .addCase(fetchPropertyById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Something went wrong";
+      })
+
+      // Fetch by ID
+      .addCase(deletePropertyById.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deletePropertyById.fulfilled, (state, action) => {
+        state.loading = false;
+        // state.selected = action.payload;
+      })
+      .addCase(deletePropertyById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Something went wrong";
       });

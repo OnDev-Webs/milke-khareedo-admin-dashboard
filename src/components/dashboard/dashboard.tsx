@@ -6,12 +6,15 @@ import DashboardLeads from "./dashboardLead";
 import DashboardRecentLeads from "./dashboardReacentLeads";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { fetchDashboard } from "@/lib/features/dashboard/dashboardApi";
+import { fetchProperties } from "@/lib/features/properties/propertiesApi";
 
 export default function Dashboard() {
   const dispatch = useAppDispatch();
 
   async function getDashboardData() {
     await dispatch(fetchDashboard());
+
+    await dispatch(fetchProperties())
   }
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { fetchDeveloperById, fetchDevelopers } from "./developerApi";
+import { createDeveloper, fetchDeveloperById, fetchDevelopers } from "./developerApi";
 
 
 export interface SourcingManager {
@@ -32,7 +32,7 @@ export interface DeveloperResponse {
 
 
 interface DeveloperState {
-  list: Developer[];
+  developers: Developer[];
   selected: Developer | null;
   loading: boolean;
   error: string | null;
@@ -42,7 +42,7 @@ interface DeveloperState {
 }
 
 const initialState: DeveloperState = {
-  list: [],
+  developers: [],
   selected: null,
   loading: false,
   error: null,
@@ -61,14 +61,27 @@ const developerSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch all
+      
+      .addCase(createDeveloper.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createDeveloper.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(createDeveloper.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Something went wrong";
+      })
+
       .addCase(fetchDevelopers.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchDevelopers.fulfilled, (state, action) => {
         state.loading = false;
-        state.list = action.payload.data;
+        state.developers = action.payload?.data;
         state.page = action.payload.page;
         state.limit = action.payload.limit;
         state.total = action.payload.total;
@@ -78,7 +91,7 @@ const developerSlice = createSlice({
         state.error = action.payload || "Something went wrong";
       })
 
-      // Fetch by ID
+      
       .addCase(fetchDeveloperById.pending, (state) => {
         state.loading = true;
       })

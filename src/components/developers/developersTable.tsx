@@ -9,14 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import DeveloperSheet, { SheetMode } from "./developersSheet";
 import PropertiesSheet from "../properties/propertiesSheet";
 import DeletePopUp from "../custom/popups/delete";
-
-type Developer = {
-  id: number;
-  name: string;
-  projectCount: string;
-  city: string;
-  status: "Active" | "Inactive";
-};
+import { Developer } from "@/lib/features/developers/developerSlice";
 
 interface DevelopersTableProps {
   developers: Developer[];
@@ -33,7 +26,6 @@ const TABLE_HEADERS = [
   { key: "name", label: "Developer Name" },
   { key: "projectCount", label: "No of Projects" },
   { key: "city", label: "City" },
-  // { key: "status", label: "Status" },
   { key: "actions", label: "Actions" },
 ] as const;
 
@@ -48,10 +40,10 @@ export default function DevelopersTable({
   indexOfLastItem,
 }: DevelopersTableProps) {
   const pageNumbers = getPageNumbers();
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
-  const [open, setOpen] = useState<boolean>(true);
+  const [openMenuId, setOpenMenuId] = useState<number | string| null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
-
+  
+  const [open, setOpen] = useState<boolean>(false);
   const [data, setData] = useState<any>(null);
   const [mode, setMode] = useState<SheetMode>("create");
   const actionMenuRef = useRef<HTMLDivElement | null>(null);
@@ -78,7 +70,7 @@ export default function DevelopersTable({
   return (
     <div className="w-full bg-white">
       <DeveloperSheet mode={mode} data={data} open={open} setOpen={setOpen} />
-      <DeletePopUp open={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} />
+      {/* <DeletePopUp open={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} /> */}
       <div className="w-full rounded-xl border bg-white overflow-x-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -93,71 +85,55 @@ export default function DevelopersTable({
               </tr>
             </thead>
 
-            {/* TABLE BODY */}
             <tbody className="divide-y">
-              {developers.map((row, index) => {
-                const isLastTwo = index >= developers.length - 2;
+              {developers?.map((row, index) => {
+                // const isLastTwo = index >= developers?.length - 2;
 
+                console.log("developers",developers)
                 return (
-                  <tr key={row.id} className="hover:bg-gray-50">
-                    {/* NAME */}
+                  <tr key={row?._id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-gray-200" />
+                        <div className="h-8 w-8 rounded-full bg-gray-200" >
+                          <img src={row?.logo} alt="logo"  className="rounded-full h-8 w-8" />
+                        </div>
                         <span className="font-semibold text-gray-800">
-                          <div> {row.name}</div>
+                          <div> {row?.developerName}</div>
                         </span>
                       </div>
                     </td>
 
-                    {/* COUNT */}
                     <td className="px-4 py-3">
                       <div>
                         <span className="font-semibold text-gray-700">
-                          {row?.projectCount ? row.projectCount : "-"}
+                          {row?.totalProjects ? row.totalProjects : "-"}
                         </span>
                       </div>
                     </td>
 
-                    {/* CITY */}
                     <td className="px-4 py-3 font-medium text-gray-600">
                       <div>{row.city}</div>
                     </td>
 
-                    {/* STATUS */}
-                    {/* <td className="px-2 py-3">
-                    <div className="flex items-center justify-center">
-                      <div
-                        className={`rounded-full flex px-2 py-1 font-semibold text-sm ${
-                          row.status.toLowerCase() === "active"
-                            ? "bg-[#BCE288] text-[#2E6B2B]"
-                            : "bg-[#FAA2A4] text-[#B44445]"
-                        }`}
-                      >
-                        <Dot /> <span className="pr-3">{row.status}</span>
-                      </div>
-                    </div>
-                  </td> */}
-
-                    {/* ACTIONS */}
                     <td className="relative px-4 py-3 mx-auto w-8">
                       <div
-                        ref={openMenuId === row.id ? actionMenuRef : null}
+                        ref={openMenuId === row?._id ? actionMenuRef : null}
                         className="relative col-span-2 flex justify-end"
                       >
                         <button
                           onClick={() =>
-                            setOpenMenuId(openMenuId === row.id ? null : row.id)
+                            setOpenMenuId(openMenuId === row?._id ? null : row?._id)
                           }
                           className="rounded-full bg-gray-100 p-2"
                         >
                           <EllipsisVertical size={16} />
                         </button>
 
-                        {openMenuId === row.id && (
+                        {openMenuId === row?._id && (
                           <div
                             className={`absolute right-0 z-10 w-36 rounded-lg border bg-white shadow ${
-                              isLastTwo ? "bottom-8" : "top-8"
+                              "top-8"
+                              // isLastTwo ? "bottom-8" : "top-8"
                             }`}
                           >
                             <button
@@ -206,7 +182,6 @@ export default function DevelopersTable({
           </table>
         </div>
 
-        {/* PAGINATION */}
         <div className="flex items-center justify-center gap-2 border-t p-4 text-sm text-gray-600">
           <button
             className="flex items-center gap-2 rounded-full border px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -256,11 +231,6 @@ export default function DevelopersTable({
           >
             Next <ChevronRight size={16} />
           </button>
-
-          <div className="ml-4 text-sm text-gray-500">
-            Showing {indexOfFirstItem + 1} to{" "}
-            {Math.min(indexOfLastItem, dataLength)} of {dataLength} entries
-          </div>
         </div>
       </div>
     </div>

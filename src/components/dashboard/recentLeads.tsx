@@ -1,14 +1,6 @@
 import { useAppSelector } from "@/lib/store/hooks";
 import { RootState } from "@/lib/store/store";
 
-// type Lead = {
-//   id: string;
-//   name: string;
-//   email: string;
-//   phone: string;
-//   project: string;
-//   price: string;
-// };
 
 export default function RecentLeads() {
   const { recentLeads } = useAppSelector((state: RootState) => state.dashboard);
@@ -32,11 +24,11 @@ export default function RecentLeads() {
               className="flex items-center justify-between rounded-lg px-2 py-2 hover:bg-gray-50"
             >
               <div className="flex items-center gap-3 w-50">
-                <div className="overflow-hidden flex items-center justify-center h-9 w-9 rounded-full bg-gray-200">
+                <div className="overflow-hidden flex items-center justify-center min-h-9 min-w-9 rounded-full bg-gray-200">
                   {lead?.profileImage ? (
-                    <img src={lead.profileImage!} alt="img" />
+                    <img src={lead.profileImage!} alt="img" className="h-9 w-9" />
                   ) : (
-                    <span className="font-bold text-lg text-[#FF765E]">
+                    <span className="h-9 w-9 flex items-center justify-center font-bold text-lg text-[#FF765E]">
                       {lead?.name[0]}
                     </span>
                   )}

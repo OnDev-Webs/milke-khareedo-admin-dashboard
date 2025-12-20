@@ -3,9 +3,13 @@ import { useMemo, useState, useEffect } from "react";
 import CustomTableSearchBar from "../custom/searchBar";
 import NotFound from "@/app/properties/not-found";
 import PropertiesTable from "./propertyTable";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { RootState } from "@/lib/store/store";
+import { Property } from "@/lib/features/properties/propertiesSlice";
+import { fetchProperties } from "@/lib/features/properties/propertiesApi";
 
 type Iproperties = {
-  id: number;
+  id: number | string;
   propertyName: string;
   developer: string;
   city: string;
@@ -26,118 +30,26 @@ type SortState<T> = {
 };
 
 export default function Properties() {
-  const initialData: Iproperties[] = [
-    {
-      id: 1,
-      propertyName: "SK Villas",
-      developer: "SB developers",
-      city: "Kanpur",
-      groupCount: "3",
-      amount: 1000,
-      status: "active",
-    },
-    {
-      id: 2,
-      propertyName: "Sisara Dev",
-      developer: "Mohal Hasm",
-      city: "Ahamdabad",
-      groupCount: "00",
-      amount: 2000,
-      status: "Active",
-    },
-    {
-      id: 3,
-      propertyName: "Godrej Properties",
-      developer: "Rogue",
-      city: "Rajkot",
-      groupCount: "02",
-      amount: 3000,
-      status: "Active",
-    },
-    {
-      id: 4,
-      propertyName: "Brigade Group",
-      developer: "Nomad",
-      city: "Mavdi",
-      groupCount: "03",
-      amount: 4000,
-      status: "Inactive",
-    },
-    {
-      id: 5,
-      propertyName: "DLF",
-      developer: "Adrian",
-      city: "Navagam",
-      groupCount: "00",
-      amount: 5000,
-      status: "Active",
-    },
-    {
-      id: 6,
-      propertyName: "Lodha Group",
-      developer: "Barrett",
-      city: "Surat",
-      groupCount: "05",
-      amount: 6000,
-      status: "Active",
-    },
-    {
-      id: 7,
-      propertyName: "Avadh Group",
-      developer: "Cedric",
-      city: "Ahamdabad",
-      groupCount: "06",
-      amount: 7000,
-      status: "Active",
-    },
-    {
-      id: 8,
-      propertyName: "Avadh Group 2",
-      developer: "Cedric",
-      city: "Ahamdabad",
-      groupCount: "06",
-      amount: 8000,
-      status: "Active",
-    },
-    {
-      id: 9,
-      propertyName: "Avadh Group 3",
-      developer: "Cedric",
-      city: "Ahamdabad",
-      groupCount: "06",
-      amount: 9000,
-      status: "Inactive",
-    },
-    {
-      id: 10,
-      propertyName: "Avadh Group 4",
-      developer: "Cedric",
-      city: "Ahamdabad",
-      groupCount: "06",
-      amount: 10000,
-      status: "Active",
-    },
-    {
-      id: 11,
-      propertyName: "Avadh Group 5",
-      developer: "Cedric",
-      city: "Ahamdabad",
-      groupCount: "06",
-      amount: 11000,
-      status: "Active",
-    },
-    {
-      id: 12,
-      propertyName: "Avadh Group 6",
-      developer: "Cedric",
-      city: "Mumbai",
-      groupCount: "06",
-      amount: 12000,
-      status: "Active",
-    },
-  ];
+ 
 
-  const [data, setData] = useState<Iproperties[]>(initialData);
+  const {PropertiesList} =  useAppSelector((state:RootState)=>state.properties)
+
+  const dispatch = useAppDispatch();
+  
+    async function getPropertiesData() {
+  
+      await dispatch(fetchProperties())
+    }
+  
+    useEffect(() => {
+      getPropertiesData();
+  
+      
+    }, [dispatch]);
+
+  console.log("PropertiesList",PropertiesList)
+
+  const [data, setData] = useState<Property[]>(PropertiesList);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [sort, setSort] = useState<SortState<Iproperties>>({
@@ -150,7 +62,7 @@ export default function Properties() {
     { key: "developer", label: "DEVELOPER", minW: "min-w-[160px]" },
     { key: "city", label: "CITY", minW: "min-w-[140px]" },
     { key: "groupCount", label: "GROUPS", minW: "min-w-[120px]" },
-    { key: "amount", label: "AMOUNT", minW: "min-w-[140px]" },
+    // { key: "amount", label: "AMOUNT", minW: "min-w-[140px]" },
     { key: "status", label: "STATUS", minW: "min-w-[100px]" },
     { key: "actions", label: "ACTIONS", minW: "min-w-[100px]" },
   ];
@@ -159,7 +71,7 @@ export default function Properties() {
     () =>
       headers
         .filter((column) => column.key !== "actions")
-        .map((c) => c.key) as (keyof Iproperties)[],
+        .map((c) => c.key) as (keyof Property)[],
     [headers]
   );
 
@@ -200,8 +112,8 @@ export default function Properties() {
 
   return (
     <div>
-      <CustomTableSearchBar<Iproperties>
-        data={initialData}
+      <CustomTableSearchBar<Property>
+        data={PropertiesList}
         setFilteredData={setData}
         searchKeys={searchKeys}
         placeholder="Search by property, developer, city, amount or status"

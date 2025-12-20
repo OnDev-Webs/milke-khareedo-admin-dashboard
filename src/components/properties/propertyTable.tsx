@@ -10,19 +10,14 @@ import {
 import { useEffect, useRef, useState } from "react";
 import PropertiesSheet from "./propertiesSheet";
 import DeletePopUp from "../custom/popups/delete";
+import { Property } from "@/lib/features/properties/propertiesSlice";
+import { deletePropertyById } from "@/lib/features/properties/propertiesApi";
+import { useAppDispatch } from "@/lib/store/hooks";
 
-interface Property {
-  id: number;
-  propertyName: string;
-  developer: string;
-  city: string;
-  groupCount: string;
-  amount: number;
-  status: string;
-}
+interface IProperty extends Property {}
 
 interface PropertiesTableProps {
-  properties: Property[];
+  properties: IProperty[];
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
@@ -43,13 +38,15 @@ export default function PropertiesTable({
   indexOfLastItem,
 }: PropertiesTableProps) {
   const pageNumbers = getPageNumbers();
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<number | string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
 
   const [data, setData] = useState<any>(null);
   const [mode, setMode] = useState<SheetMode>(null);
   const actionMenuRef = useRef<HTMLDivElement | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -70,14 +67,34 @@ export default function PropertiesTable({
     };
   }, [openMenuId]);
 
+  async function deleteProperty(id: string) {
+    await dispatch(deletePropertyById(id));
+    setIsDeleteOpen(false);
+    setDeleteId(null);
+  }
+
   return (
     <div className="w-full bg-white">
       <PropertiesSheet mode={mode} data={data} open={open} setOpen={setOpen} />
 
-      <DeletePopUp open={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} />
+      <DeletePopUp
+        id={deleteId}
+        title={"Delete this file?"}
+        description={
+          " Are you sure you want to delete this Property? Once completed,it cannot be undone."
+        }
+        buttonText="Delete property"
+        iconType="trash"
+        open={isDeleteOpen}
+        onClose={() => {
+          setIsDeleteOpen(false);
+          setDeleteId(null);
+        }}
+        onConfirm={() => deleteId && deleteProperty(deleteId)}
+      />
       <div className="w-full rounded-xl border bg-white overflow-x-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className=" w-full text-sm">
             <thead className="bg-[#f3f6ff] text-left text-gray-700">
               <tr>
                 <th className="px-4 py-3 font-bold text-sm">Property Name</th>
@@ -85,9 +102,6 @@ export default function PropertiesTable({
                 <th className="px-4 py-3 font-bold text-sm">City</th>
                 <th className="px-4 py-3 font-bold text-sm text-center">
                   Group's Count
-                </th>
-                <th className="px-4 py-3 font-bold text-sm text-center">
-                  Amount
                 </th>
                 <th className="px-4 py-3 font-bold text-sm text-center">
                   Status
@@ -100,72 +114,80 @@ export default function PropertiesTable({
 
             <tbody className="divide-y">
               {properties.map((row, index) => {
-                const isLastTwo = index >= properties.length - 2;
+                // const isLastTwo = (index >= properties.length - 2);
 
                 return (
-                  <tr key={row.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="min-h-8 min-w-8 rounded-full bg-gray-200" />
+                  <tr key={`${index}`} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 ">
+                      <div className=" flex items-center gap-3">
+                        <div className="flex items-center justify-center min-w-8 min-h-8 rounded-full bg-gray-200 overflow-hidden">
+                          <img
+                            src={row?.images[0]?.url}
+                            alt="propertyImg"
+                            className="rounded-full object-cover h-8 w-8"
+                          />
+                        </div>
                         <span className="font-semibold text-sm text-gray-800">
-                          {row.propertyName}
+                          {row?.projectName}
                         </span>
                       </div>
                     </td>
 
                     <td className="px-4 py-3 font-semibold text-sm text-gray-600">
-                      {row.developer}
+                      {row?.developer?.developerName}
                     </td>
 
                     <td className="px-4 py-3 font-semibold text-sm text-gray-600">
-                      {row.city}
+                      {row?.location}
                     </td>
 
                     <td className="px-4 py-3 text-gray-400 flex items-center justify-center">
                       <div>
                         <span className="font-semibold text-sm text-gray-700">
-                          {row.groupCount}
+                          {row.joinedGroupCount}
                         </span>{" "}
-                        / 10
+                        / {row.minGroupMembers}
                       </div>
-                    </td>
-
-                    <td className="px-4 py-3 font-semibold text-sm text-gray-600 text-center">
-                      ${row.amount.toLocaleString()}
                     </td>
 
                     <td className="px-2 py-3">
                       <div className="flex items-center justify-center">
                         <div
                           className={`rounded-full flex px-2 py-1 font-semibold text-sm ${
-                            row.status.toLowerCase() === "active"
+                            row.isStatus
                               ? "bg-[#BCE288] text-[#2E6B2B]"
                               : "bg-[#FAA2A4] text-[#B44445]"
                           }`}
                         >
-                          <Dot /> <span className="pr-3">{row.status}</span>
+                          <Dot />{" "}
+                          <span className="pr-3">
+                            {row?.isStatus ? "Active" : "Inactive"}
+                          </span>
                         </div>
                       </div>
                     </td>
 
                     <td className="relative px-4 py-3 mx-auto w-8">
                       <div
-                        ref={openMenuId === row.id ? actionMenuRef : null}
-                        className="relative col-span-2 flex justify-end"
+                        ref={openMenuId === row._id ? actionMenuRef : null}
+                        className=" relative col-span-2 flex justify-end"
                       >
                         <button
                           onClick={() =>
-                            setOpenMenuId(openMenuId === row.id ? null : row.id)
+                            setOpenMenuId(
+                              openMenuId === row._id ? null : row._id
+                            )
                           }
                           className="rounded-full bg-gray-100 p-2"
                         >
                           <EllipsisVertical size={16} />
                         </button>
 
-                        {openMenuId === row.id && (
+                        {openMenuId === row._id && (
                           <div
-                            className={`absolute right-0 z-10 w-36 rounded-lg border bg-white shadow ${
-                              isLastTwo ? "bottom-8" : "top-8"
+                            className={` overflow-hidden absolute right-0 z-50 w-36 rounded-lg border bg-white shadow ${
+                              "top-8"
+                              // isLastTwo ? "bottom-8" : "top-8"
                             }`}
                           >
                             <button
@@ -175,7 +197,7 @@ export default function PropertiesTable({
                                 setMode("edit");
                                 setOpen(true);
                               }}
-                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 `}
+                              className={` block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 `}
                             >
                               Edit
                             </button>
@@ -192,8 +214,11 @@ export default function PropertiesTable({
                             >
                               Veiw
                             </button>
+
                             <button
                               onClick={() => {
+                                setOpenMenuId(null);
+                                setDeleteId(row._id);
                                 setIsDeleteOpen(true);
                               }}
                               className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 

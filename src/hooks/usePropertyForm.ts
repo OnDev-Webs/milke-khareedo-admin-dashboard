@@ -10,7 +10,7 @@ export const usePropertyForm = (initialData?: Partial<PropertyFormValues>) => {
 
     defaultValues: {
       projectName: "",
-      developerId: "",
+      developer: "",
       location: "",
 
       projectSize: "",

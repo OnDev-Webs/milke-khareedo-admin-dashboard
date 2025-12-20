@@ -10,6 +10,8 @@ import AddRelationshipManagerForm from "./forms/relationshipManager";
 import ConnectivityForm from "./forms/connectivityForm";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { FormProvider } from "react-hook-form";
+import { useAppDispatch } from "@/lib/store/hooks";
+import { createProperty } from "@/lib/features/properties/propertiesApi";
 
 type Step = {
   id: number;
@@ -196,11 +198,14 @@ export default function AddNewProperty() {
 
   const methods = usePropertyForm();
 
+  const dispatch = useAppDispatch();
+
   const { handleSubmit } = methods;
 
   const onSubmit = (data: any) => {
     console.log("FINAL PAYLOAD", data);
-    // dispatch(createProperty(data))
+    
+    dispatch(createProperty(data))
   };
 
   return (

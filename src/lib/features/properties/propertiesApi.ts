@@ -2,6 +2,19 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { Property } from "./propertiesSlice";
 import axiosInstance from "@/utils/axiosInstance";
 
+export const createProperty = createAsyncThunk<
+  Property,
+  Property,
+  { rejectValue: string }
+>("properties/createProperty", async (payload, { rejectWithValue }) => {
+  try {
+    const res = await axiosInstance.post("/admin/create_property",payload);
+    return res.data.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data?.message || "Failed to fetch properties");
+  }
+});
+
 export const fetchProperties = createAsyncThunk<
   Property[],
   void,
@@ -27,3 +40,18 @@ export const fetchPropertyById = createAsyncThunk<
     return rejectWithValue(error.response?.data?.message || "Failed to fetch property");
   }
 });
+
+export const deletePropertyById = createAsyncThunk<
+  string,
+  string,
+  { rejectValue: string }
+>("properties/deletePropertyById", async (id, { rejectWithValue }) => {
+  try {
+    const res = await axiosInstance.delete(`admin/delete_property/${id}`);
+    return res.data.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data?.message || "Failed to fetch property");
+  }
+});
+
+

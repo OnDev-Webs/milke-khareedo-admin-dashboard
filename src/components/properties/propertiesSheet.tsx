@@ -42,7 +42,6 @@ function PropertyView({ property }: { property: Property }) {
       </div>
 
       <div className="space-y-3">
-        <Info label="Developer" value={property.developer} />
         <Info label="Groups" value={property.groupCount} />
         <Info label="Amount" value={`₹ ${property.amount}`} />
         <Info label="Status" value={property.status} />
@@ -111,88 +110,6 @@ function PropertyEdit({ property }: { property: Property }) {
     </div>
   );
 }
-
-
-// function AddNewProperty() {
-//   return (
-//     <div className="h-[90vh] overflow-auto bg-white">
-//       <div className="mx-auto max-w-2xl px-4 py-6">
-//         <form className="space-y-5">
-//           <div className="overflow-auto flex items-start gap-4">
-//             <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-black text-white">
-//               <span className="text-sm font-semibold">homy</span>
-//             </div>
-
-//             <div>
-//               <p className="text-sm font-medium text-gray-800">
-//                 Upload Photo{" "}
-//                 <span className="cursor-pointer font-semibold text-blue-600 underline">
-//                   browse
-//                 </span>
-//               </p>
-//               <p className="mt-1 text-xs text-gray-500">
-//                 Max 10 MB files are allowed
-//               </p>
-
-//               <button
-//                 type="button"
-//                 className="mt-2 rounded-md border px-3 py-1 text-xs text-gray-600"
-//               >
-//                 Edit Logo
-//               </button>
-//             </div>
-//           </div>
-//           <Field label="Property Name*">
-//             <input
-//               placeholder="Enter property name"
-//               className="w-full text-sm outline-none"
-//             />
-//           </Field>
-
-//           <Field label="Developer*">
-//             <input
-//               placeholder="Developer name"
-//               className="w-full text-sm outline-none"
-//             />
-//           </Field>
-
-//           <Field label="City*">
-//             <input placeholder="City" className="w-full text-sm outline-none" />
-//           </Field>
-
-//           <Field label="Total Groups">
-//             <input
-//               placeholder="e.g. 3"
-//               className="w-full text-sm outline-none"
-//             />
-//           </Field>
-
-//           <Field label="Amount">
-//             <input
-//               type="number"
-//               placeholder="e.g. 1000000"
-//               className="w-full text-sm outline-none"
-//             />
-//           </Field>
-
-//           <Field label="Status">
-//             <select className="w-full text-sm outline-none">
-//               <option value="active">Active</option>
-//               <option value="inactive">Inactive</option>
-//             </select>
-//           </Field>
-
-//           <button
-//             type="submit"
-//             className="w-full rounded-lg bg-black py-3 text-sm font-semibold text-white"
-//           >
-//             Add New Property
-//           </button>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// }
 
 
 function Info({ label, value }: { label: string; value: string }) {

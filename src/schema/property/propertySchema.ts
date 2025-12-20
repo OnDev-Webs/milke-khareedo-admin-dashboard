@@ -16,7 +16,7 @@ export const connectivityItemSchema = z.object({
 
 export const propertySchema = z.object({
   projectName: z.string().min(3),
-  developerId: z.string(),
+  developer: z.string(),
   location: z.string(),
 
   projectSize: z.string(),

@@ -3,11 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
+type DropdownItem =
+  | string
+  | {
+      label: string;
+      value: any;
+    };
+
 type DropdownProps = {
-  items: any[];
+  items: DropdownItem[];
   placeholder?: string;
   defaultValue?: string;
-  onSelect?: (value: string) => void;
+  onSelect?: (item: DropdownItem) => void;
   className?: string;
 };
 
@@ -19,7 +26,9 @@ export default function CustomDropdown({
   className = "",
 }: DropdownProps) {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(defaultValue || placeholder);
+  const [selectedLabel, setSelectedLabel] = useState(
+    defaultValue || placeholder
+  );
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -36,21 +45,22 @@ export default function CustomDropdown({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelect = (item: string) => {
-    setSelected(item);
+  const getLabel = (item: DropdownItem) =>
+    typeof item === "string" ? item : item.label;
+
+  const handleSelect = (item: DropdownItem) => {
+    setSelectedLabel(getLabel(item));
     onSelect?.(item);
     setOpen(false);
   };
 
   return (
-    <div ref={wrapperRef} className={`relative w-fit min-w-44 ${className}`}>
+    <div ref={wrapperRef} className={`relative min-w-44 ${className}`}>
       <div
         onClick={() => setOpen((prev) => !prev)}
-        className="rounded-md flex items-center justify-between gap-2 border p-2  cursor-pointer  select-none"
+        className="rounded-md flex items-center justify-between gap-2 border p-2 cursor-pointer select-none"
       >
-        <div className="flex gap-2 items-center overflow-hidden">
-          <span className=" truncate">{selected}</span>
-        </div>
+        <span className="truncate">{selectedLabel}</span>
 
         <ChevronDown
           className={`transition-transform duration-200 ${
@@ -60,14 +70,14 @@ export default function CustomDropdown({
       </div>
 
       {open && (
-        <div className="absolute h-36 overflow-y-auto top-full mt-2 left-0 w-full border rounded shadow-md z-999 bg-white">
-          {items.map((item) => (
+        <div className="absolute top-full mt-2 left-0 w-full max-h-36 overflow-y-auto border rounded shadow-md bg-white z-50">
+          {items.map((item, index) => (
             <div
-              key={item}
+              key={index}
               onClick={() => handleSelect(item)}
               className="px-3 py-2 hover:bg-neutral-100 cursor-pointer"
             >
-              {item}
+              {getLabel(item)}
             </div>
           ))}
         </div>

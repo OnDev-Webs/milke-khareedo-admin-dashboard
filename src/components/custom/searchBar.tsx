@@ -17,6 +17,8 @@ type TableSearchProps<T> = {
     buttonName: string;
     url: string;
   };
+  setSheetOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  mode?: string;
 };
 
 function useDebounce<T>(value: T, delay = 300) {
@@ -38,12 +40,14 @@ export default function CustomTableSearchBar<T extends Record<string, any>>({
   minQueryLength = 1,
   className = "",
   resetSort,
-  addButton
+  addButton,
+  setSheetOpen,
+  mode,
 }: TableSearchProps<T>) {
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const debouncedQuery = useDebounce(query, debounceMs);
-  
+
   const prevFilteredDataRef = useRef<T[]>(data);
 
   const normalizedQuery = useMemo(
@@ -55,26 +59,26 @@ export default function CustomTableSearchBar<T extends Record<string, any>>({
     if (!searchKeys.length) return data;
 
     if (normalizedQuery.length < minQueryLength) return data;
-    
+
     return data.filter((row) =>
       searchKeys.some((key) => {
         const value = row[key];
         if (value === null || value === undefined) return false;
-        
-        const stringValue = typeof value === 'number' 
-          ? value.toString() 
-          : String(value);
-        
-        return stringValue
-          .toLocaleLowerCase()
-          .includes(normalizedQuery);
+
+        const stringValue =
+          typeof value === "number" ? value.toString() : String(value);
+
+        return stringValue.toLocaleLowerCase().includes(normalizedQuery);
       })
     );
   }, [normalizedQuery, data, searchKeys, minQueryLength]);
 
   useEffect(() => {
-    if (setFilteredData && 
-        JSON.stringify(filteredData) !== JSON.stringify(prevFilteredDataRef.current)) {
+    if (
+      setFilteredData &&
+      JSON.stringify(filteredData) !==
+        JSON.stringify(prevFilteredDataRef.current)
+    ) {
       setFilteredData(filteredData);
       prevFilteredDataRef.current = filteredData;
     }
@@ -82,7 +86,7 @@ export default function CustomTableSearchBar<T extends Record<string, any>>({
 
   useEffect(() => {
     if (!onSearch) return;
-    
+
     if (normalizedQuery.length >= minQueryLength) {
       onSearch(normalizedQuery);
     } else {
@@ -92,11 +96,10 @@ export default function CustomTableSearchBar<T extends Record<string, any>>({
 
   const clearSearch = () => {
     if (query === "") return;
-
     setQuery("");
     resetSort?.();
     inputRef.current?.focus();
-    
+
     if (setFilteredData) {
       setFilteredData([...data]);
       prevFilteredDataRef.current = [...data];
@@ -105,7 +108,9 @@ export default function CustomTableSearchBar<T extends Record<string, any>>({
 
   return (
     <div
-      className={`px-3 border-b py-1 flex gap-3 items-center ${className} ${addButton ? "" : "py-3"}`}
+      className={`px-3 border-b py-1 flex gap-3 items-center ${className} ${
+        addButton ? "" : "py-3"
+      }`}
       role="search"
     >
       <div className="relative flex-1 flex items-center">
@@ -128,20 +133,23 @@ export default function CustomTableSearchBar<T extends Record<string, any>>({
           </button>
         )}
       </div>
-      
-      {addButton && (
+
+      {addButton?.url && (
         <button className="p-2 border rounded bg-foreground text-white hover:bg-foreground/90 transition-colors">
           <a href={addButton.url} className="whitespace-nowrap px-1">
             {addButton.buttonName}
           </a>
         </button>
       )}
-      
-      {/* {query && normalizedQuery.length >= minQueryLength && (
-        <span className="text-sm text-gray-500 whitespace-nowrap">
-          {filteredData.length} of {data.length} results
-        </span>
-      )} */}
+
+      {mode && (
+        <button
+          onClick={() => mode && setSheetOpen?.((open) => !open)}
+          className="p-2 border rounded bg-foreground text-white hover:bg-foreground/90 transition-colors"
+        >
+          {addButton?.buttonName}
+        </button>
+      )}
     </div>
   );
 }

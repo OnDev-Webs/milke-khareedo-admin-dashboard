@@ -3,9 +3,11 @@
 import { Plus, Trash } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 import { PropertyFormValues } from "@/schema/property/propertySchema";
-import { useState } from "react";
-import Home from "@/app/page";
+import { useEffect, useState } from "react";
 import CustomDropdown from "@/components/custom/dropdawn";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { RootState } from "@/lib/store/store";
+import { fetchDevelopers } from "@/lib/features/developers/developerApi";
 
 function Field({
   label,
@@ -47,6 +49,12 @@ export default function AddProjectOverviewForm() {
 
   const [configuration, setConfiguration] = useState(false);
 
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    dispatch(fetchDevelopers({ page: 1, limit: 10 }));
+  }, []);
+  const { developers } = useAppSelector((state: RootState) => state.developers);
+
   const bhkOptions = [
     "1 BHK",
     "1.5 BHK",
@@ -63,59 +71,95 @@ export default function AddProjectOverviewForm() {
   ];
   const [open, setOpen] = useState(false);
   const [selectOptionValue, setSelectOptionValue] = useState("");
-  console.log(selectOptionValue)
+  const [selectDeveloperId, setselectDeveloperId] = useState("");
+
+  useEffect(() => {
+    selectDeveloperId && setValue("developer", selectDeveloperId);
+  }, [selectDeveloperId]);
 
   return (
-    <main className="p-4 border border-red-400 h-[87vh]  overflow-y-auto">
+    <main className="p-4 h-[87vh]  overflow-y-auto">
       <div className="grid gap-6 md:grid-cols-3">
         <Field label="Project Name*" error={errors.projectName}>
-          <input className="w-full" {...register("projectName", { required: true })} />
+          <input
+            className="w-full"
+            {...register("projectName", { required: true })}
+          />
         </Field>
 
-        <Field label="Developer*" error={errors.developerId}>
-          <select {...register("developerId", { required: true })}>
-            <option value="Maarq Realty">Maarq Realty</option>
-          </select>
+        <Field label="Developer*" error={errors.developer}>
+
+          <div>
+            <CustomDropdown
+              items={developers.map((d) => ({
+                label: d.developerName,
+                value: d._id,
+              }))}
+              onSelect={(item) => {
+                if (typeof item !== "string") {
+                  setselectDeveloperId(item.value);
+                }
+              }}
+            />
+          </div>
         </Field>
 
         <Field label="Location*" error={errors.location}>
-          <input className="w-full"  {...register("location", { required: true })} />
+          <input
+            className="w-full"
+            {...register("location", { required: true })}
+          />
         </Field>
 
         <Field label="Project Size*" error={errors.projectSize}>
-          <input className="w-full"  {...register("projectSize", { required: true })} />
+          <input
+            className="w-full"
+            {...register("projectSize", { required: true })}
+          />
         </Field>
 
         <Field label="Land Parcel*" error={errors.landParcel}>
-          <input className="w-full"  {...register("landParcel", { required: true })} />
+          <input
+            className="w-full"
+            {...register("landParcel", { required: true })}
+          />
         </Field>
 
         <Field label="Possession Date*" error={errors.possessionDate}>
           <input
             type="date"
-            className="w-full" 
+            className="w-full"
             {...register("possessionDate", { required: true })}
           />
         </Field>
 
         <Field label="Developer Price*" error={errors.developerPrice}>
-          <input className="w-full"  {...register("developerPrice", { required: true })} />
+          <input
+            className="w-full"
+            {...register("developerPrice", { required: true })}
+          />
         </Field>
 
         <Field label="Offer Price*" error={errors.offerPrice}>
-          <input className="w-full"  {...register("offerPrice", { required: true })} />
+          <input
+            className="w-full"
+            {...register("offerPrice", { required: true })}
+          />
         </Field>
 
         <Field label="Required Group Members*" error={errors.minGroupMembers}>
           <input
             type="number"
-            className="w-full" 
+            className="w-full"
             {...register("minGroupMembers", { required: true })}
           />
         </Field>
 
         <Field label="RERA ID*" error={errors.reraId}>
-          <input className="w-full"  {...register("reraId", { required: true })} />
+          <input
+            className="w-full"
+            {...register("reraId", { required: true })}
+          />
         </Field>
 
         <div className="">
@@ -129,18 +173,30 @@ export default function AddProjectOverviewForm() {
         </div>
 
         <Field label="Possession Status*" error={errors.possessionStatus}>
-          <select  {...register("possessionStatus", { required: true })}>
+          
+          
+          {/* <select {...register("possessionStatus", { required: true })}>
             <option value="Ready To Move">Ready To Move</option>
             <option value="Under Construction">Under Construction</option>
-          </select>
+          </select> */}
+
+           <CustomDropdown
+              items={['Ready To Move', 'Under Construction']}
+              placeholder="Select status"
+              onSelect={(item) => {
+                if (typeof item === "string") {
+                  setValue("possessionStatus",item);
+                }
+              }}
+            />
         </Field>
       </div>
 
       <div className="mt-5">
-        <Field label="Overview*" error={errors.overview}>
+        <Field label="description*" error={errors.overview}>
           <textarea
             rows={4}
-            {...register("overview", { required: true })}
+            {...register("description", { required: true })}
             className="w-full resize-none"
           />
         </Field>
@@ -150,7 +206,7 @@ export default function AddProjectOverviewForm() {
         <div className="mt-5 border rounded-xl p-4 space-y-4">
           <div className="flex justify-between items-center w-full">
             <div className="border rounded-md border-black px-4 py-1 text-sm font-medium">
-             {selectOptionValue}
+              {selectOptionValue}
             </div>
 
             <div className="flex gap-2 items-center">
@@ -228,14 +284,18 @@ export default function AddProjectOverviewForm() {
             </div>
           </div>
 
-          <div
-            className=" pt-2"
-          >
+          <div className=" pt-2">
             <CustomDropdown
-            items={bhkOptions}
-            placeholder="Select Configuration"
-            onSelect={(item)=>setSelectOptionValue(item)}
-            /> 
+              items={bhkOptions}
+              placeholder="Select Configuration"
+              onSelect={(item) => {
+                if (typeof item === "string") {
+                  setSelectOptionValue(item);
+                } else {
+                  setSelectOptionValue(item.label);
+                }
+              }}
+            />
           </div>
         </div>
       )}
