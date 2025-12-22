@@ -16,6 +16,7 @@ type DropdownProps = {
   defaultValue?: string;
   onSelect?: (item: DropdownItem) => void;
   className?: string;
+  bordernone?:boolean;
 };
 
 export default function CustomDropdown({
@@ -24,6 +25,7 @@ export default function CustomDropdown({
   defaultValue,
   onSelect,
   className = "",
+  bordernone=false
 }: DropdownProps) {
   const [open, setOpen] = useState(false);
   const [selectedLabel, setSelectedLabel] = useState(
@@ -58,7 +60,7 @@ export default function CustomDropdown({
     <div ref={wrapperRef} className={`relative min-w-44 ${className}`}>
       <div
         onClick={() => setOpen((prev) => !prev)}
-        className="rounded-md flex items-center justify-between gap-2 border p-2 cursor-pointer select-none"
+        className={`rounded-md flex items-center justify-between gap-2 ${bordernone? "": "border p-2" }  cursor-pointer select-none`}
       >
         <span className="truncate">{selectedLabel}</span>
 

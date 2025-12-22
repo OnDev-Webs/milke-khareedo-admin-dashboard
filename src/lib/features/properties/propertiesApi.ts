@@ -8,10 +8,16 @@ export const createProperty = createAsyncThunk<
   { rejectValue: string }
 >("properties/createProperty", async (payload, { rejectWithValue }) => {
   try {
-    const res = await axiosInstance.post("/admin/create_property",payload);
+    const res = await axiosInstance.post("/admin/create_property", payload, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return res.data.data;
   } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || "Failed to fetch properties");
+    return rejectWithValue(
+      error.response?.data?.message || "Failed to fetch properties"
+    );
   }
 });
 
@@ -24,7 +30,9 @@ export const fetchProperties = createAsyncThunk<
     const res = await axiosInstance.get("/admin/get_all_property");
     return res.data.data;
   } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || "Failed to fetch properties");
+    return rejectWithValue(
+      error.response?.data?.message || "Failed to fetch properties"
+    );
   }
 });
 
@@ -37,7 +45,9 @@ export const fetchPropertyById = createAsyncThunk<
     const res = await axiosInstance.get(`/properties/${id}`);
     return res.data.data;
   } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || "Failed to fetch property");
+    return rejectWithValue(
+      error.response?.data?.message || "Failed to fetch property"
+    );
   }
 });
 
@@ -50,8 +60,8 @@ export const deletePropertyById = createAsyncThunk<
     const res = await axiosInstance.delete(`admin/delete_property/${id}`);
     return res.data.data;
   } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || "Failed to fetch property");
+    return rejectWithValue(
+      error.response?.data?.message || "Failed to fetch property"
+    );
   }
 });
-
-

@@ -1,10 +1,13 @@
 import { z } from "zod";
 
+export const subConfigurationSchame = z.object({
+  carpetArea: z.string().min(1),
+  price: z.string().min(1),
+})
+
 export const configurationSchema = z.object({
   unitType: z.string().min(1),
-  carpetArea: z.string().min(1),
-  builtUpArea: z.string().min(1),
-  price: z.string().min(1),
+  subConfiguration:z.array(subConfigurationSchame).min(1),
   availabilityStatus: z.enum(["Available", "Sold"]),
 });
 
@@ -28,7 +31,7 @@ export const propertySchema = z.object({
   minGroupMembers: z.number().min(1),
 
   reraId: z.string(),
-  reraQRcode: z
+  reraQrImage: z
     .object({
       url: z.string().url(),
       isCover: z.boolean().default(true),
@@ -40,13 +43,11 @@ export const propertySchema = z.object({
   description: z.string(),
   overview: z.string(),
 
-  configurations: z.array(configurationSchema),
+  configurations: z.array(configurationSchema).min(1),
 
   images: z.array(
     z.object({
       url: z.string().url(),
-      isCover: z.boolean(),
-      order: z.number(),
     })
   ),
 

@@ -22,7 +22,7 @@ export const usePropertyForm = (initialData?: Partial<PropertyFormValues>) => {
       minGroupMembers: 0,
 
       reraId: "",
-      reraQRcode: undefined,
+      reraQrImage: undefined,
       possessionStatus: "",
 
       overview: "",
@@ -31,12 +31,9 @@ export const usePropertyForm = (initialData?: Partial<PropertyFormValues>) => {
 
       configurations: [],
 
-      images: [],
 
       highlights: [],
       amenities: [],
-
-      layouts: [],
 
       connectivity: {
         schools: [],

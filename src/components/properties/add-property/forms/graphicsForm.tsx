@@ -7,13 +7,11 @@ import upload from "@/assets/upload.svg";
 
 export default function AddProjectPhotoUpload() {
   const { setValue, watch } = useFormContext<any>();
-  const files: File[] = watch("projectImages") || [];
+  const files: File[] = watch("images") || [];
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  /** OPEN FILE PICKER */
   const pickFiles = () => inputRef.current?.click();
 
-  /** HANDLE FILE SELECT */
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files;
     if (!selected) return;
@@ -23,7 +21,7 @@ export default function AddProjectPhotoUpload() {
     );
 
     if (validImages.length) {
-      setValue("projectImages", [...files, ...validImages], {
+      setValue("images", [...files, ...validImages], {
         shouldValidate: true,
       });
     }
@@ -31,10 +29,9 @@ export default function AddProjectPhotoUpload() {
     e.target.value = "";
   };
 
-  /** REMOVE IMAGE */
   const removeFile = (index: number) => {
     const updated = files.filter((_, i) => i !== index);
-    setValue("projectImages", updated, { shouldValidate: true });
+    setValue("images", updated, { shouldValidate: true });
   };
 
   return (
