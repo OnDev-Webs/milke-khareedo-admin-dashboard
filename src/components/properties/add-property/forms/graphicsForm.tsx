@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import React, { useRef } from "react";
 import { useFormContext } from "react-hook-form";
 import upload from "@/assets/upload.svg";
@@ -62,7 +62,7 @@ export default function AddProjectPhotoUpload() {
             return (
               <div
                 key={idx}
-                className="relative rounded-md overflow-hidden group"
+                className="relative rounded-xl overflow-hidden group  h-58"
               >
                 <img
                   src={previewUrl}
@@ -73,16 +73,18 @@ export default function AddProjectPhotoUpload() {
                 <button
                   type="button"
                   onClick={() => removeFile(idx)}
-                  className="absolute top-2 right-2 bg-black/60 p-1 rounded-full opacity-0 group-hover:opacity-100"
+                  className="absolute top-2 right-2 bg-white p-2 rounded-full opacity-0 group-hover:opacity-100"
                 >
-                  <X size={14} className="text-white" />
+                  <Trash2 size={14} className="text-red-400" />
                 </button>
 
-                {idx === 0 && (
-                  <div className="absolute bottom-2 left-2 bg-black/60 text-xs px-2 py-1 rounded text-white">
-                    Cover photo
+                
+                  <div className="absolute overflow-hidden bottom-2 right-2 bg-black/20 text-sm px-2.5 py-1.5 rounded-md backdrop-blur-2xl text-white font-normal">
+                    {`${idx + 1} / ${files?.length} ${
+                      idx == 0 ? "Preferred cover image" : ""
+                    }`}
                   </div>
-                )}
+                
               </div>
             );
           })}

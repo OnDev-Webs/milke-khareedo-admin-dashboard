@@ -6,11 +6,11 @@ import Success from "./success";
 type DeletePopUpProps = {
   open: boolean;
   onClose: () => void;
-  onConfirm: (id: string) => void;
-  id: string | null;
-  title: string;
-  description: string;
-  buttonText: string;
+  onConfirm?: (id: string) => void;
+  id?: string | null;
+  title?: string;
+  description?: string;
+  buttonText?: string;
   iconType?: string;
 };
 
@@ -59,7 +59,7 @@ export default function DeletePopUp({
               </button>
 
               <button
-                onClick={() => id && onConfirm(id)}
+                onClick={() => id && onConfirm && onConfirm(id)}
                 className="rounded-lg bg-red-600 py-3 text-sm font-semibold text-white hover:bg-red-700"
               >
                 {buttonText}

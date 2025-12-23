@@ -259,7 +259,7 @@ export default function LeadCRMSheet({
         </SheetHeader>
 
         <div className="">
-          {mode === "view" && <LeadView />}
+          {/* {mode === "view" && <LeadView />} */}
           {/* {mode === "edit" && <LeadEdit lead={selectedLead} />} */}
         </div>
       </SheetContent>

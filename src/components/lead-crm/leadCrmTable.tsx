@@ -83,7 +83,7 @@ export default function LeadCRMTable({
   return (
     <div className="w-full bg-white">
       <LeadCRMSheet mode={mode} data={data} open={open} setOpen={setOpen} />
-      <DeletePopUp open={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} />
+      <DeletePopUp open={isDeleteOpen} onClose={() => setIsDeleteOpen(false)}  />
       <div className="w-full rounded-xl overflow-hidden border bg-white">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
