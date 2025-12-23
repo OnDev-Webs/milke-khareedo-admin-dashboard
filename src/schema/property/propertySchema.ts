@@ -32,11 +32,7 @@ export const propertySchema = z.object({
 
   reraId: z.string(),
   reraQrImage: z
-    .object({
-      url: z.string().url(),
-      isCover: z.boolean().default(true),
-      order: z.number().default(1),
-    })
+    .instanceof(File)
     .optional(),
   possessionStatus: z.string(),
 

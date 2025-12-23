@@ -203,9 +203,30 @@ export default function AddNewProperty() {
   const { handleSubmit } = methods;
 
   const onSubmit = (data: any) => {
-    console.log("FINAL PAYLOAD", data);
     
-    dispatch(createProperty(data))
+    const formData: any = new FormData();
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (key === "images") return;
+
+      if (value instanceof File) {
+        formData.append(key, value);
+      }
+
+      if (typeof value === "object") {
+        formData.append(key, JSON.stringify(value));
+      } else if (value !== undefined && value !== null) {
+        formData.append(key, String(value));
+      }
+    });
+
+    if (data.images?.length) {
+      data.images.forEach((file: File) => {
+        formData.append("images", file);
+      });
+    }
+
+    dispatch(createProperty(formData));
   };
 
   return (
@@ -213,7 +234,7 @@ export default function AddNewProperty() {
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className=" h-full  grid grid-cols-24">
-            <aside className="col-span-5 border-r h-full  bg-white p-4 flex flex-col justify-between">
+            <aside className="col-span-5 border-r h-[92.1vh]  bg-white p-4 flex flex-col justify-between">
               <div>
                 <h3 className="mb-4 text-sm font-semibold text-gray-900">
                   {currentStep?.title}
@@ -224,10 +245,8 @@ export default function AddNewProperty() {
                 </ul>
 
                 <div className="border-t pt-4 space-y-2">
-                  {currentStep?.guidelines?.map((data,index) => (
-                    <div
-                    key={`key ${index}`}
-                    >
+                  {currentStep?.guidelines?.map((data, index) => (
+                    <div key={`key ${index}`}>
                       <h4 className="mb-2 text-xs font-semibold text-gray-700">
                         {data?.title}
                       </h4>
@@ -259,7 +278,7 @@ export default function AddNewProperty() {
 
                   return (
                     <button
-                    type="button"
+                      type="button"
                       key={item.id}
                       onClick={() => setActiveStep(item.step)}
                       className={`px-4 py-2  text-sm font-medium transition

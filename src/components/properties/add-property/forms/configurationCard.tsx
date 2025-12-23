@@ -1,5 +1,6 @@
 import CustomDropdown from "@/components/custom/dropdawn";
-import { Minus, Plus, Trash } from "lucide-react";
+import { numberToWords } from "@/utils/numbertoWord";
+import { IndianRupee, Minus, Plus, Trash } from "lucide-react";
 import { useFieldArray, useWatch } from "react-hook-form";
 
 export function ConfigurationCard({
@@ -25,6 +26,12 @@ export function ConfigurationCard({
     name: `configurations.${index}.unitType`,
   });
 
+  const price =
+    useWatch({
+      control,
+      name: `configurations.${index}.subConfiguration`,
+    }) || [];
+
   const bhkOptions = [
     "1 BHK",
     "1.5 BHK",
@@ -39,8 +46,6 @@ export function ConfigurationCard({
     "6.5 BHK",
     "7 BHK",
   ];
-
-  console.log("fields", fields);
 
   return (
     <div className="mt-5 border rounded-xl p-4 space-y-4">
@@ -76,36 +81,57 @@ export function ConfigurationCard({
             </div>
           )}
           <button
-                type="button"
-                onClick={() => removeConfig(index)}
-                className="bg-orange-500 p-2 rounded-md text-white"
-              >
-                <Trash size={16} />
-              </button>
+            type="button"
+            onClick={() => removeConfig(index)}
+            className="bg-orange-500 p-2 rounded-md text-white"
+          >
+            <Trash size={16} />
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-6 pb-2 ">
         {fields.map((_, subIndex) => (
           <div
             key={_.id}
-            className="relative border rounded-lg p-3 flex gap-3 items-end"
+            className="relative border   rounded-lg p-3 flex gap-3 items-end"
           >
-            <input
-              {...register(
-                `configurations.${index}.subConfiguration.${subIndex}.carpetArea`
-              )}
-              placeholder="Carpet Area (ft²)"
-              className="border px-3 py-2 rounded-md w-full"
-            />
+            <div className=" grid grid-cols-2 w-full gap-4">
+              <fieldset className="relative pr-8 border border-black px-4  rounded-md">
+                <legend className=" whitespace-nowrap text-xs font-semibold text-gray-700">
+                  <span className="pl-1">
+                    {subIndex + 1} <sup>nd</sup> Carpet Area
+                  </span>{" "}
+                  <span className="text-red-400 pr-1">*</span>
+                </legend>
 
-            <input
-              {...register(
-                `configurations.${index}.subConfiguration.${subIndex}.price`
-              )}
-              placeholder="Price"
-              className="border px-3 py-2 rounded-md w-full"
-            />
+                <input
+                  {...register(
+                    `configurations.${index}.subConfiguration.${subIndex}.carpetArea`
+                  )}
+                  placeholder="Enter Carpet Area"
+                  className=" w-full   pb-1 outline-none"
+                />
+                <p className="absolute -top-0.5  right-1 ">ft²</p>
+              </fieldset>
+
+              <div className="relative  pl-4 mt-1.5 rounded-lg flex bg-gray-100 px-2">
+                <input
+                  {...register(
+                    `configurations.${index}.subConfiguration.${subIndex}.price`
+                  )}
+                  placeholder="Price"
+                  className="w-full  outline-none  m-1.5 rounded-md"
+                />
+                <div className="absolute top-1/2 -translate-y-1/2 left-1 ">
+                  <IndianRupee size={15} className="" />
+                </div>
+
+                <p className="absolute  top-12 w-44 text-[#9A9A9A] text-xs mt-1.5 truncate">
+                  {numberToWords(`${price[subIndex]?.price ?? ""}`)}
+                </p>
+              </div>
+            </div>
 
             <button
               type="button"

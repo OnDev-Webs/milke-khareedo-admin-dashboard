@@ -221,7 +221,7 @@ export default function LeadCRM() {
         )}
       </div>
 
-      <LeadCRMSheet />
+      <LeadCRMSheet mode="" open={false} setOpen={()=>{}} />
     </div>
   );
 }
