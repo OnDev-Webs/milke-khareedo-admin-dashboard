@@ -18,7 +18,7 @@ export function ConfigurationCard({
 }) {
   const { fields, append, remove } = useFieldArray({
     control,
-    name: `configurations.${index}.subConfiguration`,
+    name: `configurations.${index}.subConfigurations`,
   });
 
   const unitType = useWatch({
@@ -29,7 +29,7 @@ export function ConfigurationCard({
   const price =
     useWatch({
       control,
-      name: `configurations.${index}.subConfiguration`,
+      name: `configurations.${index}.subConfigurations`,
     }) || [];
 
   const bhkOptions = [
@@ -107,7 +107,7 @@ export function ConfigurationCard({
 
                 <input
                   {...register(
-                    `configurations.${index}.subConfiguration.${subIndex}.carpetArea`
+                    `configurations.${index}.subConfigurations.${subIndex}.carpetArea`
                   )}
                   placeholder="Enter Carpet Area"
                   className=" w-full   pb-1 outline-none"
@@ -118,7 +118,7 @@ export function ConfigurationCard({
               <div className="relative  pl-4 mt-1.5 rounded-lg flex bg-gray-100 px-2">
                 <input
                   {...register(
-                    `configurations.${index}.subConfiguration.${subIndex}.price`
+                    `configurations.${index}.subConfigurations.${subIndex}.price`
                   )}
                   placeholder="Price"
                   className="w-full  outline-none  m-1.5 rounded-md"

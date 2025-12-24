@@ -25,8 +25,6 @@ export const usePropertyForm = (initialData?: Partial<PropertyFormValues>) => {
       reraQrImage: undefined,
       possessionStatus: "",
 
-      overview: "",
-
       description: "",
 
       configurations: [],

@@ -3,11 +3,12 @@ import { z } from "zod";
 export const subConfigurationSchame = z.object({
   carpetArea: z.string().min(1),
   price: z.string().min(1),
+  layouts: z.array(z.instanceof(File)).optional(),
 })
 
 export const configurationSchema = z.object({
   unitType: z.string().min(1),
-  subConfiguration:z.array(subConfigurationSchame).min(1),
+  subConfigurations:z.array(subConfigurationSchame).min(1),
   availabilityStatus: z.enum(["Available", "Sold"]),
 });
 
@@ -16,6 +17,11 @@ export const connectivityItemSchema = z.object({
   latitude: z.number(),
   longitude: z.number(),
 });
+
+const fileSchema =
+  typeof window === "undefined"
+    ? z.any()
+    : z.instanceof(File);
 
 export const propertySchema = z.object({
   projectName: z.string().min(3),
@@ -34,28 +40,21 @@ export const propertySchema = z.object({
   reraQrImage: z
     .instanceof(File)
     .optional(),
-  possessionStatus: z.string(),
+    
+  possessionStatus: z.string().min(1),
 
   description: z.string(),
-  overview: z.string(),
 
   configurations: z.array(configurationSchema).min(1),
 
-  images: z.array(
-    z.object({
-      url: z.string().url(),
-    })
-  ),
+  images: z.array(fileSchema).optional(),
 
   highlights: z.array(z.string()).min(3),
   amenities: z.array(z.string()).min(3),
 
-  layouts: z.array(
-    z.object({
-      configurationUnitType: z.string(),
-      image: z.string().url(),
-    })
-  ),
+  layouts: z
+    .record(z.string(), z.array(fileSchema))
+    .optional(),
 
   latitude: z.number(),
   longitude: z.number(),

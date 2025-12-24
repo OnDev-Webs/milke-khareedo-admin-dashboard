@@ -272,7 +272,7 @@ export default function AddProjectOverviewForm() {
         <Field
           label="description "
           description="Explain the project in 3–5 lines"
-          error={errors.overview}
+          error={errors.description}
         >
           <textarea
             rows={4}
@@ -298,7 +298,7 @@ export default function AddProjectOverviewForm() {
           setConfiguration(true);
           append({
             unitType: "",
-            subConfiguration: [],
+            subConfigurations: [],
             availabilityStatus: "Available",
           });
         }}
