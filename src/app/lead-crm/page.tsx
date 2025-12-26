@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { AppSidebar } from "@/components/app-sidebar";
 import Developers from "@/components/developers/developers";
 import LeadCRM from "@/components/lead-crm/leadCrm";
@@ -14,6 +15,11 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+
+export const metadata: Metadata = {
+  title: "Lead CRM - MilkE Khareedo Admin Panel",
+  description: "Manage leads and customer relationships in the MilkE Khareedo real estate CRM system.",
+};
 
 export default function Page() {
   return (
