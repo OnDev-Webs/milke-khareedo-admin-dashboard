@@ -12,6 +12,7 @@ import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { FormProvider } from "react-hook-form";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { createProperty } from "@/lib/features/properties/propertiesApi";
+import { PropertyFormValues } from "@/schema/property/propertySchema";
 
 type Step = {
   id: number;
@@ -202,15 +203,22 @@ export default function AddNewProperty() {
 
   const { handleSubmit } = methods;
 
-  const onSubmit = (data: any) => {
-    
+  const onSubmit = (data: PropertyFormValues) => {
     const formData: any = new FormData();
 
     Object.entries(data).forEach(([key, value]) => {
-      if (key === "images") return;
+      if (
+        key === "images" ||
+        key === "layouts" ||
+        value === undefined ||
+        value === null
+      ) {
+        return;
+      }
 
       if (value instanceof File) {
         formData.append(key, value);
+        return;
       }
 
       if (typeof value === "object") {
@@ -225,6 +233,12 @@ export default function AddNewProperty() {
         formData.append("images", file);
       });
     }
+
+    Object.entries(data.layouts || {})?.forEach(([layoutKey, files]) => {
+      files.forEach((file) => {
+        formData.append(`layout_${layoutKey}`, file);
+      });
+    });
 
     dispatch(createProperty(formData));
   };

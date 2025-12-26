@@ -1,105 +1,151 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
-
-type LayoutPlan = {
-  bhk: string;
-  area: number;
-  price: number;
-  image?: File | null;
-};
+import uploadImage from "@/assets/upload.svg";
+import { ChevronDown, SquarePen, Trash2 } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import { useFieldArray, useFormContext } from "react-hook-form";
+import { PropertyFormValues } from "@/schema/property/propertySchema";
+import { formatCurrency } from "@/utils/numbertoWord";
 
 export default function AddLayoutPlanForm() {
-  const { watch, setValue } = useFormContext<any>();
+  const { control, setValue, watch } = useFormContext<PropertyFormValues>();
 
-  const layoutPlans: LayoutPlan[] = watch("layoutPlans") || [
-    {
-      bhk: "1 BHK",
-      area: 350,
-      price: 35.2,
-      image: null,
-    },
-    {
-      bhk: "1 BHK",
-      area: 410,
-      price: 65.1,
-      image: null,
-    },
-  ];
+  const { fields: configurations } = useFieldArray({
+    control,
+    name: "configurations",
+  });
+
+  const [openUnits, setOpenUnits] = useState<Record<string, boolean>>({});
+
+  const layouts = watch("layouts") || {};
+
+  const toggleUnit = (id: string) =>
+    setOpenUnits((p) => ({ ...p, [id]: !p[id] }));
+
+  const makeKey = (unitType: string, carpetArea: string) =>
+    `${unitType.replace(/\s+/g, "")}_${carpetArea.replace(/\D/g, "")}`;
+
+  const handleUpload = (key: string, files: FileList | null) => {
+    if (!files?.length) return;
+
+    const existing = layouts[key] || [];
+
+    setValue("layouts", {
+      ...layouts,
+      [key]: [...existing, ...Array.from(files)],
+    });
+  };
+
+  const removeImage = (key: string, index: number) => {
+    setValue("layouts", {
+      ...layouts,
+      [key]: layouts[key].filter((_, i) => i !== index),
+    });
+  };
+
+  const replaceImage = (key: string, index: number, file: File) => {
+    const updated = [...layouts[key]];
+    updated[index] = file;
+
+    setValue("layouts", {
+      ...layouts,
+      [key]: updated,
+    });
+  };
 
   return (
-    <div className="w-full bg-white p-6">
-      <div className="mx-auto max-w-6xl">
-        <button
-          type="button"
-          className="flex w-full items-center justify-between rounded-lg bg-[#eef2ff] px-4 py-3 text-sm font-semibold text-gray-900"
-        >
-          1 BHK
-          <span className="text-lg">{/* ChevronTop */}</span>
-        </button>
+    <div className="w-full bg-white p-6 space-y-4">
+      {configurations.map((config) => {
+        const isOpen = openUnits[config.id];
 
-        <div className="mt-4 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-          {layoutPlans.map((plan, idx) => (
-            <div
-              key={idx}
-              className="rounded-2xl border border-gray-200 p-3"
+        return (
+          <div key={config.id} className="rounded-xl">
+            <button
+              type="button"
+              onClick={() => toggleUnit(config.id)}
+              className="flex w-full items-center justify-between rounded-xl border bg-indigo-50 px-4 py-3 text-sm font-semibold"
             >
-              <div className="relative overflow-hidden rounded-xl bg-gray-100">
-                <div className="h-64 w-full object-cover">
-                  {/* img */}
-                </div>
+              {config.unitType}
+              <ChevronDown
+                className={`transition ${isOpen ? "rotate-180" : ""}`}
+              />
+            </button>
 
-                <div className="absolute right-2 top-2 flex flex-col gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setValue(
-                        "layoutPlans",
-                        layoutPlans.filter((_, i) => i !== idx),
-                        { shouldValidate: true }
-                      )
-                    }
-                    className="rounded-full bg-white p-2 shadow"
-                  >
-                    {/* delete */}
-                  </button>
+            {isOpen && (
+              <div className="grid gap-6 py-4 sm:grid-cols-2 md:grid-cols-3">
+                {config.subConfigurations?.map((sub, subIndex) => {
+                  const key = makeKey(config.unitType, sub.carpetArea);
 
-                  <button
-                    type="button"
-                    className="rounded-full bg-white p-2 shadow"
-                  >
-                    {/* View */}
-                  </button>
-                </div>
+                  const images: File[] = layouts[key] || [];
+
+                  return (
+                    <div key={subIndex} className="rounded-xl border p-3">
+                      {images.length > 0 ? (
+                        <div className="rounded-lg overflow-hidden h-56">
+                          {images.map((file, i) => {
+                            const url = URL.createObjectURL(file);
+
+                            return (
+                              <div key={i} className="h-full relative">
+                                <img
+                                  src={url}
+                                  className="w-full h-full rounded object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(key, i)}
+                                  className="absolute right-2 top-2 rounded-full text-red-500 bg-white p-2 shadow"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                                <label className="absolute right-2 top-12 cursor-pointer rounded-full bg-white p-2 shadow">
+                                  <SquarePen size={14} />
+
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        replaceImage(key, i, file);
+                                      }
+                                    }}
+                                  />
+                                </label>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <label className="flex h-56 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-blue-500 bg-blue-50">
+                          <Image src={uploadImage} alt="" />
+                          <p className="mt-2 text-sm">Upload Layout Photo</p>
+                          <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => handleUpload(key, e.target.files)}
+                          />
+                        </label>
+                      )}
+
+                      <div className="mt-3 flex justify-between text-sm font-medium">
+                        <span>
+                          {sub.carpetArea} Ft <sup>2</sup>
+                        </span>
+                        <span>₹ {formatCurrency(sub.price)}</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-
-              <div className="mt-3 flex items-center justify-between text-lg font-medium">
-                <span className="font-semibold">
-                  {plan.area.toFixed(2)} Ft²
-                </span>
-                <span className="text-gray-700">
-                  ₹ {plan.price.toFixed(2)} Lak
-                </span>
-              </div>
-            </div>
-          ))}
-
-          <div className="rounded-2xl border border-gray-200 p-3">
-            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-blue-400 bg-blue-50/40 p-6 text-center h-64">
-              {/* Upload icon */}
-
-              <p className="text-sm font-medium text-gray-700">
-                Upload <br /> Project Photo
-              </p>
-            </div>
-
-            <div className="mt-3 flex w-full items-center justify-between text-lg font-medium text-gray-800">
-              <span className="text-lg font-semibold">410.00 Ft²</span>
-              <span className="text-gray-700">₹ 65.10 Lak</span>
-            </div>
+            )}
           </div>
-        </div>
-      </div>
+        );
+      })}
     </div>
   );
 }

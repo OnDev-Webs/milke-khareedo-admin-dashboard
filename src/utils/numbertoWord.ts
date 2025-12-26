@@ -85,3 +85,22 @@ function convertBelowHundred(num: number): string {
   if (num < 20) return ONES[num];
   return `${TENS[Math.floor(num / 10)]} ${ONES[num % 10]}`.trim();
 }
+
+export function formatCurrency(value: number | string): string {
+  value = Number(value);
+  if (Number.isNaN(value)) return "";
+
+  if (value >= 1_00_00_000) {
+    return `${(value / 1_00_00_000).toFixed(2)} Cr`;
+  }
+
+  if (value >= 1_00_000) {
+    return `${(value / 1_00_000).toFixed(2)} Lakh`;
+  }
+
+  if (value >= 1_000) {
+    return `${(value / 1_000).toFixed(0)} thousand`;
+  }
+
+  return value.toString();
+}
