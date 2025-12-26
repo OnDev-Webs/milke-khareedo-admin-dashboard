@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { AppSidebar } from "@/components/app-sidebar";
 import Developers from "@/components/developers/developers";
 import LeadCRM from "@/components/lead-crm/leadCrm";
@@ -15,6 +16,11 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+
+export const metadata: Metadata = {
+  title: "Edit Access Level - Settings | MilkE Khareedo Admin Panel",
+  description: "Edit access levels and permissions for users in the MilkE Khareedo admin panel.",
+};
 
 export default function Page() {
   return (

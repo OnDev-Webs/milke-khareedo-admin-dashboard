@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { AppSidebar } from "@/components/app-sidebar";
 import Properties from "@/components/properties/properties";
 import {
@@ -12,6 +13,11 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+
+export const metadata: Metadata = {
+  title: "Properties - MilkE Khareedo Admin Panel",
+  description: "Manage and view all real estate properties in the MilkE Khareedo CRM system.",
+};
 
 export default function Page() {
   return (

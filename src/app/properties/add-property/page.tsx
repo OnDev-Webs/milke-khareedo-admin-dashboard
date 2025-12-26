@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { AppSidebar } from "@/components/app-sidebar";
 import AddNewProperty from "@/components/properties/add-property/addNewProperty";
 import {
@@ -12,6 +13,11 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+
+export const metadata: Metadata = {
+  title: "Add Property - MilkE Khareedo Admin Panel",
+  description: "Add a new real estate property to the MilkE Khareedo CRM system with details, amenities, and photos.",
+};
 
 export default function Page() {
   return (

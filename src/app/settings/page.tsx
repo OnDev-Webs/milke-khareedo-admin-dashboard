@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import { AppSidebar } from "@/components/app-sidebar";
 import Settings from "@/components/settings/setting";
 
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+
+export const metadata: Metadata = {
+  title: "Settings - MilkE Khareedo Admin Panel",
+  description: "Configure profile settings, user roles, and access controls for the MilkE Khareedo admin panel.",
+};
 
 export default function Page() {
   return (
