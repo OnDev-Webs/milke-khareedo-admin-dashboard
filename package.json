@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "set PORT=3002 & next dev",
     "build": "next build",
     "start": "next start",
     "lint": "biome check",
@@ -28,6 +28,7 @@
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-hook-form": "^7.68.0",
+    "react-icons": "^5.5.0",
     "react-redux": "^9.2.0",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.2.1"

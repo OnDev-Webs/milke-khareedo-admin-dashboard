@@ -5,11 +5,13 @@ import { DeveloperForm } from "@/schema/developer/devloperSchema";
 
 export const createDeveloper = createAsyncThunk<
   DeveloperResponse,
-  DeveloperForm,
+  FormData,
   { rejectValue: string }
 >("developers/createDeveloper", async (payload, { rejectWithValue }) => {
   try {
-    const res = await axiosInstance.post(`admin/create_developer`,payload);
+    const res = await axiosInstance.post(`admin/create_developer`,payload ,{
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return res.data;
   } catch (error: any) {
     return rejectWithValue(
@@ -52,3 +54,51 @@ export const fetchDeveloperById = createAsyncThunk<
     );
   }
 });
+
+
+export const updateDeveloper = createAsyncThunk<
+  DeveloperResponse,
+  { id: string; payload: FormData },
+  { rejectValue: string }
+>(
+  "developers/updateDeveloper",
+  async ({ id, payload }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.put(
+        `admin/update_developer/${id}`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to update developer"
+      );
+    }
+  }
+);
+
+export const deleteDeveloper = createAsyncThunk<
+  { success: boolean; message: string },
+  string,
+  { rejectValue: string }
+>(
+  "developers/deleteDeveloper",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.delete(
+        `admin/delete_developer/${id}`
+      );
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to delete developer"
+      );
+    }
+  }
+);
+

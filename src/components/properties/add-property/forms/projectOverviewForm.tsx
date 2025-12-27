@@ -1,6 +1,6 @@
 "use client";
 
-import { File, FileImage, Plus, X } from "lucide-react";
+import { File, FileImage, Plus, Search, X } from "lucide-react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { PropertyFormValues } from "@/schema/property/propertySchema";
 import { useEffect, useState } from "react";
@@ -10,6 +10,7 @@ import { RootState } from "@/lib/store/store";
 import { fetchDevelopers } from "@/lib/features/developers/developerApi";
 import { ConfigurationCard } from "./configurationCard";
 import file from "@/assets/file.svg";
+import { numberToWords } from "@/utils/numbertoWord";
 
 function Field({
   label,
@@ -46,8 +47,12 @@ export default function AddProjectOverviewForm() {
   const {
     register,
     setValue,
+    watch,
     formState: { errors },
   } = useFormContext<PropertyFormValues>();
+  const developerPrice = watch("developerPrice");
+  const offerPrice = watch("offerPrice");
+
 
   const handleReraFile = (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -79,6 +84,9 @@ export default function AddProjectOverviewForm() {
   const [selectDeveloperId, setselectDeveloperId] = useState("");
   const { control } = useFormContext<PropertyFormValues>();
 
+  const [locationSearch, setLocationSearch] = useState("");
+
+
   const {
     fields: configurations,
     append,
@@ -91,6 +99,47 @@ export default function AddProjectOverviewForm() {
   useEffect(() => {
     selectDeveloperId && setValue("developer", selectDeveloperId);
   }, [selectDeveloperId]);
+
+
+  async function handleLocationSearch() {
+    if (!locationSearch) return;
+
+    const response = await fetch(
+      "https://places.googleapis.com/v1/places:searchText",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+          "X-Goog-FieldMask":
+            "places.displayName,places.location,places.formattedAddress",
+        },
+        body: JSON.stringify({
+          textQuery: locationSearch,
+        }),
+      }
+    );
+
+    const data = await response.json();
+    const place = data?.places?.[0];
+
+    if (!place) return;
+
+    // ✅ Set form values
+    setValue("location", place.formattedAddress || locationSearch, {
+      shouldValidate: true,
+    });
+
+    setValue("latitude", place.location.latitude, {
+      shouldValidate: true,
+    });
+
+    setValue("longitude", place.location.longitude, {
+      shouldValidate: true,
+    });
+
+  }
+
 
   return (
     <main className="p-4 h-[87vh] pb-10  overflow-y-auto">
@@ -127,7 +176,7 @@ export default function AddProjectOverviewForm() {
           </div>
         </Field>
 
-        <Field
+        {/* <Field
           label="Location "
           description="Primary area or landmark"
           error={errors.location}
@@ -136,7 +185,46 @@ export default function AddProjectOverviewForm() {
             className="w-full outline-none"
             {...register("location", { required: true })}
           />
+        </Field> */}
+
+        <Field
+          label="Location"
+          description="Primary area or landmark"
+          error={errors.location}
+        >
+          <div className="relative">
+            <input
+              type="text"
+              className="w-full outline-none pr-10"
+              value={locationSearch}
+              placeholder="Search location"
+              onChange={(e) => setLocationSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleLocationSearch();
+                }
+              }}
+            />
+
+            <button
+              type="button"
+              onClick={handleLocationSearch}
+              className="absolute right-8 top-1/2 -translate-y-1/2"
+            >
+              <Search size={16} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setLocationSearch("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </Field>
+
 
         <Field
           label="Project Size "
@@ -177,21 +265,37 @@ export default function AddProjectOverviewForm() {
           description="Official listed price"
           error={errors.developerPrice}
         >
-          <input
-            className="w-full outline-none"
-            {...register("developerPrice", { required: true })}
-          />
+          <div className="relative">
+            <input
+              className="w-full outline-none"
+              {...register("developerPrice", { required: true })}
+            />
+
+            {developerPrice && (
+              <p className="absolute top-full mt-8 text-xs text-[#9A9A9A] truncate w-full">
+                {numberToWords(developerPrice)}
+              </p>
+            )}
+          </div>
         </Field>
 
         <Field
-          label="Offer Price "
+          label="Offer Price"
           description="Special negotiated price for group-buy members"
           error={errors.offerPrice}
         >
-          <input
-            className="w-full outline-none"
-            {...register("offerPrice", { required: true })}
-          />
+          <div className="relative">
+            <input
+              className="w-full outline-none"
+              {...register("offerPrice", { required: true })}
+            />
+
+            {offerPrice && (
+              <p className="absolute top-full mt-14 text-xs text-[#9A9A9A] truncate w-full">
+                {numberToWords(offerPrice)}
+              </p>
+            )}
+          </div>
         </Field>
 
         <Field

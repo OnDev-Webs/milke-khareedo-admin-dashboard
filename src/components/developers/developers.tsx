@@ -9,7 +9,7 @@ import { fetchDevelopers } from "@/lib/features/developers/developerApi";
 import { RootState } from "@/lib/store/store";
 import { Developer } from "@/lib/features/developers/developerSlice";
 
-interface IDeveloper extends Developer {}
+interface IDeveloper extends Developer { }
 
 type Header = {
   key: keyof IDeveloper | "actions";

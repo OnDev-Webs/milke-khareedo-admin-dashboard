@@ -1,176 +1,221 @@
 "use client";
 
-import { useState } from "react";
-
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  avatar: string;
-};
-
-const USERS: User[] = [
-  {
-    id: "1",
-    name: "XYZ",
-    email: "xyz@milkshareedo.com",
-    avatar:
-      "https://plus.unsplash.com/premium_photo-1724853266875-f304906144a7?w=900",
-  },
-  {
-    id: "2",
-    name: "ABC",
-    email: "abc@milkshareedo.com",
-    avatar:
-      "https://plus.unsplash.com/premium_photo-1724853266875-f304906144a7?w=900",
-  },
-];
+import { useState, useEffect, useRef } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { RootState } from "@/lib/store/store";
+import {
+  Agent,
+  fetchAgentRoles,
+  fetchRelationshipManagers,
+} from "@/lib/features/role/roleApi";
+import { FiChevronDown } from "react-icons/fi";
 
 export default function AddRelationshipManagerForm() {
+  const dispatch = useAppDispatch();
+
+  const { agents, managers, loading } = useAppSelector(
+    (state: RootState) => state.roles
+  );
+
   const [rmSearch, setRmSearch] = useState("");
   const [agentSearch, setAgentSearch] = useState("");
 
   const [relationshipManager, setRelationshipManager] =
-    useState<User | null>(null);
+    useState<Agent | null>(null);
+  const [selectedAgents, setSelectedAgents] = useState<Agent[]>([]);
 
-  const [agents, setAgents] = useState<User[]>([]);
+  const [showRMList, setShowRMList] = useState(false);
+  const [showAgentList, setShowAgentList] = useState(false);
 
-  const addRM = () => {
-    const rm = USERS.find((u) =>
-      u.name.toLowerCase().includes(rmSearch.toLowerCase())
-    );
-    if (!rm) return;
+  const rmRef = useRef<HTMLDivElement>(null);
+  const agentRef = useRef<HTMLDivElement>(null);
 
-    setRelationshipManager(rm);
-    setRmSearch("");
-  };
+  useEffect(() => {
+    dispatch(fetchAgentRoles());
+    dispatch(fetchRelationshipManagers());
+  }, [dispatch]);
 
-  const addAgent = () => {
-    const agent = USERS.find((u) =>
-      u.name.toLowerCase().includes(agentSearch.toLowerCase())
-    );
-    if (!agent) return;
-    if (agents.some((a) => a.id === agent.id)) return;
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (rmRef.current && !rmRef.current.contains(event.target as Node)) {
+        setShowRMList(false);
+      }
+      if (
+        agentRef.current &&
+        !agentRef.current.contains(event.target as Node)
+      ) {
+        setShowAgentList(false);
+      }
+    };
 
-    setAgents([...agents, agent]);
-    setAgentSearch("");
-  };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredManagers = managers.filter((m) =>
+    m.name.toLowerCase().includes(rmSearch.toLowerCase())
+  );
+
+  const filteredAgents = agents
+    .filter((a) =>
+      a.name.toLowerCase().includes(agentSearch.toLowerCase())
+    )
+    .filter((a) => !selectedAgents.some((sa) => sa._id === a._id));
 
   return (
-    <div className="min-h-screen bg-white p-6">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6">
-          <fieldset className=" border px-4 rounded-md pb-1.5">
-            <legend className="text-xs font-semibold text-gray-700">
-              Select Relationship Manager*
-            </legend>
+    <div className="h-[80vh] bg-white p-6 overflow-y-auto">
+      {loading && <p>Loading...</p>}
 
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={rmSearch}
-                onChange={(e) => setRmSearch(e.target.value)}
-                placeholder="Type three characters to search"
-                className="flex-1 rounded-lg outline-none px-3 py-2 text-sm"
-              />
+      {/* ================= RELATIONSHIP MANAGER ================= */}
+      <div className="mb-6 relative" ref={rmRef}>
+        <h3 className="mb-2 text-sm font-semibold text-gray-900">
+          Relationship Manager
+        </h3>
+        <fieldset
+          className="border px-4 py-2 rounded-md cursor-pointer flex items-center justify-between"
+          onClick={() => setShowRMList((prev) => !prev)}
+        >
+          <legend className="text-xs font-semibold text-gray-700">
+            Select Relationship Manager*
+          </legend>
 
-              <button
-                type="button"
-                onClick={addRM}
-                className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200"
-              >
-                Add +
-              </button>
+          <span className="text-sm text-gray-700">
+            {relationshipManager ? relationshipManager.name : "Select RM"}
+          </span>
+
+          <FiChevronDown
+            className={`ml-2 text-gray-500 transition-transform duration-200 ${showRMList ? "rotate-180" : ""
+              }`}
+          />
+        </fieldset>
+
+        {showRMList && (
+          <div className="absolute z-30 mt-1 w-full bg-white border rounded-lg shadow">
+            <input
+              type="text"
+              value={rmSearch}
+              onChange={(e) => setRmSearch(e.target.value)}
+              placeholder="Search RM"
+              className="w-full px-3 py-2 text-sm border-b outline-none"
+            />
+
+            <ul className="max-h-56 overflow-auto">
+              {filteredManagers.map((rm) => (
+                <li
+                  key={rm._id}
+                  onClick={() => {
+                    setRelationshipManager(rm);
+                    setShowRMList(false);
+                    setRmSearch("");
+                  }}
+                  className="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100"
+                >
+                  {rm.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {relationshipManager && (
+        <div className="mb-8 max-w-sm overflow-hidden rounded-2xl shadow">
+          <div className="relative">
+            <img
+              src={relationshipManager.profileImage || "/default-avatar.png"}
+              alt="RM"
+              className="h-72 w-full object-cover"
+            />
+
+            <div className="absolute -bottom-px rounded-2xl overflow-hidden p-px bg-linear-to-r from-white via-neutral-400/40 to-white w-full">
+              <div className="bg-neutral-400/40 px-4 py-3 backdrop-blur-[55px] text-white rounded-2xl">
+                <p className="text-lg font-semibold">
+                  {relationshipManager.name}
+                </p>
+                <p className="text-base">
+                  {relationshipManager.email || "-"}
+                </p>
+              </div>
             </div>
-          </fieldset>
-
-          <p className="mt-1 text-[11px] text-gray-400">
-            Choose the primary RM for this project.
-          </p>
+          </div>
         </div>
+      )}
 
-        {relationshipManager && (
-          <div className="mb-8 max-w-sm overflow-hidden rounded-2xl shadow">
+      {/* ================= LEAD DISTRIBUTION AGENTS ================= */}
+      <div className="mb-4 relative" ref={agentRef}>
+        <h3 className="mb-2 text-sm font-semibold text-gray-900">
+          Lead Distribution
+        </h3>
+
+        <fieldset
+          className="border px-4 py-2 rounded-md cursor-pointer flex items-center justify-between"
+          onClick={() => setShowAgentList((prev) => !prev)}
+        >
+          <legend className="text-xs font-semibold text-gray-700">
+            Add agents (optional)
+          </legend>
+
+          <span className="text-sm text-gray-700">
+            {selectedAgents.length > 0
+              ? `${selectedAgents.length} agent(s) selected`
+              : "Select agents"}
+          </span>
+
+          <FiChevronDown
+            className={`ml-2 text-gray-500 transition-transform duration-200 ${showAgentList ? "rotate-180" : ""
+              }`}
+          />
+        </fieldset>
+
+        {showAgentList && (
+          <div className="absolute z-30 mt-1 w-full bg-white border rounded-lg shadow">
+            <input
+              type="text"
+              value={agentSearch}
+              onChange={(e) => setAgentSearch(e.target.value)}
+              placeholder="Search agents"
+              className="w-full px-3 py-2 text-sm border-b outline-none"
+            />
+
+            <ul className="max-h-56 overflow-auto">
+              {filteredAgents.map((agent) => (
+                <li
+                  key={agent._id}
+                  onClick={() => {
+                    setSelectedAgents([...selectedAgents, agent]);
+                    setAgentSearch("");
+                  }}
+                  className="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100"
+                >
+                  {agent.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {/* ================= SELECTED AGENTS ================= */}
+      <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+        {selectedAgents.map((agent) => (
+          <div
+            key={agent._id}
+            className="max-w-sm overflow-hidden rounded-2xl shadow">
             <div className="relative">
               <img
-                src={relationshipManager.avatar}
-                alt="RM"
+                src={agent.profileImage || "/default-avatar.png"}
+                alt="Agent"
                 className="h-72 w-full object-cover"
               />
-
-              <div className="absolute -bottom-px rounded-2xl overflow-hidden p-px  bg-linear-to-r from-white via-70% via-neutral-400/40 to-white w-full">
+              <div className="absolute -bottom-px rounded-2xl overflow-hidden p-px bg-linear-to-r from-white via-neutral-400/40 to-white w-full">
                 <div className="bg-neutral-400/40 px-4 py-3 backdrop-blur-[55px] text-white rounded-2xl">
-                  <p className="text-lg font-semibold ">
-                    {relationshipManager.name}
-                  </p>
-                  <p className="text-base">
-                    {relationshipManager.email}
-                  </p>
+                  <p className="text-lg font-semibold">{agent.name}</p>
+                  <p className="text-base">{agent.email || "-"}</p>
                 </div>
               </div>
             </div>
           </div>
-        )}
-
-        <div className="mb-4">
-          <h3 className=" mb-2 text-sm font-semibold text-gray-900">
-            Lead Distribution
-          </h3>
-
-          <fieldset className=" border px-4 rounded-md pb-1.5">
-            <legend className="text-xs font-semibold text-gray-700">
-              Add agents (optional)
-            </legend>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={agentSearch}
-                onChange={(e) => setAgentSearch(e.target.value)}
-                placeholder="Type three characters to search"
-                className="flex-1 rounded-lg outline-none px-3 py-2 text-sm"
-              />
-
-              <button
-                type="button"
-                onClick={addAgent}
-                className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200"
-              >
-                Add +
-              </button>
-            </div>
-          </fieldset>
-
-          <p className="mt-1 text-[11px] text-gray-400">
-            Add sales agents who will also receive project leads.
-          </p>
-        </div>
-
-        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-          {agents.map((agent) => (
-            <div
-              key={agent.id}
-              className="max-w-sm overflow-hidden rounded-2xl shadow"
-            >
-              <div className="relative">
-                <img
-                  src={agent.avatar}
-                  alt="Agent"
-                  className="h-72 w-full object-cover"
-                />
-
-                <div className="absolute -bottom-px rounded-2xl overflow-hidden p-px  bg-linear-to-r from-white via-70% via-neutral-400/40 to-white w-full">
-                  <div className="bg-neutral-400/40 px-4 py-3 backdrop-blur-[55px] text-white rounded-2xl">
-                    <p className="text-lg font-semibold ">
-                      {agent.name}
-                    </p>
-                    <p className="text-base">{agent.email}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        ))}
       </div>
     </div>
   );
