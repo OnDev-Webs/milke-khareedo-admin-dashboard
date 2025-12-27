@@ -4,8 +4,8 @@ import { useMemo, useState, useEffect, useCallback } from "react";
 import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
 
 const defaultCenter = {
-  lat: 19.076,
-  lng: 72.8777,
+  lat: 28.6139,
+  lng: 77.209,
 };
 
 interface GoogleMapProps {
@@ -70,7 +70,10 @@ export default function GoogleMapComponent({
 
   const mapOptions = useMemo(
     () => ({
-      disableDefaultUI: false,
+      disableDefaultUI: true,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
       clickableIcons: false,
       scrollwheel: true,
       styles: [
