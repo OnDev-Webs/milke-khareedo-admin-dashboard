@@ -14,7 +14,7 @@ import { Property } from "@/lib/features/properties/propertiesSlice";
 import { deletePropertyById } from "@/lib/features/properties/propertiesApi";
 import { useAppDispatch } from "@/lib/store/hooks";
 
-interface IProperty extends Property {}
+interface IProperty extends Property { }
 
 interface PropertiesTableProps {
   properties: IProperty[];
@@ -114,7 +114,7 @@ export default function PropertiesTable({
 
             <tbody className="divide-y">
               {properties.map((row, index) => {
-                // const isLastTwo = (index >= properties.length - 2);
+                const isLastTwo = index >= properties.length - 2;
 
                 return (
                   <tr key={`${index}`} className="hover:bg-gray-50">
@@ -153,11 +153,10 @@ export default function PropertiesTable({
                     <td className="px-2 py-3">
                       <div className="flex items-center justify-center">
                         <div
-                          className={`rounded-full flex px-2 py-1 font-semibold text-sm ${
-                            row.isStatus
+                          className={`rounded-full flex px-2 py-1 font-semibold text-sm ${row.isStatus
                               ? "bg-[#BCE288] text-[#2E6B2B]"
                               : "bg-[#FAA2A4] text-[#B44445]"
-                          }`}
+                            }`}
                         >
                           <Dot />{" "}
                           <span className="pr-3">
@@ -185,10 +184,7 @@ export default function PropertiesTable({
 
                         {openMenuId === row._id && (
                           <div
-                            className={` overflow-hidden absolute right-0 z-50 w-36 rounded-lg border bg-white shadow ${
-                              "top-8"
-                              // isLastTwo ? "bottom-8" : "top-8"
-                            }`}
+                            className={`absolute right-0 z-50 w-36 rounded-lg border bg-white shadow ${isLastTwo ? "bottom-8" : "top-8"}`}
                           >
                             <button
                               onClick={() => {
@@ -209,7 +205,6 @@ export default function PropertiesTable({
                                 setOpen(true);
                               }}
                               className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
-                            
                         `}
                             >
                               Veiw
@@ -251,11 +246,10 @@ export default function PropertiesTable({
           {pageNumbers.map((page) => (
             <button
               key={page}
-              className={`rounded-full w-7 h-7 flex items-center justify-center ${
-                currentPage === page
+              className={`rounded-full w-7 h-7 flex items-center justify-center ${currentPage === page
                   ? "bg-black text-white"
                   : "bg-gray-100 hover:bg-gray-200"
-              }`}
+                }`}
               onClick={() => onPageChange(page)}
             >
               {page}
@@ -270,11 +264,10 @@ export default function PropertiesTable({
 
           {totalPages > 5 && currentPage < totalPages - 1 && (
             <button
-              className={`rounded-full w-7 h-7 flex items-center justify-center ${
-                currentPage === totalPages
+              className={`rounded-full w-7 h-7 flex items-center justify-center ${currentPage === totalPages
                   ? "bg-black text-white"
                   : "bg-gray-100 hover:bg-gray-200"
-              }`}
+                }`}
               onClick={() => onPageChange(totalPages)}
             >
               {totalPages}

@@ -13,6 +13,7 @@ import { FormProvider } from "react-hook-form";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { createProperty } from "@/lib/features/properties/propertiesApi";
 import { PropertyFormValues } from "@/schema/property/propertySchema";
+import { useRouter } from "next/navigation";
 
 type Step = {
   id: number;
@@ -30,6 +31,7 @@ type List = {
 
 export default function AddNewProperty() {
   const [activeStep, setActiveStep] = useState(1);
+  const router = useRouter();
 
   const newProperty: Step[] = [
     {
@@ -143,7 +145,7 @@ export default function AddNewProperty() {
     {
       id: 6,
       step: 6,
-      title: "connectivity",
+      title: "Connectivity",
       description:
         "Add the project’s main location and surrounding points of interest. This helps buyers understand access, convenience, and overall livability.",
       component: <ConnectivityForm />,
@@ -195,6 +197,20 @@ export default function AddNewProperty() {
     },
   ];
 
+  const totalSteps = newProperty.length;
+
+  const handleNext = () => {
+    if (activeStep < totalSteps) {
+      setActiveStep((prev) => prev + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (activeStep > 1) {
+      setActiveStep((prev) => prev - 1);
+    }
+  };
+
   const currentStep = newProperty.find((item) => item.step === activeStep);
 
   const methods = usePropertyForm();
@@ -203,7 +219,7 @@ export default function AddNewProperty() {
 
   const { handleSubmit } = methods;
 
-  const onSubmit = (data: PropertyFormValues) => {
+  const onSubmit = async (data: PropertyFormValues) => {
     const formData: any = new FormData();
 
     Object.entries(data).forEach(([key, value]) => {
@@ -234,13 +250,20 @@ export default function AddNewProperty() {
       });
     }
 
-    Object.entries(data.layouts || {})?.forEach(([layoutKey, files]) => {
+    Object.entries(data.layouts || {}).forEach(([layoutKey, files]) => {
+      const [unitType, carpetAreaRaw] = layoutKey.split("_");
+      const carpetArea = Math.floor(Number(carpetAreaRaw) / 100 || Number(carpetAreaRaw));
+      const finalKey = `${unitType}_${carpetArea}`;
       files.forEach((file) => {
-        formData.append(`layout_${layoutKey}`, file);
+        formData.append(`layout_${finalKey}`, file);
       });
     });
 
-    dispatch(createProperty(formData));
+    const resultAction = await dispatch(createProperty(formData));
+
+    if (createProperty.fulfilled.match(resultAction)) {
+      router.push("/properties");
+    }
   };
 
   return (
@@ -275,14 +298,35 @@ export default function AddNewProperty() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-center">
-                <button
-                  type="submit"
-                  className="whitespace-nowrap border px-16 rounded py-1 bg-black text-white"
-                >
-                  Save Property
-                </button>
+              <div className="flex items-center justify-center gap-3">
+                {activeStep > 1 && (
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    className="border px-8 rounded py-1 bg-white text-black"
+                  >
+                    Back
+                  </button>
+                )}
+
+                {activeStep < totalSteps ? (
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    className="border px-8 rounded py-1 bg-black text-white"
+                  >
+                    Next
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    className="border px-12 rounded py-1 bg-black text-white"
+                  >
+                    Save Property
+                  </button>
+                )}
               </div>
+
             </aside>
 
             <div className="col-span-19 ">
@@ -296,11 +340,10 @@ export default function AddNewProperty() {
                       key={item.id}
                       onClick={() => setActiveStep(item.step)}
                       className={`px-4 py-2  text-sm font-medium transition
-                ${
-                  isActive
-                    ? "border-b-2 border-black"
-                    : "text-[#7B7B7B] hover:bg-[#F4F8FF]"
-                }`}
+                ${isActive
+                          ? "border-b-2 border-black"
+                          : "text-[#7B7B7B] hover:bg-[#F4F8FF]"
+                        }`}
                     >
                       {item.title}
                     </button>

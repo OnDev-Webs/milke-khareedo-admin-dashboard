@@ -106,14 +106,28 @@ export default function ConnectivityForm() {
   };
 
   const mapMarkers = useMemo(() => {
-    return Object.values(connectivity)
+    const connectivityMarkers = Object.values(connectivity)
       .flat()
       .map((item) => ({
         lat: item.latitude,
         lng: item.longitude,
         title: item.name,
       }));
-  }, [connectivity]);
+
+    const mainLocationMarker = selectedCoords
+      ? [
+        {
+          lat: selectedCoords.latitude,
+          lng: selectedCoords.longitude,
+          title: "Project Location",
+          type: "main",
+        },
+      ]
+      : [];
+
+    return [...mainLocationMarker, ...connectivityMarkers];
+  }, [connectivity, selectedCoords]);
+
 
   const [mapCenter, setMapCenter] = useState(
     mapMarkers[0] ?? { lat: 28.6139, lng: 77.209 }
@@ -215,11 +229,10 @@ export default function ConnectivityForm() {
             key={cat.key}
             type="button"
             onClick={() => setActiveCategory(cat.key)}
-            className={`px-4 py-2 text-sm font-medium ${
-              activeCategory === cat.key
+            className={`px-4 py-2 text-sm font-medium ${activeCategory === cat.key
                 ? "border-b-2 border-black"
                 : "text-gray-500 hover:text-black"
-            }`}
+              }`}
           >
             {cat.title}
           </button>
@@ -248,11 +261,10 @@ export default function ConnectivityForm() {
             type="button"
             disabled={!selectedCoords}
             onClick={() => addItem(activeCategory)}
-            className={`rounded-lg px-4 py-1 text-sm font-medium ${
-              selectedCoords
+            className={`rounded-lg px-4 py-1 text-sm font-medium ${selectedCoords
                 ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 : "bg-gray-50 text-gray-400 cursor-not-allowed"
-            }`}
+              }`}
           >
             Add +
           </button>

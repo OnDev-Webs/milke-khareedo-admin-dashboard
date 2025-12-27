@@ -87,9 +87,8 @@ export default function DevelopersTable({
 
             <tbody className="divide-y">
               {developers?.map((row, index) => {
-                // const isLastTwo = index >= developers?.length - 2;
+                const isLastTwo = index >= developers?.length - 2;
 
-                console.log("developers",developers)
                 return (
                   <tr key={row?._id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
@@ -131,10 +130,7 @@ export default function DevelopersTable({
 
                         {openMenuId === row?._id && (
                           <div
-                            className={`absolute right-0 z-10 w-36 rounded-lg border bg-white shadow ${
-                              "top-8"
-                              // isLastTwo ? "bottom-8" : "top-8"
-                            }`}
+                            className={`absolute right-0 z-10 w-36 rounded-lg border bg-white shadow ${isLastTwo ? "bottom-8" : "top-8"}`}
                           >
                             <button
                               onClick={() => {

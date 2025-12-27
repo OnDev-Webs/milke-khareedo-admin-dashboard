@@ -18,7 +18,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
-import logo from "@/assets/logo.svg"
+import logo from "@/assets/logo.png"
 import img from "@/assets/loginImg.jpg"
 
 const data = {
@@ -56,7 +56,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <img src={logo.src} alt="logo" className="size-7 mx-2" />
+        <img src={logo.src} alt="logo" className="w-30 mx-2" />
       </SidebarHeader>
       <div className="px-3 py-2.5">
       <hr  className="border-[#303547]"/>
