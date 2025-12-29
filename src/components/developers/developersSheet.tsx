@@ -130,8 +130,10 @@ function DeveloperEdit({
   setOpen: (open: boolean) => void;
 }) {
   const dispatch = useAppDispatch();
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(developer.logo || null);
 
-  const { register, handleSubmit } = useForm<DeveloperForm>({
+  const { register, handleSubmit, formState: { isSubmitting }, } = useForm<DeveloperForm>({
     defaultValues: {
       name: developer.developerName,
       description: developer.description,
@@ -145,7 +147,7 @@ function DeveloperEdit({
     },
   });
 
-  const onSubmit = (data: DeveloperForm) => {
+  const onSubmit = async (data: DeveloperForm) => {
     const formData = new FormData();
 
     formData.append("developerName", data.name);
@@ -163,30 +165,35 @@ function DeveloperEdit({
       })
     );
 
-    dispatch(
-      updateDeveloper({
-        id: developer._id,
-        payload: formData,
-      })
-    )
-      .unwrap()
-      .then(() => {
-        setOpen(false);
-        dispatch(fetchDevelopers({ page: 1, limit: 10 }));
-      })
-      .catch(console.error);
-  };
+    if (file) {
+      formData.append("logo", file);
+    }
 
+    try {
+      await dispatch(
+        updateDeveloper({
+          id: developer._id,
+          payload: formData,
+        })
+      ).unwrap();
+
+      setOpen(false);
+      dispatch(fetchDevelopers({ page: 1, limit: 10 }));
+    } catch (error) {
+      console.error("Update failed:", error);
+    }
+  };
 
   return (
     <div className="h-[90vh] overflow-auto bg-white">
       <div className="mx-auto max-w-2xl bg-white px-4 shadow-sm">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div className="flex items-start gap-4">
+            {/* Logo Preview */}
             <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-gray-100 overflow-hidden">
-              {developer.logo ? (
+              {preview ? (
                 <img
-                  src={developer.logo}
+                  src={preview}
                   alt="Developer logo"
                   className="h-full w-full object-cover"
                 />
@@ -195,25 +202,55 @@ function DeveloperEdit({
               )}
             </div>
 
+            {/* Upload Section */}
             <div>
               <p className="text-sm font-medium text-gray-800">
                 Upload Photo{" "}
-                <span className="cursor-pointer font-semibold text-blue-600 underline">
+                <label className="cursor-pointer font-semibold text-blue-600 underline">
                   browse
-                </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const selectedFile = e.target.files?.[0];
+                      if (selectedFile) {
+                        setFile(selectedFile);
+                        setPreview(URL.createObjectURL(selectedFile));
+                      }
+                    }}
+                  />
+                </label>
               </p>
+
               <p className="mt-1 text-xs text-gray-500">
                 Max 10 MB files are allowed
               </p>
 
-              <button
-                type="button"
-                className="mt-2 rounded-md border px-3 py-1 text-xs text-gray-600"
-              >
-                Edit Logo
-              </button>
+              {/* Edit Button */}
+              <div className="mt-2 relative inline-block">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="absolute inset-0 cursor-pointer opacity-0"
+                  onChange={(e) => {
+                    const selectedFile = e.target.files?.[0];
+                    if (selectedFile) {
+                      setFile(selectedFile);
+                      setPreview(URL.createObjectURL(selectedFile));
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  className="rounded-md border px-3 py-1 text-xs text-gray-600"
+                >
+                  Edit Logo
+                </button>
+              </div>
             </div>
           </div>
+
 
           <Field label="Developer Name*">
             <input
@@ -291,10 +328,15 @@ function DeveloperEdit({
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-black py-3 text-sm font-semibold text-white"
+            disabled={isSubmitting}
+            className={`w-full rounded-lg py-3 text-sm font-semibold text-white transition ${isSubmitting
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-black hover:bg-gray-900"
+              }`}
           >
-            Edit Developer
+            {isSubmitting ? "Updating Developer..." : "Edit Developer"}
           </button>
+
         </form>
       </div>
     </div>
@@ -325,7 +367,7 @@ function AddNewDeveloper({ setOpen }: { setOpen: (open: boolean) => void }) {
   });
   const dispatch = useAppDispatch();
 
-  const onSubmit = (data: DeveloperForm) => {
+  const onSubmit = async (data: DeveloperForm) => {
     const formData = new FormData();
 
     formData.append("developerName", data.name);
@@ -347,15 +389,14 @@ function AddNewDeveloper({ setOpen }: { setOpen: (open: boolean) => void }) {
       formData.append("logo", file);
     }
 
-    dispatch(createDeveloper(formData))
-      .unwrap()
-      .then(() => {
-        setOpen(false);
-        dispatch(fetchDevelopers({ page: 1, limit: 10 }));
-      })
-      .catch((err) => {
-        console.error("Failed to create developer:", err);
-      });
+    try {
+      await dispatch(createDeveloper(formData)).unwrap();
+
+      setOpen(false);
+      dispatch(fetchDevelopers({ page: 1, limit: 10 }));
+    } catch (err) {
+      console.error("Failed to create developer:", err);
+    }
   };
 
   return (
@@ -507,7 +548,10 @@ function AddNewDeveloper({ setOpen }: { setOpen: (open: boolean) => void }) {
           <button
             disabled={isSubmitting}
             type="submit"
-            className="w-full rounded-lg bg-black py-3 text-sm font-semibold text-white"
+            className={`w-full rounded-lg py-3 text-sm font-semibold text-white transition ${isSubmitting
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-black hover:bg-gray-900"
+              }`}
           >
             {isSubmitting ? "Adding New Developer" : "Add New Developer"}
           </button>

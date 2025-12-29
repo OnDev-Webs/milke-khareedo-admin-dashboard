@@ -4,7 +4,7 @@ import axiosInstance from "@/utils/axiosInstance";
 
 export const createProperty = createAsyncThunk<
   Property,
-  Property,
+  FormData,
   { rejectValue: string }
 >("properties/createProperty", async (payload, { rejectWithValue }) => {
   try {
@@ -42,7 +42,7 @@ export const fetchPropertyById = createAsyncThunk<
   { rejectValue: string }
 >("properties/fetchById", async (id, { rejectWithValue }) => {
   try {
-    const res = await axiosInstance.get(`/properties/${id}`);
+    const res = await axiosInstance.get(`admin/get_all_property_by_id/${id}`);
     return res.data.data;
   } catch (error: any) {
     return rejectWithValue(
@@ -65,3 +65,26 @@ export const deletePropertyById = createAsyncThunk<
     );
   }
 });
+
+
+export const updateProperty = createAsyncThunk<
+  Property,
+  { id: string; payload: FormData },
+  { rejectValue: string }
+>(
+  "properties/updateProperty",
+  async ({ id, payload }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.put(
+        `/admin/update_property/${id}`,
+        payload
+      );
+      return res.data.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to update property"
+      );
+    }
+  }
+);
+

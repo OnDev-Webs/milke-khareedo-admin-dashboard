@@ -82,4 +82,28 @@ axiosInstance.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error)
 );
 
+// Response interceptor to handle 401/403 errors
+axiosInstance.interceptors.response.use(
+  (response: AxiosResponse) => response,
+  (error: AxiosError) => {
+    if (typeof window !== "undefined") {
+      // Handle 401 Unauthorized or 403 Forbidden
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        // Clear auth data and remember me
+        const { clearRememberMe } = require("@/utils/rememberMe");
+        clearRememberMe();
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("userId");
+
+        // Only redirect if not already on login page
+        if (window.location.pathname !== "/" && window.location.pathname !== "/login") {
+          window.location.href = "/";
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default axiosInstance;

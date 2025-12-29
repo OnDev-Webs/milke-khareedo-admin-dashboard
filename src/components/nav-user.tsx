@@ -1,12 +1,10 @@
 "use client"
 
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
-import {
   DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -15,6 +13,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { User, LogOut } from "lucide-react"
+import { useAppDispatch } from "@/lib/store/hooks"
+import { resetAuth } from "@/lib/features/auth/adminAuthSlice"
+import { useRouter } from "next/navigation"
 
 export function NavUser({
   user,
@@ -22,10 +24,21 @@ export function NavUser({
   user: {
     name: string
     email: string
-    avatar: any
+    profileImage?: string | null
   }
 }) {
   const { isMobile } = useSidebar()
+  const dispatch = useAppDispatch()
+  const router = useRouter()
+
+  const handleSignOut = () => {
+    // Clear all auth data
+    dispatch(resetAuth());
+    // Use window.location for immediate redirect (no React state delays)
+    if (typeof window !== "undefined") {
+      window.location.href = "/";
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -37,19 +50,43 @@ export function NavUser({
               className=" flex items-center"
               // className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              {/* <Avatar className="h-8 w-8 rounded-full border">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-              </Avatar> */}
-              <div className="size-8 rounded-full bg-white flex items-center justify-center overflow-hidden">
-                <img src={user?.avatar?.src} alt="profile" className="object-cover h-full w-full "/>
+              <div className="size-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                {user.profileImage && user.profileImage.trim() !== "" ? (
+                  <img
+                    src={user.profileImage}
+                    alt={user.name || "User"}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User size={16} className="text-gray-400" />
+                )}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate font-medium">{user.name || "User"}</span>
+                <span className="truncate text-xs">{user.email || ""}</span>
               </div>
             </SidebarMenuButton>
           </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-56 rounded-lg"
+            side={isMobile ? "bottom" : "top"}
+            align={isMobile ? "end" : "start"}
+            sideOffset={8}
+          >
+            <div className="px-2 py-1.5">
+              <p className="text-sm font-medium text-foreground">{user.name || "User"}</p>
+              <p className="text-xs text-muted-foreground truncate">{user.email || ""}</p>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={handleSignOut}
+              variant="destructive"
+              className="cursor-pointer"
+            >
+              <LogOut className="text-destructive" />
+              <span>Sign Out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>

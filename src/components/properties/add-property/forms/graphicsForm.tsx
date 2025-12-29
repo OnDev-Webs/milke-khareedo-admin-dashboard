@@ -4,6 +4,7 @@ import { Trash2, X } from "lucide-react";
 import React, { useRef } from "react";
 import { useFormContext } from "react-hook-form";
 import upload from "@/assets/upload.svg";
+import Image from "next/image";
 
 export default function AddProjectPhotoUpload() {
   const { setValue, watch } = useFormContext<any>();
@@ -57,16 +58,22 @@ export default function AddProjectPhotoUpload() {
       {files.length > 0 && (
         <div className="grid grid-cols-4 gap-4">
           {files.map((file, idx) => {
-            const previewUrl = URL.createObjectURL(file);
+            const previewUrl =
+              file instanceof File
+                ? URL.createObjectURL(file)
+                : typeof file === "string"
+                  ? file
+                  : "";
 
             return (
               <div
                 key={idx}
                 className="relative rounded-xl overflow-hidden group  h-58"
               >
-                <img
+                <Image
                   src={previewUrl}
                   alt="preview"
+                  fill
                   className="w-full h-full object-cover"
                 />
 
@@ -78,13 +85,12 @@ export default function AddProjectPhotoUpload() {
                   <Trash2 size={14} className="text-red-400" />
                 </button>
 
-                
-                  <div className="absolute overflow-hidden bottom-2 right-2 bg-black/20 text-sm px-2.5 py-1.5 rounded-md backdrop-blur-2xl text-white font-normal">
-                    {`${idx + 1} / ${files?.length} ${
-                      idx == 0 ? "Preferred cover image" : ""
+
+                <div className="absolute overflow-hidden bottom-2 right-2 bg-black/20 text-sm px-2.5 py-1.5 rounded-md backdrop-blur-2xl text-white font-normal">
+                  {`${idx + 1} / ${files?.length} ${idx == 0 ? "Preferred cover image" : ""
                     }`}
-                  </div>
-                
+                </div>
+
               </div>
             );
           })}

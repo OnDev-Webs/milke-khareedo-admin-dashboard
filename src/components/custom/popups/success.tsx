@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 
-export default function Success(){
+export default function Success({ onClose }: { onClose: () => void }){
 
     return <div className="w-full max-w-md rounded-2xl bg-white px-6 py-7 shadow-xl">
             <div className="flex justify-center">
@@ -22,7 +22,7 @@ export default function Success(){
 
             <div className="mt-6">
               <button
-                // onClick={onClose}
+                onClick={onClose}
                 className="w-full rounded-lg bg-black py-3 text-sm font-semibold text-white"
               >
                 Close
