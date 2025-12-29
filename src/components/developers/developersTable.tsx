@@ -10,6 +10,8 @@ import DeveloperSheet, { SheetMode } from "./developersSheet";
 import PropertiesSheet from "../properties/propertiesSheet";
 import DeletePopUp from "../custom/popups/delete";
 import { Developer } from "@/lib/features/developers/developerSlice";
+import { deleteDeveloper } from "@/lib/features/developers/developerApi";
+import { useAppDispatch } from "@/lib/store/hooks";
 
 interface DevelopersTableProps {
   developers: Developer[];
@@ -39,10 +41,13 @@ export default function DevelopersTable({
   indexOfFirstItem,
   indexOfLastItem,
 }: DevelopersTableProps) {
+  const dispatch = useAppDispatch();
   const pageNumbers = getPageNumbers();
-  const [openMenuId, setOpenMenuId] = useState<number | string| null>(null);
+  const [openMenuId, setOpenMenuId] = useState<number | string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
-  
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+
   const [open, setOpen] = useState<boolean>(false);
   const [data, setData] = useState<any>(null);
   const [mode, setMode] = useState<SheetMode>("create");
@@ -67,10 +72,32 @@ export default function DevelopersTable({
     };
   }, [openMenuId]);
 
+  const handleDelete = async (id: string) => {
+    try {
+      await dispatch(deleteDeveloper(id)).unwrap();
+
+      // setIsDeleteOpen(false);
+      // setDeleteId(null);
+    } catch (error) {
+      console.error("Delete failed:", error);
+    }
+  };
+
   return (
     <div className="w-full bg-white">
       <DeveloperSheet mode={mode} data={data} open={open} setOpen={setOpen} />
-      {/* <DeletePopUp open={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} /> */}
+      <DeletePopUp
+        open={isDeleteOpen}
+        onClose={() => {
+          setIsDeleteOpen(false);
+          setDeleteId(null);
+        }}
+        id={deleteId}
+        title="Delete Developer?"
+        description="Are you sure you want to delete this developer? This action cannot be undone."
+        buttonText="Delete"
+        onConfirm={(id) => handleDelete(id)}
+      />
       <div className="w-full rounded-xl border bg-white overflow-x-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -94,7 +121,7 @@ export default function DevelopersTable({
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full bg-gray-200" >
-                          <img src={row?.logo} alt="logo"  className="rounded-full h-8 w-8" />
+                          <img src={row?.logo} alt="logo" className="rounded-full h-8 w-8" />
                         </div>
                         <span className="font-semibold text-gray-800">
                           <div> {row?.developerName}</div>
@@ -158,15 +185,15 @@ export default function DevelopersTable({
                             </button>
                             <button
                               onClick={() => {
+                                setOpenMenuId(null);
+                                setDeleteId(row._id);
                                 setIsDeleteOpen(true);
                               }}
-                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
-                            text-red-600
-                            
-                        `}
+                              className="block w-full px-4 py-2 text-left text-xs text-red-600 hover:bg-gray-50"
                             >
                               Delete
                             </button>
+
                           </div>
                         )}
                       </div>
@@ -190,11 +217,10 @@ export default function DevelopersTable({
           {pageNumbers.map((page) => (
             <button
               key={page}
-              className={`flex h-7 w-7 items-center justify-center rounded-full ${
-                page === currentPage
-                  ? "bg-black text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+              className={`flex h-7 w-7 items-center justify-center rounded-full ${page === currentPage
+                ? "bg-black text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
               onClick={() => onPageChange(page)}
             >
               {page}
@@ -209,11 +235,10 @@ export default function DevelopersTable({
 
           {totalPages > 5 && currentPage < totalPages - 1 && (
             <button
-              className={`flex h-7 w-7 items-center justify-center rounded-full ${
-                currentPage === totalPages
-                  ? "bg-black text-white"
-                  : "bg-gray-100 hover:bg-gray-200"
-              }`}
+              className={`flex h-7 w-7 items-center justify-center rounded-full ${currentPage === totalPages
+                ? "bg-black text-white"
+                : "bg-gray-100 hover:bg-gray-200"
+                }`}
               onClick={() => onPageChange(totalPages)}
             >
               {totalPages}

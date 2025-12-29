@@ -43,7 +43,7 @@ function Field({
   );
 }
 
-export default function AddProjectOverviewForm() {
+export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?: boolean }) {
   const {
     register,
     setValue,
@@ -86,15 +86,55 @@ export default function AddProjectOverviewForm() {
 
   const [locationSearch, setLocationSearch] = useState("");
 
+  useEffect(() => {
+    const loc = watch("location");
+    if (loc) {
+      setLocationSearch(loc);
+    }
+  }, [watch("location")]);
+
+  const reraFromApi = watch("reraQrImage");
+
+  useEffect(() => {
+    if (typeof reraFromApi === "string" && reraFromApi) {
+      setReraFileImg({
+        filename: reraFromApi,
+        state: true,
+      });
+    }
+  }, [reraFromApi]);
 
   const {
     fields: configurations,
     append,
     remove,
+    replace,
   } = useFieldArray({
     control,
     name: "configurations",
   });
+
+  useEffect(() => {
+    const configs = watch("configurations");
+
+    if (configs && Array.isArray(configs) && configs.length > 0) {
+      replace(configs);
+    }
+  }, []);
+
+
+  const possessionDate = watch("possessionDate");
+
+  useEffect(() => {
+    if (possessionDate && possessionDate.includes("T")) {
+      const formatted = possessionDate.split("T")[0];
+      setValue("possessionDate", formatted);
+    }
+  }, [possessionDate]);
+
+  const possessionStatus = watch("possessionStatus");
+
+  const developerId = watch("developer");
 
   useEffect(() => {
     selectDeveloperId && setValue("developer", selectDeveloperId);
@@ -152,6 +192,8 @@ export default function AddProjectOverviewForm() {
           <input
             className="w-full outline-none"
             {...register("projectName", { required: true })}
+            readOnly={readOnly}
+            disabled={readOnly}
           />
         </Field>
 
@@ -169,8 +211,13 @@ export default function AddProjectOverviewForm() {
               onSelect={(item) => {
                 if (typeof item !== "string") {
                   setselectDeveloperId(item.value);
+                  setValue("developer", item.value);
                 }
               }}
+              placeholder={
+                developers.find((d) => d._id === developerId)?.developerName
+                || "Select Developer"
+              }
               bordernone={true}
             />
           </div>
@@ -205,6 +252,8 @@ export default function AddProjectOverviewForm() {
                   handleLocationSearch();
                 }
               }}
+              disabled={readOnly}
+              readOnly={readOnly}
             />
 
             <button
@@ -234,6 +283,8 @@ export default function AddProjectOverviewForm() {
           <input
             className="w-full outline-none"
             {...register("projectSize", { required: true })}
+            readOnly={readOnly}
+            disabled={readOnly}
           />
         </Field>
 
@@ -245,6 +296,8 @@ export default function AddProjectOverviewForm() {
           <input
             className="w-full outline-none"
             {...register("landParcel", { required: true })}
+            readOnly={readOnly}
+            disabled={readOnly}
           />
         </Field>
 
@@ -257,6 +310,8 @@ export default function AddProjectOverviewForm() {
             type="date"
             className="w-full outline-none"
             {...register("possessionDate", { required: true })}
+            readOnly={readOnly}
+            disabled={readOnly}
           />
         </Field>
 
@@ -269,6 +324,8 @@ export default function AddProjectOverviewForm() {
             <input
               className="w-full outline-none"
               {...register("developerPrice", { required: true })}
+              readOnly={readOnly}
+              disabled={readOnly}
             />
 
             {developerPrice && (
@@ -288,6 +345,8 @@ export default function AddProjectOverviewForm() {
             <input
               className="w-full outline-none"
               {...register("offerPrice", { required: true })}
+              readOnly={readOnly}
+              disabled={readOnly}
             />
 
             {offerPrice && (
@@ -307,6 +366,8 @@ export default function AddProjectOverviewForm() {
             type="number"
             className="w-full outline-none"
             {...register("minGroupMembers", { required: true })}
+            readOnly={readOnly}
+            disabled={readOnly}
           />
         </Field>
 
@@ -318,6 +379,8 @@ export default function AddProjectOverviewForm() {
           <input
             className="w-full outline-none"
             {...register("reraId", { required: true })}
+            readOnly={readOnly}
+            disabled={readOnly}
           />
         </Field>
 
@@ -361,14 +424,16 @@ export default function AddProjectOverviewForm() {
         >
           <CustomDropdown
             items={["Ready To Move", "Under Construction"]}
-            placeholder="Select status"
+            placeholder={possessionStatus || "Select status"}
             onSelect={(item) => {
+              if (readOnly) return;
               if (typeof item === "string") {
                 setValue("possessionStatus", item);
               }
             }}
             bordernone={true}
           />
+
         </Field>
       </div>
 
@@ -381,6 +446,8 @@ export default function AddProjectOverviewForm() {
           <textarea
             rows={4}
             {...register("description", { required: true })}
+            readOnly={readOnly}
+            disabled={readOnly}
             className="w-full outline-none resize-none"
           />
         </Field>
