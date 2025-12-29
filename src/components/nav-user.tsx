@@ -2,6 +2,9 @@
 
 import {
   DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -10,7 +13,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { User } from "lucide-react"
+import { User, LogOut } from "lucide-react"
+import { useAppDispatch } from "@/lib/store/hooks"
+import { resetAuth } from "@/lib/features/auth/adminAuthSlice"
+import { useRouter } from "next/navigation"
 
 export function NavUser({
   user,
@@ -22,6 +28,17 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const dispatch = useAppDispatch()
+  const router = useRouter()
+
+  const handleSignOut = () => {
+    // Clear all auth data
+    dispatch(resetAuth());
+    // Use window.location for immediate redirect (no React state delays)
+    if (typeof window !== "undefined") {
+      window.location.href = "/";
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -50,6 +67,26 @@ export function NavUser({
               </div>
             </SidebarMenuButton>
           </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-56 rounded-lg"
+            side={isMobile ? "bottom" : "top"}
+            align={isMobile ? "end" : "start"}
+            sideOffset={8}
+          >
+            <div className="px-2 py-1.5">
+              <p className="text-sm font-medium text-foreground">{user.name || "User"}</p>
+              <p className="text-xs text-muted-foreground truncate">{user.email || ""}</p>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={handleSignOut}
+              variant="destructive"
+              className="cursor-pointer"
+            >
+              <LogOut className="text-destructive" />
+              <span>Sign Out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>

@@ -8,7 +8,6 @@ import { useAppDispatch } from "@/lib/store/hooks";
 import { AppDispatch } from "@/lib/store/store";
 import { useCallback, useEffect, useState } from "react";
 import { adminLogin } from "@/lib/features/auth/adminAuthApi";
-import { fetchDashboard } from "@/lib/features/dashboard/dashboardApi";
 import { useRouter } from "next/navigation";
 import { setRememberMe, setRememberMeEmail, getRememberMeEmail, getRememberMe, clearRememberMe } from "@/utils/rememberMe";
 import { Eye, EyeOff } from "lucide-react";
@@ -102,8 +101,7 @@ export default function Login() {
           clearRememberMe();
         }
 
-        await dispatch(fetchDashboard());
-
+        // Redirect immediately - dashboard will fetch its own data
         router.replace("/dashboard");
       }
     },

@@ -15,8 +15,14 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
+    // Skip on server
+    if (typeof window === "undefined") {
+      setIsChecking(false);
+      return;
+    }
+
     // Check for token in localStorage first
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const token = localStorage.getItem("token");
     
     // If no token and not on login page, redirect immediately
     if (!token && pathname !== "/" && pathname !== "/login") {
@@ -26,37 +32,51 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // If we have a token but auth state says not authenticated, wait a bit for hydration
+    // Allow login page to render immediately
+    if (pathname === "/" || pathname === "/login") {
+      setIsChecking(false);
+      return;
+    }
+
+    // If we have a token but auth state says not authenticated, check once more after a brief delay for hydration
     if (token && !isAuthenticated && !loading) {
-      // Give AuthHydrator time to restore state
       const timer = setTimeout(() => {
-        const stillNoAuth = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-        if (!stillNoAuth && pathname !== "/" && pathname !== "/login") {
-          dispatch(resetAuth());
-          router.replace("/");
+        // Re-check auth state after hydration
+        if (!isAuthenticated && pathname !== "/" && pathname !== "/login") {
+          const stillNoAuth = localStorage.getItem("token");
+          if (!stillNoAuth) {
+            dispatch(resetAuth());
+            router.replace("/");
+          }
         }
         setIsChecking(false);
-      }, 100);
+      }, 50); // Reduced from 100ms to 50ms
       return () => clearTimeout(timer);
     }
 
-    // If loading is done and not authenticated, redirect
+    // If loading is done and authenticated, allow access
+    if (!loading && isAuthenticated) {
+      setIsChecking(false);
+      return;
+    }
+
+    // If loading is done and not authenticated (and we're not on login), redirect
     if (!loading && !isAuthenticated && pathname !== "/" && pathname !== "/login") {
       dispatch(resetAuth());
       router.replace("/");
+      setIsChecking(false);
+      return;
     }
-
-    setIsChecking(false);
   }, [isAuthenticated, loading, pathname, router, dispatch]);
 
-  // Show nothing while checking or loading
-  if (isChecking || loading) {
-    return null;
-  }
-
-  // Allow access to login page even if not authenticated
+  // Allow access to login page immediately (prevents flicker)
   if (pathname === "/" || pathname === "/login") {
     return <>{children}</>;
+  }
+
+  // Show nothing while checking or loading (prevents flicker during auth check)
+  if (isChecking || loading) {
+    return null;
   }
 
   // If not authenticated and not on login page, show nothing (redirecting)
