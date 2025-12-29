@@ -2,6 +2,8 @@
 import { useRef } from 'react'
 import { Provider } from 'react-redux'
 import { makeStore, AppStore } from '@/lib/store/store';
+import AuthHydrator from '@/components/custom/authHydrator/authHydrator';
+import AuthGuard from '@/lib/features/auth/authGuard';
 
 export default function StoreProvider({
   children
@@ -14,5 +16,12 @@ export default function StoreProvider({
     storeRef.current = makeStore()
   }
 
-  return <Provider store={storeRef.current}>{children}</Provider>
+  return (
+    <Provider store={storeRef.current}>
+      <AuthHydrator />
+      <AuthGuard>
+        {children}
+      </AuthGuard>
+    </Provider>
+  )
 }

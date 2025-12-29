@@ -60,10 +60,36 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    resetAuth: () => initialState,
+    resetAuth: () => {
+      // Clear remember me on logout
+      if (typeof window !== "undefined") {
+        try {
+          // Dynamic import to avoid SSR issues
+          const { clearRememberMe } = require("@/utils/rememberMe");
+          clearRememberMe();
+        } catch (e) {
+          // Ignore if rememberMe utils not available
+        }
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("userId");
+      }
+      return initialState;
+    },
      setAuthFromStorage: (state, action:PayloadAction<{token:string; admin:IAdmin}>) => {
       state.token = action.payload.token;
       state.isLoggedIn = true;
+      state.isAuthenticated = true;
+      // Restore all auth data from storage
+      if (action.payload.admin) {
+        state.id = action.payload.admin.id || "";
+        state.name = action.payload.admin.name || "";
+        state.email = action.payload.admin.email || "";
+        state.role = action.payload.admin.role || { id: "", name: "" };
+        if (action.payload.admin.permissions) {
+          state.permissions = action.payload.admin.permissions;
+        }
+      }
     },
   },
   extraReducers: (builder) => {
@@ -78,12 +104,18 @@ const authSlice = createSlice({
         (state, action: PayloadAction<AdminUser>) => {
           state.loading = false;
           state.isLoggedIn = true;
+          state.isAuthenticated = true;
 
           state.id = action.payload.id;
           state.name = action.payload.name;
           state.email = action.payload.email;
           state.token = action.payload.token;
           state.role = action.payload.role;
+          
+          // Store permissions from role if available
+          if (action.payload.role?.permissions) {
+            state.permissions = action.payload.role.permissions;
+          }
         }
       )
 
