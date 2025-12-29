@@ -16,7 +16,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import upload from "@/assets/uploadimg.svg";
 import { useAppDispatch } from "@/lib/store/hooks";
-import { createDeveloper } from "@/lib/features/developers/developerApi";
+import { createDeveloper, fetchDevelopers, updateDeveloper } from "@/lib/features/developers/developerApi";
 
 export type Developer = {
   _id: string;
@@ -122,11 +122,66 @@ function DeveloperView({ developer }: { developer: Developer }) {
   );
 }
 
-function DeveloperEdit({ developer }: { developer: Developer }) {
+function DeveloperEdit({
+  developer,
+  setOpen,
+}: {
+  developer: Developer;
+  setOpen: (open: boolean) => void;
+}) {
+  const dispatch = useAppDispatch();
+
+  const { register, handleSubmit } = useForm<DeveloperForm>({
+    defaultValues: {
+      name: developer.developerName,
+      description: developer.description,
+      city: developer.city,
+      establishedYear: String(developer.establishedYear),
+      totalProjects: String(developer.totalProjects),
+      website: developer.website,
+      contactName: developer.sourcingManager?.name,
+      phone: developer.sourcingManager?.mobile,
+      email: developer.sourcingManager?.email,
+    },
+  });
+
+  const onSubmit = (data: DeveloperForm) => {
+    const formData = new FormData();
+
+    formData.append("developerName", data.name);
+    formData.append("description", data.description || "");
+    formData.append("city", data.city);
+    formData.append("establishedYear", data.establishedYear);
+    formData.append("totalProjects", data.totalProjects);
+    formData.append("website", data.website || "");
+    formData.append(
+      "sourcingManager",
+      JSON.stringify({
+        name: data.contactName,
+        mobile: data.phone,
+        email: data.email,
+      })
+    );
+
+    dispatch(
+      updateDeveloper({
+        id: developer._id,
+        payload: formData,
+      })
+    )
+      .unwrap()
+      .then(() => {
+        setOpen(false);
+        dispatch(fetchDevelopers({ page: 1, limit: 10 }));
+      })
+      .catch(console.error);
+  };
+
+
   return (
     <div className="h-[90vh] overflow-auto bg-white">
       <div className="mx-auto max-w-2xl bg-white px-4 shadow-sm">
-        <form className="space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div className="flex items-start gap-4">
             <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-gray-100 overflow-hidden">
               {developer.logo ? (
@@ -162,7 +217,7 @@ function DeveloperEdit({ developer }: { developer: Developer }) {
 
           <Field label="Developer Name*">
             <input
-              defaultValue={developer.developerName}
+              {...register("name")}
               className="w-full rounded-lg text-sm outline-none"
             />
           </Field>
@@ -170,14 +225,14 @@ function DeveloperEdit({ developer }: { developer: Developer }) {
           <Field label="Description">
             <textarea
               rows={4}
-              defaultValue={developer.description}
+              {...register("description")}
               className="w-full rounded-lg text-sm outline-none"
             />
           </Field>
 
           <Field label="City">
             <input
-              defaultValue={developer.city}
+              {...register("city")}
               className="w-full rounded-lg text-sm outline-none"
             />
           </Field>
@@ -185,7 +240,7 @@ function DeveloperEdit({ developer }: { developer: Developer }) {
           <Field label="Established Year">
             <input
               type="number"
-              defaultValue={developer.establishedYear}
+              {...register("establishedYear")}
               className="w-full rounded-lg text-sm outline-none"
             />
           </Field>
@@ -193,14 +248,14 @@ function DeveloperEdit({ developer }: { developer: Developer }) {
           <Field label="Total Projects">
             <input
               type="number"
-              defaultValue={developer.totalProjects}
+              {...register("totalProjects")}
               className="w-full rounded-lg text-sm outline-none"
             />
           </Field>
 
           <Field label="Website / Project Link (Optional)">
             <input
-              defaultValue={developer.website}
+              {...register("website")}
               className="w-full rounded-lg text-sm outline-none"
             />
           </Field>
@@ -213,21 +268,21 @@ function DeveloperEdit({ developer }: { developer: Developer }) {
             <div className="space-y-4">
               <Field label="Contact Person Name">
                 <input
-                  defaultValue={developer.sourcingManager?.name}
+                  {...register("contactName")}
                   className="w-full rounded-lg text-sm outline-none"
                 />
               </Field>
 
               <Field label="Phone Number">
                 <input
-                  defaultValue={developer.sourcingManager?.mobile}
+                  {...register("phone")}
                   className="w-full rounded-lg text-sm outline-none"
                 />
               </Field>
 
               <Field label="Email ID">
                 <input
-                  defaultValue={developer.sourcingManager?.email}
+                  {...register("email")}
                   className="w-full rounded-lg text-sm outline-none"
                 />
               </Field>
@@ -246,8 +301,10 @@ function DeveloperEdit({ developer }: { developer: Developer }) {
   );
 }
 
-function AddNewDeveloper() {
-  const [preview, setPreview] = useState<File | string | null>();
+function AddNewDeveloper({ setOpen }: { setOpen: (open: boolean) => void }) {
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -268,31 +325,57 @@ function AddNewDeveloper() {
   });
   const dispatch = useAppDispatch();
 
-  const onSubmit = (data: any) => {
-    data.logo = preview;
-    dispatch(createDeveloper(data))
-    
-  };
+  const onSubmit = (data: DeveloperForm) => {
+    const formData = new FormData();
 
+    formData.append("developerName", data.name);
+    formData.append("description", data.description || "");
+    formData.append("city", data.city);
+    formData.append("establishedYear", data.establishedYear);
+    formData.append("totalProjects", data.totalProjects);
+    formData.append("website", data.website || "");
+    formData.append(
+      "sourcingManager",
+      JSON.stringify({
+        name: data.contactName,
+        mobile: data.phone,
+        email: data.email,
+      })
+    );
+
+    if (file) {
+      formData.append("logo", file);
+    }
+
+    dispatch(createDeveloper(formData))
+      .unwrap()
+      .then(() => {
+        setOpen(false);
+        dispatch(fetchDevelopers({ page: 1, limit: 10 }));
+      })
+      .catch((err) => {
+        console.error("Failed to create developer:", err);
+      });
+  };
 
   return (
     <div className=" overflow-auto h-[90vh] bg-white">
       <div className="overflow-auto mx-auto max-w-2xl  bg-white px-4 shadow-sm">
-        <form  onSubmit={handleSubmit(onSubmit)} className="overflow-auto space-y-5 pb-2">
+        <form onSubmit={handleSubmit(onSubmit)} className="overflow-auto space-y-5 pb-2">
           <div className="overflow-auto flex items-start gap-4">
-            <div className={`${preview? "" : "border-dashed border-blue-400 border"} flex h-20 w-20 items-center justify-center rounded-lg  bg-blue-50  text-white`}>
+            <div className={`${preview ? "" : "border-dashed border-blue-400 border"} flex h-20 w-20 items-center justify-center rounded-lg  bg-blue-50  text-white`}>
               <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setPreview(URL.createObjectURL(file));
+                  const selectedFile = e.target.files?.[0];
+                  if (selectedFile) {
+                    setFile(selectedFile);
+                    setPreview(URL.createObjectURL(selectedFile));
                   }
                 }}
                 className="absolute h-20 w-20 cursor-pointer opacity-0"
               />
-
               {preview ? (
                 <img
                   src={preview}
@@ -303,7 +386,6 @@ function AddNewDeveloper() {
                 <img src={upload.src} alt="logo" />
               )}
             </div>
-
             <div>
               <p className="text-sm font-medium text-gray-800">
                 Upload Photo{" "}
@@ -314,25 +396,24 @@ function AddNewDeveloper() {
               <p className="mt-1 text-xs text-gray-500">
                 Max 10 MB files are allowed
               </p>
-
               <div>
-                
                 <button
                   type="button"
                   className="mt-2 bg-black text-white rounded-sm border px-2 py-1 text-xs flex gap-1 items-center cursor-pointer"
                 >
                   <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setPreview(URL.createObjectURL(file));
-                    }
-                  }}
-                  className="absolute border-2 w-18 opacity-0 cursor-pointer "
-                />
-                  <Camera className="size-3.5"/>
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const selectedFile = e.target.files?.[0];
+                      if (selectedFile) {
+                        setFile(selectedFile);
+                        setPreview(URL.createObjectURL(selectedFile));
+                      }
+                    }}
+                    className="absolute border-2 w-18 opacity-0 cursor-pointer"
+                  />
+                  <Camera className="size-3.5" />
                   Edit Logo
                 </button>
               </div>
@@ -490,8 +571,10 @@ export default function DeveloperSheet({
         </SheetHeader>
 
         {mode === "view" && data && <DeveloperView developer={data} />}
-        {mode === "edit" && data && <DeveloperEdit developer={data} />}
-        {mode === "create" && <AddNewDeveloper />}
+        {mode === "edit" && data && (
+          <DeveloperEdit developer={data} setOpen={setOpen} />
+        )}
+        {mode === "create" && <AddNewDeveloper setOpen={setOpen} />}
       </SheetContent>
     </Sheet>
   );

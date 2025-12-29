@@ -55,7 +55,7 @@ export default function AddLayoutPlanForm() {
   };
 
   return (
-    <div className="w-full bg-white p-6 space-y-4">
+    <div className="w-full bg-white p-6 space-y-4 h-[86vh] overflow-y-auto">
       {configurations.map((config) => {
         const isOpen = openUnits[config.id];
 
@@ -136,7 +136,7 @@ export default function AddLayoutPlanForm() {
                         <span>
                           {sub.carpetArea} Ft <sup>2</sup>
                         </span>
-                        <span>₹ {formatCurrency(sub.price)}</span>
+                        <span className="text-[#4C4C4C] font-semibold">₹ {(sub.price)}</span>
                       </div>
                     </div>
                   );

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import GoogleMapComponent from "./map/googleMap";
+import { Search, X } from "lucide-react";
 
 type ConnectivityItem = {
   name: string;
@@ -58,6 +59,8 @@ export default function ConnectivityForm() {
   const [activeCategory, setActiveCategory] =
     useState<ConnectivityCategoryKey>("schools");
 
+  const [searchText, setSearchText] = useState("");
+
   const [inputs, setInputs] = useState<Record<ConnectivityCategoryKey, string>>(
     {
       schools: "",
@@ -103,16 +106,32 @@ export default function ConnectivityForm() {
   };
 
   const mapMarkers = useMemo(() => {
-    return Object.values(connectivity)
+    const connectivityMarkers = Object.values(connectivity)
       .flat()
       .map((item) => ({
         lat: item.latitude,
         lng: item.longitude,
         title: item.name,
       }));
-  }, [connectivity]);
 
-  const mapCenter = mapMarkers[0] ?? { lat: 28.4089, lng: 77.0418 };
+    const mainLocationMarker = selectedCoords
+      ? [
+        {
+          lat: selectedCoords.latitude,
+          lng: selectedCoords.longitude,
+          title: "Project Location",
+          type: "main",
+        },
+      ]
+      : [];
+
+    return [...mainLocationMarker, ...connectivityMarkers];
+  }, [connectivity, selectedCoords]);
+
+
+  const [mapCenter, setMapCenter] = useState(
+    mapMarkers[0] ?? { lat: 28.6139, lng: 77.209 }
+  );
 
   const activeConfig = CONNECTIVITY_CATEGORIES.find(
     (c) => c.key === activeCategory
@@ -120,12 +139,45 @@ export default function ConnectivityForm() {
 
   const items = connectivity[activeCategory];
 
+  async function handleTextSearch() {
+    const response = await fetch(
+      "https://places.googleapis.com/v1/places:searchText",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+          "X-Goog-FieldMask":
+            "places.displayName,places.location,places.formattedAddress",
+        },
+        body: JSON.stringify({
+          textQuery: searchText,
+        }),
+      }
+    );
+
+    const data = await response.json();
+    const location = data?.places?.[0]?.location;
+    if (!location) return;
+
+    setMapCenter({
+      lat: location.latitude,
+      lng: location.longitude,
+      title: "",
+    });
+
+    setSelectedCoords({
+      latitude: location.latitude,
+      longitude: location.longitude,
+    });
+  }
+
   return (
     <div className="p-4 space-y-6">
       <div>
-        <h1 className="font-medium text-sm mb-2">Nearby Connectivity</h1>
+        <h1 className="font-medium text-sm mb-2">Project Location</h1>
 
-        <div className="h-[220px] w-full rounded-lg overflow-hidden">
+        <div className="h-[220px] w-full rounded-lg relative overflow-hidden">
           <GoogleMapComponent
             center={mapCenter}
             markers={mapMarkers}
@@ -136,6 +188,38 @@ export default function ConnectivityForm() {
               })
             }
           />
+          <div className="border absolute top-2 left-4 rounded-full bg-white px-4 py-2 text-xs font-medium text-gray-800 shadow-md flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="Search location"
+              className="bg-transparent border-none focus:outline-none text-xs"
+              value={searchText}
+              onChange={(e) => {
+                const address = e.target.value;
+                setSearchText(address);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleTextSearch();
+                }
+              }}
+            />
+            <button
+              type="button"
+              onClick={handleTextSearch}
+              className="hover:bg-gray-100 rounded-full p-1"
+            >
+              <Search size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setSearchText("")}
+              className="hover:bg-gray-100 rounded-full p-1"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -145,11 +229,10 @@ export default function ConnectivityForm() {
             key={cat.key}
             type="button"
             onClick={() => setActiveCategory(cat.key)}
-            className={`px-4 py-2 text-sm font-medium ${
-              activeCategory === cat.key
+            className={`px-4 py-2 text-sm font-medium ${activeCategory === cat.key
                 ? "border-b-2 border-black"
                 : "text-gray-500 hover:text-black"
-            }`}
+              }`}
           >
             {cat.title}
           </button>
@@ -178,11 +261,10 @@ export default function ConnectivityForm() {
             type="button"
             disabled={!selectedCoords}
             onClick={() => addItem(activeCategory)}
-            className={`rounded-lg px-4 py-1 text-sm font-medium ${
-              selectedCoords
+            className={`rounded-lg px-4 py-1 text-sm font-medium ${selectedCoords
                 ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 : "bg-gray-50 text-gray-400 cursor-not-allowed"
-            }`}
+              }`}
           >
             Add +
           </button>

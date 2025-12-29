@@ -8,12 +8,14 @@ import adminAuthReducer from "@/lib/features/auth/adminAuthSlice";
 import dashboard from "@/lib/features/dashboard/dashboardSlice";
 import properties from "@/lib/features/properties/propertiesSlice"
 import developers from "@/lib/features/developers/developerSlice"
+import roles from "@/lib/features/role/roleSlice"; 
 
 const rootReducer = combineSlices({
   auth: adminAuthReducer,
   dashboard:dashboard,
   properties:properties,
-  developers:developers
+  developers:developers,
+  roles: roles, 
 });
 
 export const makeStore = () => {
