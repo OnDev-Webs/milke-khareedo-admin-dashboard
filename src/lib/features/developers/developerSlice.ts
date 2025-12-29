@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { createDeveloper, fetchDeveloperById, fetchDevelopers } from "./developerApi";
+import { createDeveloper, deleteDeveloper, fetchDeveloperById, fetchDevelopers } from "./developerApi";
 
 
 export interface SourcingManager {
@@ -61,7 +61,7 @@ const developerSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      
+
       .addCase(createDeveloper.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -91,7 +91,7 @@ const developerSlice = createSlice({
         state.error = action.payload || "Something went wrong";
       })
 
-      
+
       .addCase(fetchDeveloperById.pending, (state) => {
         state.loading = true;
       })
@@ -106,6 +106,22 @@ const developerSlice = createSlice({
         state.loading = false;
         state.error = action.payload || "Something went wrong";
       });
+
+    builder
+      .addCase(deleteDeveloper.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteDeveloper.fulfilled, (state, action) => {
+        state.loading = false;
+        state.developers = state.developers.filter(
+          (dev) => dev._id !== action.meta.arg
+        );
+      })
+      .addCase(deleteDeveloper.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Delete failed";
+      });
+
   },
 });
 

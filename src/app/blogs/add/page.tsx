@@ -57,7 +57,6 @@ export default function AddBlogPage() {
           </header>
           <div className="w-full h-full overflow-auto bg-white">
             <div className="p-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-6">Create New Blog</h1>
               <BlogForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
             </div>
           </div>

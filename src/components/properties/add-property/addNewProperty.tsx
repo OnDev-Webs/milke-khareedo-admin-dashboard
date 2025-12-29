@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AddProjectOverviewForm from "./forms/projectOverviewForm";
 import AddHighlightsForm from "./forms/highlightFrom";
 import AddProjectPhotoUpload from "./forms/graphicsForm";
@@ -14,6 +14,9 @@ import { useAppDispatch } from "@/lib/store/hooks";
 import { createProperty } from "@/lib/features/properties/propertiesApi";
 import { PropertyFormValues } from "@/schema/property/propertySchema";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { fetchPropertyById, updateProperty } from "@/lib/features/properties/propertiesApi";
+
 
 type Step = {
   id: number;
@@ -32,6 +35,11 @@ type List = {
 export default function AddNewProperty() {
   const [activeStep, setActiveStep] = useState(1);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const propertyId = searchParams.get("id");
+  const mode = searchParams.get("mode"); 
+  const isViewMode = mode === "view";
+  const isEditMode = mode === "edit";
 
   const newProperty: Step[] = [
     {
@@ -217,9 +225,53 @@ export default function AddNewProperty() {
 
   const dispatch = useAppDispatch();
 
+  useEffect(() => {
+    if (!propertyId) return;
+
+    dispatch(fetchPropertyById(propertyId)).then((res: any) => {
+      const property = res.payload;
+      console.log("property is :-", property);
+      if (!property) return;
+
+      methods.reset(property);
+
+      if (property.developer?._id) {
+        methods.setValue("developer", property.developer._id);
+      }
+
+      if (property.location) {
+        methods.setValue("location", property.location);
+      }
+
+      if (property.configurations?.length) {
+        methods.setValue("configurations", property.configurations);
+      }
+
+      if (property.connectivity) {
+        methods.setValue("connectivity", property.connectivity);
+      }
+    });
+  }, [propertyId]);
+
+  useEffect(() => {
+    if (!propertyId) return;
+
+    dispatch(fetchPropertyById(propertyId)).then((res: any) => {
+      const data = res.payload;
+      if (!data) return;
+
+      methods.reset({
+        ...data,
+        images: data.images?.map((img: any) => img.url) || [],
+      });
+    });
+  }, [propertyId]);
+
+
   const { handleSubmit } = methods;
 
   const onSubmit = async (data: PropertyFormValues) => {
+    if (isViewMode) return;
     const formData: any = new FormData();
 
     Object.entries(data).forEach(([key, value]) => {
@@ -259,9 +311,14 @@ export default function AddNewProperty() {
       });
     });
 
-    const resultAction = await dispatch(createProperty(formData));
+    const resultAction = isEditMode && propertyId
+      ? await dispatch(updateProperty({ id: propertyId, payload: formData }))
+      : await dispatch(createProperty(formData));
 
-    if (createProperty.fulfilled.match(resultAction)) {
+    if (
+      createProperty.fulfilled.match(resultAction) ||
+      updateProperty.fulfilled.match(resultAction)
+    ) {
       router.push("/properties");
     }
   };
@@ -299,6 +356,7 @@ export default function AddNewProperty() {
               </div>
 
               <div className="flex items-center justify-center gap-3">
+                {/* Back */}
                 {activeStep > 1 && (
                   <button
                     type="button"
@@ -309,7 +367,8 @@ export default function AddNewProperty() {
                   </button>
                 )}
 
-                {activeStep < totalSteps ? (
+                {/* Next (Create + Edit only) */}
+                {activeStep < totalSteps && (
                   <button
                     type="button"
                     onClick={handleNext}
@@ -317,12 +376,15 @@ export default function AddNewProperty() {
                   >
                     Next
                   </button>
-                ) : (
+                )}
+
+                {/* Last Step Button */}
+                {!isViewMode && activeStep === totalSteps && (
                   <button
                     type="submit"
-                    className="border px-12 rounded py-1 bg-black text-white"
+                    className="border px-4 rounded py-1 bg-black text-white"
                   >
-                    Save Property
+                    {isEditMode ? "Edit Property" : "Save Property"}
                   </button>
                 )}
               </div>

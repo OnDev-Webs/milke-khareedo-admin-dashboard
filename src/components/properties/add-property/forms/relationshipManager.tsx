@@ -9,6 +9,7 @@ import {
   fetchRelationshipManagers,
 } from "@/lib/features/role/roleApi";
 import { FiChevronDown } from "react-icons/fi";
+import { useFormContext } from "react-hook-form";
 
 export default function AddRelationshipManagerForm() {
   const dispatch = useAppDispatch();
@@ -29,6 +30,29 @@ export default function AddRelationshipManagerForm() {
 
   const rmRef = useRef<HTMLDivElement>(null);
   const agentRef = useRef<HTMLDivElement>(null);
+
+  const { setValue, watch } = useFormContext<any>();
+
+  const rmFromForm = watch("relationshipManager");
+  const agentsFromForm = watch("leadDistributionAgents");
+
+  useEffect(() => {
+    if (rmFromForm && managers.length > 0) {
+      const rm = managers.find((m) => m._id === rmFromForm);
+      if (rm) setRelationshipManager(rm);
+    }
+  }, [rmFromForm, managers]);
+
+  useEffect(() => {
+    if (Array.isArray(agentsFromForm) && agents.length > 0) {
+      const selected = agents.filter((a) =>
+        agentsFromForm.includes(a._id)
+      );
+      setSelectedAgents(selected);
+    }
+  }, [agentsFromForm, agents]);
+
+
 
   useEffect(() => {
     dispatch(fetchAgentRoles());
@@ -105,6 +129,7 @@ export default function AddRelationshipManagerForm() {
                   key={rm._id}
                   onClick={() => {
                     setRelationshipManager(rm);
+                    setValue("relationshipManager", rm._id, { shouldDirty: true });
                     setShowRMList(false);
                     setRmSearch("");
                   }}
@@ -113,6 +138,7 @@ export default function AddRelationshipManagerForm() {
                   {rm.name}
                 </li>
               ))}
+
             </ul>
           </div>
         )}
@@ -182,7 +208,15 @@ export default function AddRelationshipManagerForm() {
                 <li
                   key={agent._id}
                   onClick={() => {
-                    setSelectedAgents([...selectedAgents, agent]);
+                    const updated = [...selectedAgents, agent];
+                    setSelectedAgents(updated);
+
+                    setValue(
+                      "leadDistributionAgents",
+                      updated.map((a) => a._id),
+                      { shouldDirty: true }
+                    );
+
                     setAgentSearch("");
                   }}
                   className="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100"
@@ -190,6 +224,7 @@ export default function AddRelationshipManagerForm() {
                   {agent.name}
                 </li>
               ))}
+
             </ul>
           </div>
         )}

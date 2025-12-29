@@ -1,6 +1,6 @@
 "use client";
 import loginImg from "@/assets/loginImg.jpg";
-import logo from "@/assets/logo.svg";
+import logo from "@/assets/logo1.png";
 import { loginFrom, loginSchema } from "@/schema/login/loginSchema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

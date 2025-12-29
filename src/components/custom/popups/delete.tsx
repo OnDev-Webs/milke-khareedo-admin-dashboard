@@ -1,7 +1,9 @@
+'use client'
 import { Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import Success from "./success";
+import { useState } from "react";
 
 type DeletePopUpProps = {
   open: boolean;
@@ -24,17 +26,21 @@ export default function DeletePopUp({
   buttonText,
   iconType,
 }: DeletePopUpProps) {
-  const deleted = false;
+  const [deleted, setDeleted] = useState(false);
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) { setDeleted(false); onClose(); } }}>
       <DialogContent className="border-none bg-transparent p-0 shadow-none">
         <VisuallyHidden>
           <DialogTitle>{title}</DialogTitle>
         </VisuallyHidden>
 
         {deleted ? (
-          <Success />
+          <Success
+            onClose={() => {
+              onClose();
+            }}
+          />
         ) : (
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
             <div className="flex justify-center">
@@ -59,7 +65,11 @@ export default function DeletePopUp({
               </button>
 
               <button
-                onClick={() => id && onConfirm && onConfirm(id)}
+                onClick={async () => {
+                  if (!id || !onConfirm) return;
+                  await onConfirm(id);
+                  setDeleted(true);
+                }}
                 className="rounded-lg bg-red-600 py-3 text-sm font-semibold text-white hover:bg-red-700"
               >
                 {buttonText}
