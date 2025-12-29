@@ -10,19 +10,13 @@ import {
 import { useEffect, useRef, useState } from "react";
 import LeadCRMSheet, { SheetMode } from "./leadCrmSheet";
 import DeletePopUp from "../custom/popups/delete";
-
-interface ILeadCRM {
-  id: number;
-  userName: string;
-  email: string;
-  phone: string;
-  date: string;
-  projectId: string;
-  status: string;
-}
+import { Lead } from "@/lib/features/lead-crm/leadcrmSlice";
+import { User } from "lucide-react";
+import { useAppDispatch } from "@/lib/store/hooks";
+import { deleteLead } from "@/lib/features/lead-crm/leadcrmApi";
 
 interface LeadCRMTableProps {
-  leads: ILeadCRM[];
+  leads: Lead[];
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
@@ -30,17 +24,36 @@ interface LeadCRMTableProps {
   dataLength: number;
   indexOfFirstItem: number;
   indexOfLastItem: number;
+  onRefreshLeads?: () => void;
 }
 
 const headers = [
   { key: "userName", label: "User Name", minW: "min-w-[200px]" },
   { key: "email", label: "Email", minW: "min-w-[160px]" },
-  { key: "phone", label: "Phone", minW: "min-w-[140px]" },
-  { key: "date", label: "Date & Time", minW: "min-w-[160px]" },
+  { key: "phoneNumber", label: "Phone", minW: "min-w-[140px]" },
+  { key: "dateTime", label: "Date & Time", minW: "min-w-[160px]" },
   { key: "projectId", label: "Project ID", minW: "min-w-[140px]" },
   { key: "status", label: "Status", minW: "min-w-[120px]" },
   { key: "actions", label: "Actions", minW: "min-w-[100px]" },
 ] as const;
+
+const getStatusColor = (status: string) => {
+  const statusLower = status.toLowerCase();
+  if (statusLower === "lead_received" || statusLower === "interested") {
+    return "bg-[#BCE288] text-[#2E6B2B]";
+  } else if (statusLower === "pending") {
+    return "bg-[#FFF4E5] text-[#F59E0B]";
+  } else {
+    return "bg-[#FAA2A4] text-[#B44445]";
+  }
+};
+
+const formatStatus = (status: string) => {
+  return status
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
 
 export default function LeadCRMTable({
   leads,
@@ -51,14 +64,16 @@ export default function LeadCRMTable({
   dataLength,
   indexOfFirstItem,
   indexOfLastItem,
+  onRefreshLeads,
 }: LeadCRMTableProps) {
+  const dispatch = useAppDispatch();
   const pageNumbers = getPageNumbers();
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
-
-  const [data, setData] = useState<any>(null);
-  const [mode, setMode] = useState<SheetMode>("");
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [deleteLeadId, setDeleteLeadId] = useState<string | null>(null);
+  const [mode, setMode] = useState<SheetMode>("view");
   const actionMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -80,10 +95,61 @@ export default function LeadCRMTable({
     };
   }, [openMenuId]);
 
+  const handleViewLead = (leadId: string) => {
+    setSelectedLeadId(leadId);
+    setMode("view");
+    setOpen(true);
+    setOpenMenuId(null);
+  };
+
+  const handleSheetClose = () => {
+    setOpen(false);
+    setSelectedLeadId(null);
+    if (onRefreshLeads) {
+      onRefreshLeads();
+    }
+  };
+
+  const handleDeleteClick = (leadId: string) => {
+    setDeleteLeadId(leadId);
+    setIsDeleteOpen(true);
+    setOpenMenuId(null);
+  };
+
+  const handleDeleteConfirm = async (id: string) => {
+    try {
+      await dispatch(deleteLead(id)).unwrap();
+      setIsDeleteOpen(false);
+      setDeleteLeadId(null);
+      if (onRefreshLeads) {
+        onRefreshLeads();
+      }
+    } catch (error) {
+      console.error("Failed to delete lead:", error);
+    }
+  };
+
   return (
     <div className="w-full bg-white">
-      <LeadCRMSheet mode={mode} data={data} open={open} setOpen={setOpen} />
-      <DeletePopUp open={isDeleteOpen} onClose={() => setIsDeleteOpen(false)}  />
+      <LeadCRMSheet
+        mode={mode}
+        leadId={selectedLeadId}
+        open={open}
+        setOpen={setOpen}
+        onClose={handleSheetClose}
+      />
+      <DeletePopUp
+        open={isDeleteOpen}
+        onClose={() => {
+          setIsDeleteOpen(false);
+          setDeleteLeadId(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        id={deleteLeadId || undefined}
+        title="Delete Lead?"
+        description="Are you sure you want to delete this lead? Once completed, it cannot be undone."
+        buttonText="Delete Lead"
+      />
       <div className="w-full rounded-xl overflow-hidden border bg-white">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -92,11 +158,10 @@ export default function LeadCRMTable({
                 {headers.map((header) => (
                   <th
                     key={header.key}
-                    className={`px-4 py-3 text-sm font-bold ${header.minW} ${
-                      header.key === "status" || header.key === "actions"
-                        ? " text-center"
-                        : "text-left"
-                    }`}
+                    className={`px-4 py-3 text-sm font-bold ${header.minW} ${header.key === "status" || header.key === "actions"
+                      ? " text-center"
+                      : "text-left"
+                      }`}
                   >
                     {header.label}
                   </th>
@@ -109,92 +174,81 @@ export default function LeadCRMTable({
                 const isLastTwo = index >= leads.length - 2;
 
                 return (
-                  <tr key={row.id} className="hover:bg-gray-50">
+                  <tr key={row._id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-gray-200" />
-                        <span className="font-semibold">{row.userName}</span>
+                        <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                          {row.profileImage && row.profileImage.trim() !== "" ? (
+                            <img
+                              src={row.profileImage}
+                              alt={row.userName || "Lead"}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <User size={16} className="text-gray-400" />
+                          )}
+                        </div>
+                        <span className="font-semibold">{row.userName || "N/A"}</span>
                       </div>
                     </td>
 
-                    <td className="px-4 py-3 font-semibold">{row.email}</td>
+                    <td className="px-4 py-3 font-semibold">{row.email || "N/A"}</td>
 
-                    <td className="px-4 py-3 font-semibold">{row.phone}</td>
+                    <td className="px-4 py-3 font-semibold">
+                      {row.phoneNumber || "N/A"}
+                    </td>
 
-                    <td className="px-4 py-3 font-semibold">{row.date}</td>
+                    <td className="px-4 py-3 font-semibold">{row.dateTime || "N/A"}</td>
 
-                    <td className="px-4 py-3 font-semibold">{row.projectId}</td>
+                    <td className="px-4 py-3 font-semibold">
+                      {row.projectId || "N/A"}
+                    </td>
 
                     <td className="px-4 py-3">
                       <div className="flex justify-center">
                         <span
-                          className={`flex items-center rounded-full px-3 py-1 text-sm font-semibold ${
-                            row.status.toLowerCase() === "active"
-                              ? "bg-[#BCE288] text-[#2E6B2B]"
-                              : "bg-[#FAA2A4] text-[#B44445]"
-                          }`}
+                          className={`flex items-center rounded-full px-3 py-1 text-sm font-semibold ${getStatusColor(
+                            row.status
+                          )}`}
                         >
                           <Dot />
-                          {row.status.charAt(0).toUpperCase() +
-                            row.status.slice(1)}
+                          {formatStatus(row.status)}
                         </span>
                       </div>
                     </td>
 
                     <td className="relative px-4 py-3 mx-auto w-8">
                       <div
-                        ref={openMenuId === row.id ? actionMenuRef : null}
+                        ref={openMenuId === row._id ? actionMenuRef : null}
                         className="relative col-span-2 flex justify-end"
                       >
                         <button
                           onClick={() =>
-                            setOpenMenuId(openMenuId === row.id ? null : row.id)
+                            setOpenMenuId(openMenuId === row._id ? null : row._id)
                           }
                           className="rounded-full bg-gray-100 p-2"
                         >
                           <EllipsisVertical size={16} />
                         </button>
 
-                        {openMenuId === row.id && (
+                        {openMenuId === row._id && (
                           <div
-                            className={`absolute right-0 z-10 w-36 rounded-lg overflow-hidden border bg-white shadow ${
-                              isLastTwo ? "bottom-8" : "top-8"
-                            }`}
+                            className={`absolute right-0 z-10 w-36 rounded-lg overflow-hidden border bg-white shadow ${isLastTwo ? "bottom-8" : "top-8"
+                              }`}
                           >
                             <button
-                              onClick={() => {
-                                setOpenMenuId(null);
-                                setData(row);
-                                setMode("view");
-                                setOpen(true);
-                              }}
+                              onClick={() => handleViewLead(row._id)}
                               className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
                             
                         `}
                             >
-                              Veiw
+                              View
                             </button>
                             <button
-                              onClick={() => {
-                                setIsDeleteOpen(true);
-                              }}
-                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
-                            text-red-600
-                            
-                        `}
+                              onClick={() => handleDeleteClick(row._id)}
+                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 text-red-600`}
                             >
                               Delete
-                            </button>
-                            <button
-                              onClick={() => {
-                                setOpenMenuId(null);
-                                // setData(row);
-                                // setMode("edit");
-                                // setOpen(true);
-                              }}
-                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 `}
-                            >
-                              Export PDF
                             </button>
                           </div>
                         )}
@@ -219,11 +273,10 @@ export default function LeadCRMTable({
           {pageNumbers.map((page) => (
             <button
               key={page}
-              className={`h-7 w-7 rounded-full flex items-center justify-center ${
-                page === currentPage
-                  ? "bg-black text-white"
-                  : "bg-gray-100 hover:bg-gray-200"
-              }`}
+              className={`h-7 w-7 rounded-full flex items-center justify-center ${page === currentPage
+                ? "bg-black text-white"
+                : "bg-gray-100 hover:bg-gray-200"
+                }`}
               onClick={() => onPageChange(page)}
             >
               {page}
@@ -238,11 +291,10 @@ export default function LeadCRMTable({
 
           {totalPages > 5 && currentPage < totalPages - 1 && (
             <button
-              className={`h-7 w-7 rounded-full flex items-center justify-center ${
-                currentPage === totalPages
-                  ? "bg-black text-white"
-                  : "bg-gray-100 hover:bg-gray-200"
-              }`}
+              className={`h-7 w-7 rounded-full flex items-center justify-center ${currentPage === totalPages
+                ? "bg-black text-white"
+                : "bg-gray-100 hover:bg-gray-200"
+                }`}
               onClick={() => onPageChange(totalPages)}
             >
               {totalPages}

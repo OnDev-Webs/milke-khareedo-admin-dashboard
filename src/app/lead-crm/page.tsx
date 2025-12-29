@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+"use client";
+
 import { AppSidebar } from "@/components/app-sidebar";
 import Developers from "@/components/developers/developers";
 import LeadCRM from "@/components/lead-crm/leadCrm";
@@ -15,13 +16,30 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-
-export const metadata: Metadata = {
-  title: "Lead CRM - MilkE Khareedo Admin Panel",
-  description: "Manage leads and customer relationships in the MilkE Khareedo real estate CRM system.",
-};
+import { useAppDispatch } from "@/lib/store/hooks";
+import { exportLeadsCSV } from "@/lib/features/lead-crm/leadcrmApi";
+import { Download } from "lucide-react";
 
 export default function Page() {
+  const dispatch = useAppDispatch();
+
+  const handleExportCSV = async () => {
+    try {
+      const result = await dispatch(exportLeadsCSV()).unwrap();
+
+      // Create a temporary anchor element to download the file
+      const link = document.createElement("a");
+      link.href = result.csvUrl;
+      link.download = `leads_export_${new Date().toISOString().split('T')[0]}.csv`;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Failed to export CSV:", error);
+    }
+  };
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -35,12 +53,20 @@ export default function Page() {
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink href="#">Lead / CRM </BreadcrumbLink>
                 </BreadcrumbItem>
-               
+                <div className="flex items-center">
+                  <button
+                    onClick={handleExportCSV}
+                    className="flex items-center gap-2 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                  >
+                    <Download size={14} />
+                    Export CSV
+                  </button>
+                </div>
               </BreadcrumbList>
             </Breadcrumb>
           </header>
           <div className="w-full h-full overflow-hidden">
-           <LeadCRM/>
+            <LeadCRM />
           </div>
         </div>
       </SidebarInset>

@@ -12,257 +12,653 @@ import {
   Clock,
   Mail,
   Phone,
-  Plus,
-  Replace,
+  CheckCircle2,
+  User,
   X,
+  MessageCircle,
+  AlertCircle,
+  Edit2,
+  Save,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import {
+  fetchLeadById,
+  createLeadActivity,
+  updateLeadStatus,
+  updateLeadRemark,
+} from "@/lib/features/lead-crm/leadcrmApi";
+import { RootState } from "@/lib/store/store";
+import { LeadDetails, TimelineItem } from "@/lib/features/lead-crm/leadcrmSlice";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import CustomDropdown from "@/components/custom/dropdawn";
+import { cn } from "@/lib/utils";
 
-export type Lead = {
-  id: number;
-  userName: string;
-  email: string;
-  phone: string;
-  date: string;
-  projectId: string;
-  status: "active" | "inactive";
-};
+export type SheetMode = "view" | "edit" | "";
 
 type LeadSheetProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  data?: Lead;
+  leadId?: string | null;
   mode: SheetMode;
+  onClose?: () => void;
 };
 
-export type SheetMode = "view" | "edit" | "";
+const statusOptions = [
+  { label: "Lead Received", value: "lead_received" },
+  { label: "Interested", value: "interested" },
+  { label: "No Response - Do Not Pick (DNP)", value: "dnp" },
+  { label: "Unable to Contact", value: "unable_to_contact" },
+  { label: "Call Back Scheduled", value: "call_back_scheduled" },
+  { label: "Demo Discussion Ongoing", value: "demo_discussion_ongoing" },
+  { label: "Site Visit Coordination in Progress", value: "site_visit_coordination" },
+  { label: "Site Visit Confirmed", value: "site_visit_confirmed" },
+  { label: "Commercial Negotiation", value: "commercial_negotiation" },
+  { label: "Deal Closed", value: "deal_closed" },
+  { label: "Declined Interest", value: "declined_interest" },
+  { label: "Does Not Meet Requirements", value: "does_not_meet_requirements" },
+];
 
-function LeadView() {
-  // function LeadView({ lead }: { lead: Lead }) {
+function TimelineIcon({ activityType }: { activityType: string }) {
+  switch (activityType.toLowerCase()) {
+    case "phone_call":
+      return <Phone size={16} className="text-green-600" />;
+    case "whatsapp":
+    case "message":
+      return <MessageCircle size={16} className="text-green-600" />;
+    case "status_change":
+      return <CheckCircle2 size={16} className="text-blue-600" />;
+    case "visit":
+      return <Calendar size={16} className="text-blue-600" />;
+    case "follow_up":
+      return <Clock size={16} className="text-blue-600" />;
+    case "client_added":
+    case "created":
+      return <ArrowUp size={16} className="text-gray-600" />;
+    default:
+      return <User size={16} className="text-gray-600" />;
+  }
+}
+
+function FollowUpDialog({
+  open,
+  onClose,
+  onConfirm,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: (date: string, time: string) => void;
+}) {
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+
+  useEffect(() => {
+    if (!open) {
+      setDate("");
+      setTime("");
+    }
+  }, [open]);
+
+  const handleSubmit = () => {
+    if (date && time) {
+      const dateTime = new Date(`${date}T${time}`).toISOString();
+      onConfirm(dateTime, time);
+      setDate("");
+      setTime("");
+      onClose();
+    }
+  };
+
   return (
-    <div className="space-y-3 text-sm">
-      {/* <Info label="User" value={lead.userName} />
-      <Info label="Email" value={lead.email} />
-      <Info label="Phone" value={lead.phone} />
-      <Info label="Project ID" value={lead.projectId} />
-      <Info label="Status" value={lead.status} /> */}
-
-      <div className="h-[90vh] overflow-auto bg-white px-4">
-        <div className="">
-          <div className="mb-4 flex items-start gap-3">
-            <div className="h-10 w-10 rounded-full bg-gray-200" />
-            <div>
-              <p className="text-sm font-semibold text-gray-900">Devang Shah</p>
-              <p className="text-xs text-gray-500">2 Jan, 2025, 02:33 AM</p>
-            </div>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-semibold">Schedule Follow Up</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Date</label>
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full"
+              min={new Date().toISOString().split("T")[0]}
+            />
           </div>
-
-          <div className="mb-5 rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-xs text-green-700 flex items-center gap-2">
-            <Calendar size={16} />
-            Next follow up overdue on Dec, 2025 – <b>10 AM</b>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Time</label>
+            <Input
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="w-full"
+            />
           </div>
-
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">
-              Details
-            </h3>
-
-            <div className="space-y-3 text-sm">
-              <div>
-                <p className="text-xs font-semibold text-gray-500">
-                  Phone Number
-                </p>
-                <p className="text-gray-800 text-sm font-medium">
-                  +91 956 256 2648
-                </p>
-              </div>
-
-              <div>
-                <p className="text-xs font-semibold text-gray-500">
-                  Projects ID
-                </p>
-                <p className="text-gray-800 text-sm font-medium">
-                  Sisara#21562
-                </p>
-              </div>
-
-              <div>
-                <p className="text-xs font-semibold text-gray-500">Source</p>
-                <p className="text-gray-800 text-sm font-medium">Facebook</p>
-              </div>
-
-              <div>
-                <p className="text-xs font-semibold text-gray-500">
-                  IP address
-                </p>
-                <p className="text-gray-800 text-sm font-medium">
-                  SF6264562343
-                </p>
-              </div>
-              <hr />
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <p className="text-xs font-semibold text-gray-500">Remarks</p>
-                  <button className="text-xs font-medium text-blue-600">
-                    Edit
-                  </button>
-                </div>
-                <p className="text-xs text-gray-600">
-                  Lorem Ipsum is simply dummy text of the printing and
-                  typesetting industry.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <button className="mb-6 flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium text-gray-700">
-            <Clock size={16} /> Next Follow up
-          </button>
-
-          <div className="mb-6">
-            <h3 className="mb-3 text-sm font-semibold text-gray-900">
-              Timeline
-            </h3>
-
-            <div className="space-y-4 text-sm">
-              <button className="flex items-center gap-2 text-sm font-medium text-blue-600">
-                <Plus size={16} /> Add Activity
-              </button>
-
-              <div className="flex gap-3">
-                <Phone size={16} />
-                <div>
-                  <p className="text-xs text-gray-500">Dec 09, 2025 03:09 PM</p>
-                  <p className="text-sm font-medium text-gray-800">
-                    Phone call by Sumit
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Phone size={16} />
-                <div>
-                  <p className="text-xs text-gray-500">Dec 08, 2025 03:09 PM</p>
-                  <p className="text-sm font-medium text-gray-800">
-                    Phone call
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Mail size={16} />
-                <div>
-                  <p className="text-xs text-gray-500">Dec 06, 2025 03:09 PM</p>
-                  <p className="text-sm font-medium text-gray-800">
-                    Whatsapp message sent by Amit
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Replace size={16} />
-                <div>
-                  <p className="text-xs text-gray-500">Dec 05, 2025 03:09 PM</p>
-                  <p className="text-sm font-medium text-gray-800">
-                    Status changed by Amit
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <ArrowUp size={16} />
-                <div>
-                  <p className="text-xs text-gray-500">Dec 05, 2025 03:09 PM</p>
-                  <p className="text-sm font-medium text-gray-800">
-                    Client added to CRM
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button className="flex-1 rounded-lg bg-black py-3 text-sm font-semibold text-white">
-              Update Status
+          <div className="flex gap-3 justify-end pt-2">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Cancel
             </button>
-
-            <button className="flex h-11 w-11 items-center justify-center rounded-lg border">
-              <Phone size={16} />
-            </button>
-
-            <button className="flex h-11 w-11 items-center justify-center rounded-lg border">
-              <Mail size={16} />
+            <button
+              onClick={handleSubmit}
+              disabled={!date || !time}
+              className="px-4 py-2 text-sm font-medium bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Schedule
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
-function LeadEdit({ lead }: { lead: Lead }) {
-  return (
-    <div className="space-y-4 text-sm">
-      {/* Placeholder for React Hook Form */}
-      <input
-        defaultValue={lead.userName}
-        className="w-full rounded border px-3 py-2"
-      />
-      <input
-        defaultValue={lead.email}
-        className="w-full rounded border px-3 py-2"
-      />
-      <button className="w-full rounded bg-black py-2 text-white">
-        Save Changes
-      </button>
-    </div>
-  );
-}
+function UpdateStatusDialog({
+  open,
+  onClose,
+  onConfirm,
+  currentStatus,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: (status: string) => void;
+  currentStatus?: string;
+}) {
+  const [selectedStatus, setSelectedStatus] = useState("");
 
-function Info({ label, value }: { label: string; value: string }) {
+  const handleSelect = (item: string | { label: string; value: string }) => {
+    if (typeof item === "string") {
+      setSelectedStatus(item);
+    } else {
+      setSelectedStatus(item.value);
+    }
+  };
+
+  const handleConfirm = () => {
+    if (selectedStatus) {
+      onConfirm(selectedStatus);
+      setSelectedStatus("");
+      onClose();
+    }
+  };
+
   return (
-    <p className="flex justify-between gap-4">
-      <span className="text-gray-500">{label}</span>
-      <span className="font-medium">{value}</span>
-    </p>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-semibold">Update Lead Status</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Select Status</label>
+            <CustomDropdown
+              items={statusOptions.map((s) => ({ label: s.label, value: s.value }))}
+              placeholder="Choose a status"
+              defaultValue={currentStatus ? statusOptions.find(s => s.value === currentStatus)?.label : undefined}
+              onSelect={handleSelect}
+              searchable={true}
+            />
+          </div>
+          <div className="flex gap-3 justify-end pt-2">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleConfirm}
+              disabled={!selectedStatus}
+              className="px-4 py-2 text-sm font-medium bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Update Status
+            </button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
 export default function LeadCRMSheet({
   open,
   setOpen,
-  data,
+  leadId,
   mode,
+  onClose,
 }: LeadSheetProps) {
+  const dispatch = useAppDispatch();
+  const { selected, loadingDetails } = useAppSelector(
+    (state: RootState) => state.leadcrm
+  );
+  const [followUpOpen, setFollowUpOpen] = useState(false);
+  const [updateStatusOpen, setUpdateStatusOpen] = useState(false);
+  const [isEditingRemark, setIsEditingRemark] = useState(false);
+  const [remarkValue, setRemarkValue] = useState("");
+  const [isSavingRemark, setIsSavingRemark] = useState(false);
+
+  useEffect(() => {
+    if (open && leadId && mode === "view") {
+      dispatch(fetchLeadById(leadId));
+    }
+  }, [open, leadId, mode, dispatch]);
+
+  useEffect(() => {
+    if (selected?.remark !== undefined) {
+      setRemarkValue(selected.remark || "");
+    }
+  }, [selected]);
+
   const handleClose = () => {
+    setIsEditingRemark(false);
+    setRemarkValue("");
     setOpen(false);
+    if (onClose) {
+      onClose();
+    }
   };
 
-  return (
-    <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="w-[420px]">
-        <SheetHeader>
-          <SheetTitle>
-            <div className="flex items-center justify-between">
-              {mode === "view" && "Lead Details"}
-              {/* {mode === "edit" && "Edit Lead"}
-            {mode === "create" && "Create Lead"} */}
-              <button
-                type="button"
-                className="rounded-full bg-gray-100 p-2 text-sm text-gray-600"
-                onClick={handleClose}
-              >
-                <X size={16} className="text-red-500" />
-              </button>
-            </div>
-          </SheetTitle>
-        </SheetHeader>
+  const handleFollowUp = (dateTime: string, time: string) => {
+    if (!leadId) return;
+    dispatch(
+      createLeadActivity({
+        leadId,
+        activityType: "follow_up",
+        description: "Follow-up call for lead.",
+        nextFollowUpDate: dateTime,
+      })
+    ).then(() => {
+      dispatch(fetchLeadById(leadId));
+    });
+  };
 
-        <div className="">
-          {/* {mode === "view" && <LeadView />} */}
-          {/* {mode === "edit" && <LeadEdit lead={selectedLead} />} */}
-        </div>
-      </SheetContent>
-    </Sheet>
+  const formatPhoneNumber = (phone: string) => {
+    if (!phone || phone === "N/A") return null;
+    // Remove all non-digit characters except +
+    return phone.replace(/[^\d+]/g, "");
+  };
+
+  const handlePhoneCall = () => {
+    if (!leadId || !selected) return;
+    const phoneNumber = formatPhoneNumber(selected.phoneNumber);
+    
+    if (!phoneNumber) {
+      alert("Phone number is not available");
+      return;
+    }
+
+    dispatch(
+      createLeadActivity({
+        leadId,
+        activityType: "phone_call",
+        description: "Called the lead regarding the property.",
+      })
+    )
+      .unwrap()
+      .then(() => {
+        dispatch(fetchLeadById(leadId));
+        // Open phone dialer
+        window.location.href = `tel:${phoneNumber}`;
+      })
+      .catch((error) => {
+        console.error("Failed to create phone call activity:", error);
+      });
+  };
+
+  const handleWhatsApp = () => {
+    if (!leadId || !selected) return;
+    const phoneNumber = formatPhoneNumber(selected.phoneNumber);
+    
+    if (!phoneNumber) {
+      alert("Phone number is not available");
+      return;
+    }
+
+    // Remove + sign and any leading zeros for WhatsApp URL
+    const whatsappNumber = phoneNumber.replace(/^\+/, "").replace(/^0+/, "");
+    
+    dispatch(
+      createLeadActivity({
+        leadId,
+        activityType: "whatsapp",
+        description: "WhatsApp message sent to lead.",
+      })
+    )
+      .unwrap()
+      .then(() => {
+        dispatch(fetchLeadById(leadId));
+        // Open WhatsApp
+        window.open(`https://wa.me/${whatsappNumber}`, "_blank");
+      })
+      .catch((error) => {
+        console.error("Failed to create WhatsApp activity:", error);
+      });
+  };
+
+  const handleUpdateStatus = (status: string) => {
+    if (!leadId) return;
+    dispatch(updateLeadStatus({ leadId, status })).then(() => {
+      dispatch(fetchLeadById(leadId));
+    });
+  };
+
+  const handleStartEditRemark = () => {
+    setRemarkValue(selected?.remark || "");
+    setIsEditingRemark(true);
+  };
+
+  const handleCancelEditRemark = () => {
+    setRemarkValue(selected?.remark || "");
+    setIsEditingRemark(false);
+  };
+
+  const handleSaveRemark = () => {
+    if (!leadId) return;
+    setIsSavingRemark(true);
+    dispatch(updateLeadRemark({ leadId, remark: remarkValue }))
+      .then(() => {
+        dispatch(fetchLeadById(leadId));
+        setIsEditingRemark(false);
+      })
+      .catch((error) => {
+        console.error("Failed to update remark:", error);
+      })
+      .finally(() => {
+        setIsSavingRemark(false);
+      });
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "N/A";
+    try {
+      return new Date(dateString).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  if (!selected && !loadingDetails) {
+    return null;
+  }
+
+  return (
+    <>
+      <Sheet open={open} onOpenChange={handleClose}>
+        <SheetContent className="w-[420px] p-0 overflow-hidden flex flex-col">
+          <SheetHeader className="border-b px-4 py-3 bg-white">
+            <SheetTitle>
+              <div className="flex items-center justify-between">
+                <span className="text-lg font-semibold text-gray-900">Lead Details</span>
+                <button
+                  type="button"
+                  className="rounded-full bg-gray-100 p-1.5 text-sm text-gray-600 hover:bg-gray-200 transition-colors"
+                  onClick={handleClose}
+                >
+                  <X size={16} className="text-red-500" />
+                </button>
+              </div>
+            </SheetTitle>
+          </SheetHeader>
+
+          {loadingDetails ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-gray-500">Loading...</div>
+            </div>
+          ) : selected ? (
+            <div className="flex-1 overflow-y-auto bg-white px-4 py-4">
+              {/* Lead Header */}
+              <div className="mb-5 flex items-start gap-3">
+                <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                  {selected.user?.profileImage && selected.user.profileImage.trim() !== "" ? (
+                    <img
+                      src={selected.user.profileImage}
+                      alt={selected.leadName || "Lead"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User size={24} className="text-gray-400" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-base font-semibold text-gray-900 truncate">
+                    {selected.leadName || "N/A"}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">{selected.date}</p>
+                </div>
+              </div>
+
+              {/* Next Follow Up Banner */}
+              {selected.nextFollowUp && (
+                <div
+                  className={cn(
+                    "mb-5 rounded-lg border px-4 py-3 text-xs flex items-center gap-2",
+                    selected.nextFollowUp.isOverdue
+                      ? "border-red-300 bg-red-50 text-red-700"
+                      : "border-green-300 bg-green-50 text-green-700"
+                  )}
+                >
+                  {selected.nextFollowUp.isOverdue ? (
+                    <AlertCircle size={16} className="flex-shrink-0" />
+                  ) : (
+                    <Calendar size={16} className="flex-shrink-0" />
+                  )}
+                  <div className="flex-1">
+                    {selected.nextFollowUp.isOverdue ? (
+                      <span>
+                        Next Follow up <span className="font-semibold">Overdue</span> on{" "}
+                        <span className="font-semibold">
+                          {selected.nextFollowUp.formattedDate || formatDate(selected.nextFollowUp.date)}
+                        </span>
+                      </span>
+                    ) : (
+                      <span>
+                        Next Follow up on{" "}
+                        <span className="font-semibold">
+                          {selected.nextFollowUp.formattedDate || formatDate(selected.nextFollowUp.date)}
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Details Section */}
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                  Details
+                </h3>
+
+                <div className="space-y-4 text-sm">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 mb-1">
+                      Phone Number
+                    </p>
+                    <p className="text-gray-900 text-sm font-medium">
+                      {selected.phoneNumber || "N/A"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 mb-1">
+                      Projects ID
+                    </p>
+                    <p className="text-gray-900 text-sm font-medium">
+                      {selected.projectId || "N/A"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 mb-1">Source</p>
+                    <p className="text-gray-900 text-sm font-medium">
+                      {selected.source || "N/A"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 mb-1">
+                      IP address
+                    </p>
+                    <p className="text-gray-900 text-sm font-medium">
+                      {selected.ipAddress || "N/A"}
+                    </p>
+                  </div>
+                  
+                  {/* Remark Section */}
+                  <div className="border-t pt-4">
+                    <div className="mb-3 flex items-center justify-between">
+                      <p className="text-xs font-semibold text-gray-500">
+                        Remarks
+                      </p>
+                      {!isEditingRemark && (
+                        <button
+                          onClick={handleStartEditRemark}
+                          className="text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"
+                        >
+                          <Edit2 size={12} />
+                          Edit
+                        </button>
+                      )}
+                    </div>
+                    
+                    {isEditingRemark ? (
+                      <div className="space-y-3">
+                        <textarea
+                          value={remarkValue}
+                          onChange={(e) => setRemarkValue(e.target.value)}
+                          placeholder="Enter remarks..."
+                          rows={4}
+                          className={cn(
+                            "w-full rounded-md border border-gray-300 px-3 py-2 text-sm",
+                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500",
+                            "resize-none"
+                          )}
+                        />
+                        <div className="flex gap-2 justify-end">
+                          <button
+                            onClick={handleCancelEditRemark}
+                            disabled={isSavingRemark}
+                            className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleSaveRemark}
+                            disabled={isSavingRemark}
+                            className="px-3 py-1.5 text-xs font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-1"
+                          >
+                            <Save size={12} />
+                            {isSavingRemark ? "Saving..." : "Save"}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="min-h-[60px] p-3 rounded-md bg-gray-50 border border-gray-200">
+                        <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap">
+                          {selected.remark || (
+                            <span className="text-gray-400 italic">No remarks</span>
+                          )}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Next Follow Up Button */}
+              <button
+                onClick={() => setFollowUpOpen(true)}
+                className="mb-6 flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors w-full"
+              >
+                <Clock size={16} /> Next Follow up
+              </button>
+
+              {/* Timeline Section */}
+              <div className="mb-6">
+                <h3 className="mb-4 text-sm font-semibold text-gray-900">
+                  Timeline
+                </h3>
+
+                <div className="space-y-4 text-sm">
+                  {selected.timeline && selected.timeline.length > 0 ? (
+                    selected.timeline.map((item: TimelineItem) => (
+                      <div key={item.id} className="flex gap-3">
+                        <div className="mt-0.5 flex-shrink-0">
+                          <TimelineIcon activityType={item.activityType} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-gray-500 mb-1">
+                            {item.formattedDate || formatDate(item.activityDate)}
+                          </p>
+                          <p className="text-sm font-medium text-gray-800 leading-relaxed">
+                            {item.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-gray-500">No timeline entries</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3 pt-2 border-t">
+                <button
+                  onClick={() => setUpdateStatusOpen(true)}
+                  className="flex-1 rounded-lg bg-black py-3 text-sm font-semibold text-white hover:bg-gray-800 transition-colors"
+                >
+                  Update Status
+                </button>
+
+                <button
+                  onClick={handlePhoneCall}
+                  className="flex h-11 w-11 items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                  title="Phone Call"
+                >
+                  <Phone size={18} className="text-gray-700" />
+                </button>
+
+                <button
+                  onClick={handleWhatsApp}
+                  className="flex h-11 w-11 items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                  title="WhatsApp"
+                >
+                  <MessageCircle size={18} className="text-gray-700" />
+                </button>
+              </div>
+            </div>
+          ) : null}
+        </SheetContent>
+      </Sheet>
+
+      <FollowUpDialog
+        open={followUpOpen}
+        onClose={() => setFollowUpOpen(false)}
+        onConfirm={handleFollowUp}
+      />
+
+      <UpdateStatusDialog
+        open={updateStatusOpen}
+        onClose={() => setUpdateStatusOpen(false)}
+        onConfirm={handleUpdateStatus}
+        currentStatus={selected?.statusValue}
+      />
+    </>
   );
 }

@@ -8,14 +8,16 @@ import adminAuthReducer from "@/lib/features/auth/adminAuthSlice";
 import dashboard from "@/lib/features/dashboard/dashboardSlice";
 import properties from "@/lib/features/properties/propertiesSlice"
 import developers from "@/lib/features/developers/developerSlice"
-import roles from "@/lib/features/role/roleSlice"; 
+import roles from "@/lib/features/role/roleSlice";
+import leadcrm from "@/lib/features/lead-crm/leadcrmSlice";
 
 const rootReducer = combineSlices({
   auth: adminAuthReducer,
   dashboard:dashboard,
   properties:properties,
   developers:developers,
-  roles: roles, 
+  roles: roles,
+  leadcrm: leadcrm,
 });
 
 export const makeStore = () => {
