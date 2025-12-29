@@ -30,6 +30,7 @@ export interface IAdmin {
   email: string;
   token: string;
   phone?: string;
+  profileImage?: string | null;
   role?: Role;
   permissions?: Permissions;
   isAuthenticated?:boolean;
@@ -86,6 +87,7 @@ const authSlice = createSlice({
         state.name = action.payload.admin.name || "";
         state.email = action.payload.admin.email || "";
         state.role = action.payload.admin.role || { id: "", name: "" };
+        state.profileImage = action.payload.admin.profileImage || null;
         if (action.payload.admin.permissions) {
           state.permissions = action.payload.admin.permissions;
         }
@@ -111,6 +113,7 @@ const authSlice = createSlice({
           state.email = action.payload.email;
           state.token = action.payload.token;
           state.role = action.payload.role;
+          state.profileImage = action.payload.profileImage || null;
           
           // Store permissions from role if available
           if (action.payload.role?.permissions) {

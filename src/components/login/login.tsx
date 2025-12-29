@@ -85,6 +85,7 @@ export default function Login() {
           email: user.email,
           role: user.role || { id: "", name: "" },
           permissions: user.role?.permissions || undefined,
+          profileImage: user.profileImage || null,
         });
 
         // Store session token (always stored)

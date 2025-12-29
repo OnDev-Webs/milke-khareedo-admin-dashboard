@@ -14,6 +14,7 @@ export type AdminUser = {
   email: string;
   role: Role;
   token: string;
+  profileImage?: string | null;
 }
 
 export const adminLogin = createAsyncThunk<
@@ -41,6 +42,7 @@ export const adminLogin = createAsyncThunk<
           email: apiData.user.email || "",
           role: apiData.user.role || { id: "", name: "", permissions: {} as Permissions },
           token: apiData.token,
+          profileImage: apiData.user.profileImage || null,
         };
       }
 
@@ -52,6 +54,7 @@ export const adminLogin = createAsyncThunk<
           email: apiData.email || "",
           role: apiData.role || { id: "", name: "", permissions: {} as Permissions },
           token: apiData.token,
+          profileImage: apiData.profileImage || null,
         };
       }
 

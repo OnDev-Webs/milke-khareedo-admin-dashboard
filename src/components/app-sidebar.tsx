@@ -18,48 +18,50 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { useAppSelector } from "@/lib/store/hooks"
 
 import logo from "@/assets/logo.png"
-import img from "@/assets/loginImg.jpg"
 import Image from "next/image"
 
-const data = {
-  user: {
-    name: "Yash",
-    email: "m@example.com",
-    avatar: img,
+const navMain = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: SquareTerminal,
+    isActive: true,
   },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: SquareTerminal,
-      isActive: true,
-    },
-    {
-      title: "Properties",
-      url: "/properties",
-      icon: Bot,
-    },
-    {
-      title: "Developers",
-      url: "/developers",
-      icon: BookOpen,
-    },
-    {
-      title: "Lead / CRM",
-      url: "/lead-crm",
-      icon: Settings2,
-    },
-    {
-      title: "Blogs",
-      url: "/blogs",
-      icon: FileText,
-    },
-  ],
-}
+  {
+    title: "Properties",
+    url: "/properties",
+    icon: Bot,
+  },
+  {
+    title: "Developers",
+    url: "/developers",
+    icon: BookOpen,
+  },
+  {
+    title: "Lead / CRM",
+    url: "/lead-crm",
+    icon: Settings2,
+  },
+  {
+    title: "Blogs",
+    url: "/blogs",
+    icon: FileText,
+  },
+]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { name, email, profileImage } = useAppSelector((state) => state.auth);
+
+  // Create user object from Redux state
+  const user = {
+    name: name || "",
+    email: email || "",
+    profileImage: profileImage || null,
+  };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -77,10 +79,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <hr className="border-[#303547]" />
       </div>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
