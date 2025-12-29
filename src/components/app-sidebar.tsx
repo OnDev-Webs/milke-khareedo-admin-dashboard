@@ -6,6 +6,7 @@ import {
   Bot,
   Settings2,
   SquareTerminal,
+  FileText,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -48,6 +49,11 @@ const data = {
       title: "Lead / CRM",
       url: "/lead-crm",
       icon: Settings2,
+    },
+    {
+      title: "Blogs",
+      url: "/blogs",
+      icon: FileText,
     },
   ],
 }

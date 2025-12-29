@@ -10,6 +10,7 @@ import properties from "@/lib/features/properties/propertiesSlice"
 import developers from "@/lib/features/developers/developerSlice"
 import roles from "@/lib/features/role/roleSlice";
 import leadcrm from "@/lib/features/lead-crm/leadcrmSlice";
+import blogs from "@/lib/features/blogs/blogSlice";
 
 const rootReducer = combineSlices({
   auth: adminAuthReducer,
@@ -18,6 +19,7 @@ const rootReducer = combineSlices({
   developers:developers,
   roles: roles,
   leadcrm: leadcrm,
+  blogs: blogs,
 });
 
 export const makeStore = () => {
