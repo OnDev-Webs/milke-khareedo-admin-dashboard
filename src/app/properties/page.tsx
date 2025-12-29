@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
-  title: "Properties - MilkE Khareedo Admin Panel",
-  description: "Manage and view all real estate properties in the MilkE Khareedo CRM system.",
+  title: "Properties - Milke Khareedo Admin Panel",
+  description: "Manage and view all real estate properties in the Milke Khareedo CRM system.",
 };
 
 export default function Page() {
@@ -33,7 +33,7 @@ export default function Page() {
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink href="#">Properties</BreadcrumbLink>
                 </BreadcrumbItem>
-               
+
               </BreadcrumbList>
             </Breadcrumb>
           </header>

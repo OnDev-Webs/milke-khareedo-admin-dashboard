@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
-  title: "Edit Access Level - Settings | MilkE Khareedo Admin Panel",
-  description: "Edit access levels and permissions for users in the MilkE Khareedo admin panel.",
+  title: "Edit Access Level - Settings | Milke Khareedo Admin Panel",
+  description: "Edit access levels and permissions for users in the Milke Khareedo admin panel.",
 };
 
 export default function Page() {

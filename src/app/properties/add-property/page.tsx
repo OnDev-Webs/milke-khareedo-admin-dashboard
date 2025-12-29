@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
-  title: "Add Property - MilkE Khareedo Admin Panel",
-  description: "Add a new real estate property to the MilkE Khareedo CRM system with details, amenities, and photos.",
+  title: "Add Property - Milke Khareedo Admin Panel",
+  description: "Add a new real estate property to the Milke Khareedo CRM system with details, amenities, and photos.",
 };
 
 export default function Page() {

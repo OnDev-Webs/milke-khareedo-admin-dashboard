@@ -16,8 +16,8 @@ import {
 } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
-  title: "Developers - MilkE Khareedo Admin Panel",
-  description: "Manage real estate developers and their projects in the MilkE Khareedo CRM system.",
+  title: "Developers - Milke Khareedo Admin Panel",
+  description: "Manage real estate developers and their projects in the Milke Khareedo CRM system.",
 };
 
 export default function Page() {
@@ -34,12 +34,12 @@ export default function Page() {
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink href="#">Developers</BreadcrumbLink>
                 </BreadcrumbItem>
-               
+
               </BreadcrumbList>
             </Breadcrumb>
           </header>
           <div className="w-full h-full overflow-hidden">
-            <Developers/>
+            <Developers />
           </div>
         </div>
       </SidebarInset>
