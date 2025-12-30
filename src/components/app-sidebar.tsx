@@ -1,12 +1,14 @@
 "use client"
 
 import * as React from "react"
+import { usePathname } from "next/navigation"
 import {
   BookOpen,
   Bot,
   Settings2,
   SquareTerminal,
   FileText,
+  Settings,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -19,48 +21,42 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { useAppSelector } from "@/lib/store/hooks"
-
-import logo from "@/assets/logo.png"
 import Image from "next/image"
+import logo from "@/assets/logo.png"
 
 const navMain = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: SquareTerminal,
-    isActive: true,
-  },
-  {
-    title: "Properties",
-    url: "/properties",
-    icon: Bot,
-  },
-  {
-    title: "Developers",
-    url: "/developers",
-    icon: BookOpen,
-  },
-  {
-    title: "Lead / CRM",
-    url: "/lead-crm",
-    icon: Settings2,
-  },
-  {
-    title: "Blogs",
-    url: "/blogs",
-    icon: FileText,
-  },
+  { title: "Dashboard", url: "/dashboard", icon: SquareTerminal },
+  { title: "Properties", url: "/properties", icon: Bot },
+  { title: "Developers", url: "/developers", icon: BookOpen },
+  { title: "Lead / CRM", url: "/lead-crm", icon: Settings2 },
+  { title: "Blogs", url: "/blogs", icon: FileText },
 ]
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { name, email, profileImage } = useAppSelector((state) => state.auth);
+const navSetting = [
+  { title: "Setting", url: "/settings", icon: Settings },
+]
 
-  // Create user object from Redux state
+export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname()
+  const { name, email, profileImage } = useAppSelector((state) => state.auth)
+
   const user = {
     name: name || "",
     email: email || "",
     profileImage: profileImage || null,
-  };
+  }
+
+  const navMainWithActive = navMain.map((item) => ({
+    ...item,
+    isActive:
+      pathname === item.url ||
+      pathname.startsWith(item.url + "/"),
+  }))
+
+  const navSettingWithActive = navSetting.map((item) => ({
+    ...item,
+    isActive: pathname.startsWith(item.url),
+  }))
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -73,17 +69,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           priority
           className="mx-2 object-contain"
         />
-
       </SidebarHeader>
+
       <div className="px-3 py-2.5">
         <hr className="border-[#303547]" />
       </div>
+
       <SidebarContent>
-        <NavMain items={navMain} />
+        <NavMain items={navMainWithActive} />
       </SidebarContent>
+
       <SidebarFooter>
+        <NavMain items={navSettingWithActive} />
         <NavUser user={user} />
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   )

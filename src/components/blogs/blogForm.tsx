@@ -142,6 +142,7 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("SUBMIT TRIGGERED");
     if (readOnly) return;
 
     // Ensure content is updated from editor
@@ -171,16 +172,15 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
   };
 
   return (
-    <div className="grid grid-cols-12 gap-8">
+    <div className="grid grid-cols-12 gap-4">
       {/* Left Column - Posting Guide */}
       <aside className="col-span-12 lg:col-span-3 border-r bg-white">
-        <div className="h-[92vh] p-4 flex flex-col justify-between">
+        <div className="h-full pe-4 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[16px] font-semibold text-gray-900">
                 Posting guide
               </h3>
-
               <Image
                 src="/images/tips_and_updates.png"
                 alt="Guide"
@@ -189,9 +189,7 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
                 className="opacity-70"
               />
             </div>
-
-
-            <ul className="space-y-2 text-xs text-gray-600 pe-20">
+            <ul className="space-y-2 text-xs text-gray-600">
               <li>• Write a clear Title and optional Subtitle</li>
               <li>• Select a Category; use Refresh to sync latest categories.</li>
               <li>• Add Tags: type a tag and press Enter; click x to remove.</li>
@@ -201,20 +199,18 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
             </ul>
           </div>
 
-          {!readOnly && (
-            <div className="flex items-center justify-center gap-3 border-t pt-4">
-              <button
-                type="submit"
-                form="blog-form"
-                disabled={isSubmitting}
-                className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg
-                 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? "Publishing..." : "Publish Post"}
-              </button>
-            </div>
-          )}
-
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => {
+              if (!readOnly) {
+                handleSubmit(new Event("submit") as any);
+              }
+            }}
+            className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg"
+          >
+            {isSubmitting ? "Publishing..." : "Publish Post"}
+          </button>
         </div>
       </aside>
 
@@ -227,7 +223,7 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
               <div>
                 <div
                   onClick={() => !readOnly && bannerInputRef.current?.click()}
-                  className={`w-full flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-10 py-8 text-center transition-colors ${readOnly ? "" : "cursor-pointer hover:bg-gray-100"
+                  className={`w-full flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-[#F4F8FF] px-10 py-20 text-center transition-colors ${readOnly ? "" : "cursor-pointer"
                     }`}
                 >
                   {bannerPreview ? (
@@ -252,14 +248,21 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
                     </div>
                   ) : (
                     <>
-                      <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                      <p className="text-sm font-medium text-gray-700">
+                      <Image
+                        src={upload}
+                        alt="logo"
+                        width={8}
+                        height={8}
+                        priority
+                        className="w-6 h-6 mx-2 object-contain"
+                      />
+                      <p className="text-sm font-medium text-[#000000]">
                         Upload Photo{" "}
-                        <span className="font-semibold text-blue-600 underline cursor-pointer">
+                        <span className="font-semibold text-[#1849D6] cursor-pointer">
                           browse
                         </span>
                       </p>
-                      <p className="mt-1 text-xs text-gray-500">
+                      <p className="mt-1 text-xs text-[#515151]">
                         Max 10 MB files are allowed
                       </p>
                     </>
@@ -274,74 +277,65 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
                 />
               </div>
             </div>
-
             <div className="col-span-12 md:col-span-7 space-y-6">
               {/* Title */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Title<span className="text-red-500">*</span>
-                </label>
+              <fieldset className="border border-gray-300 px-3 py-2 rounded-md min-h-[56px]">
+                <legend className="px-1 text-sm text-gray-700 font-medium">
+                  Title <span className="text-red-500">*</span>
+                </legend>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Post title"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  required
                   readOnly={readOnly}
                   disabled={readOnly}
+                  className="w-full outline-none pt-1 pb-1 text-base placeholder:text-gray-400 disabled:bg-transparent"
                 />
-              </div>
-
+              </fieldset>
               {/* Tags */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tags<span className="text-red-500">*</span>
-                </label>
+              <fieldset className="border border-gray-300 px-3 py-2 rounded-md min-h-[56px]">
+                <legend className="px-1 text-sm text-gray-700 font-medium">
+                  Tags <span className="text-red-500">*</span>
+                </legend>
+
                 <input
                   type="text"
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={handleTagInputKeyDown}
                   placeholder="Type a tag and press enter"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   readOnly={readOnly}
                   disabled={readOnly}
+                  className="w-full outline-none pt-1 pb-1 text-base placeholder:text-gray-400"
                 />
-                {tags.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {tags.map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className="inline-flex items-center gap-1 px-3 py-1 bg-[#F4F8FF] text-[#000000] rounded-md text-sm"
-                      >
-                        {tag.startsWith("#") ? tag : `#${tag}`}
-                        {!readOnly && (
-                          <button
-                            type="button"
-                            onClick={() => removeTag(tag)}
-                            className="hover:text-red-600"
-                          >
-                            <X size={14} />
-                          </button>
-                        )}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
+              </fieldset>
+              {tags.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {tags.map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-[#F4F8FF] text-[#000000] font-medium rounded-md text-sm"
+                    >
+                      {tag.startsWith("#") ? tag : `#${tag}`}
+                      {!readOnly && (
+                        <button
+                          type="button"
+                          onClick={() => removeTag(tag)}
+                          className="hover:text-red-600"
+                        >
+                          <X size={14} />
+                        </button>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-
-
           {/* Rich Text Editor Toolbar */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Content<span className="text-red-500">*</span>
-            </label>
-            <div className="border border-gray-300 rounded-lg overflow-hidden relative">
-              {/* Toolbar */}
+            <div className="border border-gray-300 rounded-md overflow-hidden">
               {!readOnly && (
                 <div className="flex items-center gap-2 p-2 bg-gray-50 border-b border-gray-300 flex-wrap">
                   <button
@@ -440,31 +434,35 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
                   </button>
                 </div>
               )}
+              <fieldset className="m-3 border border-gray-300 rounded-md min-h-[400px] focus-within:border-primary">
+                <legend className="px-1 text-sm text-gray-700 font-medium">
+                  Content <span className="text-red-500">*</span>
+                </legend>
 
-              {/* Content Editor */}
-              {readOnly ? (
-                <div
-                  className="w-full px-4 py-3 min-h-[400px] blog-content-view"
-                  style={{
-                    minHeight: '400px',
-                  }}
-                  dangerouslySetInnerHTML={{ __html: content }}
-                />
-              ) : (
-                <div
-                  ref={contentRef}
-                  contentEditable={true}
-                  onInput={handleContentChange}
-                  onBlur={handleContentChange}
-                  suppressContentEditableWarning
-                  data-placeholder="Write your blog content here..."
-                  className="w-full px-4 py-3 min-h-[400px] focus:outline-none overflow-y-auto blog-content-editor"
-                  style={{
-                    minHeight: '400px',
-                    outline: 'none',
-                  }}
-                />
-              )}
+                {readOnly ? (
+                  <div
+                    className="w-full px-4 py-3 min-h-[400px] blog-content-view"
+                    style={{
+                      minHeight: '400px',
+                    }}
+                    dangerouslySetInnerHTML={{ __html: content }}
+                  />
+                ) : (
+                  <div
+                    ref={contentRef}
+                    contentEditable={true}
+                    onInput={handleContentChange}
+                    onBlur={handleContentChange}
+                    suppressContentEditableWarning
+                    data-placeholder="Write your blog content here..."
+                    className="w-full px-4 py-3 min-h-[400px] focus:outline-none overflow-y-auto blog-content-editor"
+                    style={{
+                      minHeight: '400px',
+                      outline: 'none',
+                    }}
+                  />
+                )}
+              </fieldset>
             </div>
           </div>
         </form>

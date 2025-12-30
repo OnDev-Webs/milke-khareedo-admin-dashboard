@@ -5,8 +5,8 @@ import Settings from "@/components/settings/setting";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
-  title: "Settings - MilkE Khareedo Admin Panel",
-  description: "Configure profile settings, user roles, and access controls for the MilkE Khareedo admin panel.",
+  title: "Settings - Milke Khareedo Admin Panel",
+  description: "Configure profile settings, user roles, and access controls for the Milke Khareedo admin panel.",
 };
 
 export default function Page() {
