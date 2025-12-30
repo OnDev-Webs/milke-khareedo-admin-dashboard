@@ -138,7 +138,6 @@ export default function BlogTable({
 
             <tbody className="divide-y">
               {blogs.map((row, index) => {
-                const isLastTwo = index >= blogs.length - 2;
 
                 return (
                   <tr key={row._id} className="hover:bg-gray-50">
@@ -194,9 +193,7 @@ export default function BlogTable({
 
                         {openMenuId === row._id && (
                           <div
-                            className={`absolute right-0 z-10 w-36 rounded-lg overflow-hidden border bg-white shadow ${
-                              isLastTwo ? "bottom-8" : "top-8"
-                            }`}
+                            className={`absolute right-0 z-50 w-36 rounded-lg overflow-hidden border bg-white shadow`}
                           >
                             <button
                               onClick={() => {

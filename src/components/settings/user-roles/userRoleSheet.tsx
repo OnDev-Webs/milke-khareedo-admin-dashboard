@@ -1,22 +1,8 @@
 "use client";
 
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import {
-  ArrowUp,
-  Calendar,
-  Clock,
-  Mail,
-  Phone,
-  Plus,
-  Replace,
-  X,
-} from "lucide-react";
-import { useState } from "react";
+import {Sheet,SheetContent,SheetHeader,SheetTitle,} from "@/components/ui/sheet";
+import {Eye,EyeOff, Mail,Phone,Upload, X,} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export type User = {
   id: number;
@@ -52,10 +38,9 @@ function Field({
   );
 }
 
-function UserView(data: any) {
-  // function UserView({ User }: { User: User }) {
+function UserView({ data, onEdit }: any) {
   return (
-    <div className="mx-auto  bg-white  h-[90vh] px-4 flex flex-col justify-between">
+    <div className="mx-auto  bg-white  h-[86vh] px-4 flex flex-col justify-between">
       <div>
         <div className="mb-6 flex items-start gap-4">
           <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-black text-white">
@@ -114,30 +99,62 @@ function UserView(data: any) {
       <div className="mt-10">
         <button
           type="button"
+          onClick={onEdit}
           className="w-full rounded-lg bg-black py-3 text-sm font-semibold text-white"
         >
           Edit Developer
         </button>
+
       </div>
     </div>
   );
 }
 
-function UserEdit(data: any) {
+function UserEdit({ data }: any) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    setPreview(data?.image || "");
+  }, [data]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPreview(URL.createObjectURL(file));
+  };
+
   return (
-    <div className=" overflow-auto h-[90vh] bg-white">
-      <div className="overflow-auto mx-auto max-w-2xl  bg-white px-4 h-full">
-        <form className="overflow-auto flex flex-col justify-between h-full">
-          <div className="space-y-5">
-            <div className="overflow-auto flex items-start gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-black text-white">
-                <span className="text-sm font-semibold">homy</span>
+    <div className="h-[86vh] bg-white overflow-hidden">
+      <div className="mx-auto max-w-2xl bg-white px-4 h-full">
+        <form className="flex flex-col justify-between h-full">
+          <div className="space-y-5 overflow-y-auto pr-1">
+
+            {/* IMAGE EDIT SECTION (FIXED) */}
+            <div className="flex items-start gap-4">
+              <div
+                onClick={() => fileRef.current?.click()}
+                className="flex h-20 w-20 cursor-pointer items-center justify-center rounded-lg border border-dashed overflow-hidden text-gray-400"
+              >
+                {preview ? (
+                  <img
+                    src={preview}
+                    alt="profile"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <Upload size={20} />
+                )}
               </div>
 
               <div>
                 <p className="text-sm font-medium text-gray-800">
                   Upload Photo{" "}
-                  <span className="cursor-pointer font-semibold text-blue-600 underline">
+                  <span
+                    onClick={() => fileRef.current?.click()}
+                    className="cursor-pointer font-semibold text-blue-600 underline"
+                  >
                     browse
                   </span>
                 </p>
@@ -145,12 +162,22 @@ function UserEdit(data: any) {
                   Max 10 MB files are allowed
                 </p>
 
+                {/* EDIT PROFILE BUTTON */}
                 <button
                   type="button"
-                  className="mt-2 rounded-sm border px-3 py-1 text-xs text-gray-600 bg-black text-white"
+                  onClick={() => fileRef.current?.click()}
+                  className="mt-2 rounded-sm bg-black px-3 py-1 text-xs text-white"
                 >
                   Edit Profile
                 </button>
+
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
               </div>
             </div>
 
@@ -166,7 +193,7 @@ function UserEdit(data: any) {
             <Field label="Domain ID">
               <input
                 type="text"
-                defaultValue="Maarq Vista"
+                defaultValue={data.domainId}
                 placeholder="Enter Your Domain ID"
                 className="w-full outline-none text-sm"
               />
@@ -175,35 +202,52 @@ function UserEdit(data: any) {
             <Field label="Phone Number">
               <input
                 type="number"
-                defaultValue="7777777777"
+                defaultValue={data.phone}
                 placeholder="Enter Your Phone Number"
-                className="w-full rounded-lg outline-none text-sm"
+                className="w-full outline-none text-sm"
               />
             </Field>
 
             <Field label="Role">
-              <input
-                type="text"
-                defaultValue="Admin"
-                placeholder="Select Role"
-                className="w-full rounded-lg outline-none text-sm"
-              />
+              <select
+                defaultValue={data.role || ""}
+                className="w-full outline-none text-sm bg-transparent"
+              >
+                <option value="" disabled>
+                  Select Role
+                </option>
+                <option value="SuperAdmin">SuperAdmin</option>
+                <option value="Admin">Admin</option>
+                <option value="Project Manager">Project Manager</option>
+                <option value="Sales Agent">Sales Agent</option>
+                <option value="User">User</option>
+              </select>
             </Field>
 
             <Field label="Password">
-              <input
-                defaultValue="xxxxxxxx"
-                type="password"
-                className="w-full rounded-lg outline-none text-sm"
-              />
+              <div className="flex items-center">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  defaultValue="xxxxxxxx"
+                  className="w-full outline-none text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="ml-2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </Field>
+
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-black py-3 text-sm font-semibold text-white"
+            className="mt-4 w-full rounded-lg bg-black py-3 text-sm font-semibold text-white"
           >
-            Add New User
+            Update User
           </button>
         </form>
       </div>
@@ -212,20 +256,45 @@ function UserEdit(data: any) {
 }
 
 function UserCreate() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPreview(URL.createObjectURL(file));
+  };
+
   return (
-    <div className=" overflow-auto h-[90vh] bg-white">
-      <div className="overflow-auto mx-auto max-w-2xl  bg-white px-4 h-full">
-        <form className="overflow-auto flex flex-col justify-between h-full">
-          <div className="space-y-5">
-            <div className="overflow-auto flex items-start gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-black text-white">
-                <span className="text-sm font-semibold">homy</span>
+    <div className="h-[86vh] bg-white overflow-hidden">
+      <div className="mx-auto max-w-2xl bg-white px-4 h-full">
+        <form className="flex flex-col justify-between h-full">
+
+          <div className="space-y-5 overflow-y-auto pr-1">
+            <div className="flex items-start gap-4">
+              <div
+                onClick={() => fileRef.current?.click()}
+                className="flex h-20 w-20 cursor-pointer items-center justify-center rounded-lg border border-dashed overflow-hidden text-gray-400"
+              >
+                {preview ? (
+                  <img
+                    src={preview}
+                    alt="preview"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <Upload size={20} />
+                )}
               </div>
 
               <div>
                 <p className="text-sm font-medium text-gray-800">
                   Upload Photo{" "}
-                  <span className="cursor-pointer font-semibold text-blue-600 underline">
+                  <span
+                    onClick={() => fileRef.current?.click()}
+                    className="cursor-pointer font-semibold text-blue-600 underline"
+                  >
                     browse
                   </span>
                 </p>
@@ -235,17 +304,24 @@ function UserCreate() {
 
                 <button
                   type="button"
-                  className="mt-2 rounded-sm border px-3 py-1 text-xs text-gray-600 bg-black text-white"
-                >
+                  onClick={() => fileRef.current?.click()}
+                  className="mt-2 rounded-sm bg-black px-3 py-1 text-xs text-white">
                   Edit Profile
                 </button>
+
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
               </div>
             </div>
 
             <Field label="Name*">
               <input
                 type="text"
-                defaultValue="Robert"
                 placeholder="Enter Name"
                 className="w-full outline-none text-sm"
               />
@@ -254,45 +330,54 @@ function UserCreate() {
             <Field label="Domain ID">
               <input
                 type="text"
-                defaultValue="Maarq Vista"
-                placeholder="Enter Your Domain ID"
+                placeholder="Enter Domain ID"
                 className="w-full outline-none text-sm"
               />
             </Field>
 
             <Field label="Phone Number">
               <input
-                type="number"
-                defaultValue="7777777777"
-                placeholder="Enter Your Phone Number"
-                className="w-full rounded-lg outline-none text-sm"
+                type="tel"
+                placeholder="+91 000 000 0000"
+                className="w-full outline-none text-sm"
               />
             </Field>
 
             <Field label="Role">
-              <input
-                type="text"
-                defaultValue="Admin"
-                placeholder="Select Role"
-                className="w-full rounded-lg outline-none text-sm"
-              />
+              <select className="w-full outline-none text-sm bg-transparent">
+                <option value="">Select Role</option>
+                <option value="admin">Admin</option>
+                <option value="manager">Manager</option>
+                <option value="agent">Agent</option>
+              </select>
             </Field>
 
             <Field label="Password">
-              <input
-                defaultValue="xxxxxxxx"
-                type="password"
-                className="w-full rounded-lg outline-none text-sm"
-              />
+              <div className="flex items-center">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="xxxxxxxxxx"
+                  className="w-full outline-none text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="ml-2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </Field>
+
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-black py-3 text-sm font-semibold text-white"
+            className="mt-4 w-full rounded-lg bg-black py-3 text-sm font-semibold text-white"
           >
             Add New User
           </button>
+
         </form>
       </div>
     </div>
@@ -308,12 +393,10 @@ function Info({ label, value }: { label: string; value: string }) {
   );
 }
 
-export default function UserAndRolesSheet({ open, setOpen, data, mode }: any) {
-  //   let selectedUser = null;
-  //   if (!open || !selectedUser) return null;
-
+export default function UserAndRolesSheet({ open, setOpen, data, mode, setMode }: any) {
   const handleClose = () => {
     setOpen(false);
+    setMode("view");
   };
 
   return (
@@ -337,7 +420,13 @@ export default function UserAndRolesSheet({ open, setOpen, data, mode }: any) {
         </SheetHeader>
 
         <div className="">
-          {mode === "view" && <UserView data={data} />}
+          {mode === "view" && (
+            <UserView
+              data={data}
+              onEdit={() => setMode("edit")}
+            />
+          )}
+
           {mode === "edit" && <UserEdit data={data} />}
           {mode === "create" && <UserCreate />}
         </div>

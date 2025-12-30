@@ -142,6 +142,7 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("SUBMIT TRIGGERED");
     if (readOnly) return;
 
     // Ensure content is updated from editor
@@ -198,20 +199,18 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
             </ul>
           </div>
 
-          {!readOnly && (
-            <div className="flex items-center justify-center gap-3 border-t pt-4">
-              <button
-                type="submit"
-                form="blog-form"
-                disabled={isSubmitting}
-                className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg
-                 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? "Publishing..." : "Publish Post"}
-              </button>
-            </div>
-          )}
-
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => {
+              if (!readOnly) {
+                handleSubmit(new Event("submit") as any);
+              }
+            }}
+            className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg"
+          >
+            {isSubmitting ? "Publishing..." : "Publish Post"}
+          </button>
         </div>
       </aside>
 
@@ -441,28 +440,28 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
                 </legend>
 
                 {readOnly ? (
-                <div
-                  className="w-full px-4 py-3 min-h-[400px] blog-content-view"
-                  style={{
-                    minHeight: '400px',
-                  }}
-                  dangerouslySetInnerHTML={{ __html: content }}
-                />
-              ) : (
-                <div
-                  ref={contentRef}
-                  contentEditable={true}
-                  onInput={handleContentChange}
-                  onBlur={handleContentChange}
-                  suppressContentEditableWarning
-                  data-placeholder="Write your blog content here..."
-                  className="w-full px-4 py-3 min-h-[400px] focus:outline-none overflow-y-auto blog-content-editor"
-                  style={{
-                    minHeight: '400px',
-                    outline: 'none',
-                  }}
-                />
-              )}
+                  <div
+                    className="w-full px-4 py-3 min-h-[400px] blog-content-view"
+                    style={{
+                      minHeight: '400px',
+                    }}
+                    dangerouslySetInnerHTML={{ __html: content }}
+                  />
+                ) : (
+                  <div
+                    ref={contentRef}
+                    contentEditable={true}
+                    onInput={handleContentChange}
+                    onBlur={handleContentChange}
+                    suppressContentEditableWarning
+                    data-placeholder="Write your blog content here..."
+                    className="w-full px-4 py-3 min-h-[400px] focus:outline-none overflow-y-auto blog-content-editor"
+                    style={{
+                      minHeight: '400px',
+                      outline: 'none',
+                    }}
+                  />
+                )}
               </fieldset>
             </div>
           </div>
