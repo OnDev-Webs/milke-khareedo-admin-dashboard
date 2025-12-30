@@ -65,8 +65,14 @@ axiosInstance.interceptors.request.use(
       config.baseURL = cleanBaseUrl;
     }
 
-    if (!config.headers["Content-Type"]) {
+    // Only set Content-Type if not already set and not FormData
+    // FormData needs to set Content-Type with boundary automatically
+    if (!config.headers["Content-Type"] && !(config.data instanceof FormData)) {
       config.headers["Content-Type"] = "application/json";
+    }
+    // If Content-Type is explicitly set to undefined, remove it
+    if (config.headers["Content-Type"] === undefined) {
+      delete config.headers["Content-Type"];
     }
 
     if (typeof window !== "undefined") {

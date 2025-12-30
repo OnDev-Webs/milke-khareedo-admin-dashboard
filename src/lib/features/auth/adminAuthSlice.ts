@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { adminLogin, AdminUser } from "./adminAuthApi";
+import { adminLogin, AdminUser, getAdminProfile, updateAdminProfile, AdminProfile } from "./adminAuthApi";
 
 export type Role = {
   id: string;
@@ -30,10 +30,15 @@ export interface IAdmin {
   email: string;
   token: string;
   phone?: string;
+  phoneNumber?: string;
   profileImage?: string | null;
+  firstName?: string;
+  lastName?: string;
   role?: Role;
   permissions?: Permissions;
   isAuthenticated?:boolean;
+  profileLoading?: boolean;
+  profileError?: string | null;
 }
 
 const initialState: IAdmin = {
@@ -55,6 +60,8 @@ const initialState: IAdmin = {
     developer: { add: false, view: false, edit: false, delete: false, export: false },
     team: { add: false, view: false, edit: false, delete: false, export: false },
   },
+  profileLoading: false,
+  profileError: null,
 };
 
 const authSlice = createSlice({
@@ -126,6 +133,52 @@ const authSlice = createSlice({
         state.loading = false;
         state.isLoggedIn = false;
         state.error = action.error.message || "Login failed";
+      })
+      // Get Admin Profile
+      .addCase(getAdminProfile.pending, (state) => {
+        state.profileLoading = true;
+        state.profileError = null;
+      })
+      .addCase(getAdminProfile.fulfilled, (state, action: PayloadAction<AdminProfile>) => {
+        state.profileLoading = false;
+        state.profileError = null;
+        
+        // Update profile fields
+        state.id = action.payload._id || state.id;
+        state.name = action.payload.name || state.name;
+        state.email = action.payload.email || state.email;
+        state.profileImage = action.payload.profileImage || null;
+        state.firstName = action.payload.firstName || "";
+        state.lastName = action.payload.lastName || "";
+        state.phoneNumber = action.payload.phoneNumber || "";
+        state.phone = action.payload.phoneNumber || state.phone;
+      })
+      .addCase(getAdminProfile.rejected, (state, action) => {
+        state.profileLoading = false;
+        state.profileError = action.payload || "Failed to fetch profile";
+      })
+      // Update Admin Profile
+      .addCase(updateAdminProfile.pending, (state) => {
+        state.profileLoading = true;
+        state.profileError = null;
+      })
+      .addCase(updateAdminProfile.fulfilled, (state, action: PayloadAction<AdminProfile>) => {
+        state.profileLoading = false;
+        state.profileError = null;
+        
+        // Update profile fields
+        state.id = action.payload._id || state.id;
+        state.name = action.payload.name || state.name;
+        state.email = action.payload.email || state.email;
+        state.profileImage = action.payload.profileImage || null;
+        state.firstName = action.payload.firstName || "";
+        state.lastName = action.payload.lastName || "";
+        state.phoneNumber = action.payload.phoneNumber || "";
+        state.phone = action.payload.phoneNumber || state.phone;
+      })
+      .addCase(updateAdminProfile.rejected, (state, action) => {
+        state.profileLoading = false;
+        state.profileError = action.payload || "Failed to update profile";
       });
   },
 });

@@ -1,8 +1,35 @@
+"use client";
 import homy from "@/assets/homy.png";
 import settingImg from "@/assets/settingImg.png";
 import Image from "next/image";
+import { useAppSelector } from "@/lib/store/hooks";
+import { useEffect, useState } from "react";
 
 export default function SettingsHeader() {
+  const { firstName, profileImage } = useAppSelector((state) => state.auth);
+  const [currentDate, setCurrentDate] = useState<string>("");
+
+  useEffect(() => {
+    // Generate current date on frontend
+    const date = new Date();
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    const formattedDate = date.toLocaleDateString("en-US", options);
+    setCurrentDate(formattedDate);
+  }, []);
+
+  // Use profile image or default
+  const displayImage = profileImage && profileImage.trim() !== "" 
+    ? profileImage 
+    : homy.src;
+
+  // Get first name or fallback
+  const displayName = firstName || "Admin";
+
   return (
     <div
       className="relative p-10 my-4 border-2 border-gray-100 rounded-2xl overflow-hidden"
@@ -19,8 +46,8 @@ export default function SettingsHeader() {
         {/* Avatar */}
         <div className="relative size-30 rounded-full overflow-hidden border-2 border-white bg-gray-200">
           <Image
-            src={homy}
-            alt="homy"
+            src={displayImage}
+            alt="Profile"
             fill
             className="object-cover"
             priority
@@ -28,10 +55,10 @@ export default function SettingsHeader() {
         </div>
         <div>
           <h2 className="text-3xl font-bold text-white">
-            Hello, Shivam!
+            Hello, {displayName}!
           </h2>
           <p className="text-xl text-gray-200">
-            Welcome to Brandname. it's december 17th, 2025.
+            Welcome to MilkE Khareedo. it's {currentDate}.
           </p>
         </div>
       </div>

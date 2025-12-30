@@ -13,10 +13,11 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { User, LogOut } from "lucide-react"
+import { LogOut } from "lucide-react"
 import { useAppDispatch } from "@/lib/store/hooks"
 import { resetAuth } from "@/lib/features/auth/adminAuthSlice"
 import { useRouter } from "next/navigation"
+import homy from "@/assets/homy.png"
 
 export function NavUser({
   user,
@@ -51,15 +52,11 @@ export function NavUser({
               // className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="size-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
-                {user.profileImage && user.profileImage.trim() !== "" ? (
-                  <img
-                    src={user.profileImage}
-                    alt={user.name || "User"}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <User size={16} className="text-gray-400" />
-                )}
+                <img
+                  src={user.profileImage && user.profileImage.trim() !== "" ? user.profileImage : homy.src}
+                  alt={user.name || "User"}
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name || "User"}</span>
