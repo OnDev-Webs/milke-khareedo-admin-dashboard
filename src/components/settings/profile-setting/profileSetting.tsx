@@ -1,3 +1,7 @@
+import homy from "@/assets/homy.png";
+import Image from "next/image";
+import { useRef, useState } from "react";
+
 function Field({
   label,
   error,
@@ -10,7 +14,9 @@ function Field({
   return (
     <div>
       <fieldset className="border px-4 pb-1.5 rounded-md">
-        <legend className="text-xs px-1 font-semibold text-gray-700">{label}</legend>
+        <legend className="text-xs px-1 font-semibold text-gray-700">
+          {label}
+        </legend>
         {children}
       </fieldset>
       {error && (
@@ -21,6 +27,21 @@ function Field({
 }
 
 export default function ProfileSettings() {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string>(homy.src);
+
+  const handleEditClick = () => {
+    fileRef.current?.click();
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+  };
+
   return (
     <div className="bg-white">
       <div className="mx-auto w-full">
@@ -31,44 +52,58 @@ export default function ProfileSettings() {
         <form className="space-y-6 w-full">
           <div className="flex items-start gap-6">
             <div className="relative">
-              <div className="flex h-42 w-42 items-center justify-center rounded-xl bg-linear-to-br from-blue-600 to-black text-white">
-                <span className="text-sm font-semibold">homy</span>
+              <div className="relative h-[150px] w-[150px] rounded-2xl overflow-hidden">
+                <Image
+                  src={preview} 
+                  alt="homy"
+                  fill
+                  priority
+                  className="object-cover object-center"
+                />
               </div>
 
               <button
                 type="button"
-                className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-sm bg-gray-900 border border-gray-600 px-3 py-1 text-xs text-white"
-              >
+                onClick={handleEditClick}
+                className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-sm bg-gray-900 border border-gray-600 px-1 py-1 text-xs text-white">
                 Edit Profile
               </button>
+
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
             </div>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">
             <Field label="First Name*">
               <input
-                defaultValue="Maarin"
+              placeholder="Enter Your First name"
                 className="w-full rounded-lg outline-none text-sm"
               />
             </Field>
 
             <Field label="Last Name*">
               <input
-                defaultValue="Lakhiyo"
+                placeholder="Enter Your Last Name"
                 className="w-full rounded-lg outline-none text-sm"
               />
             </Field>
 
             <Field label="Email Address*">
               <input
-                defaultValue="Example@gmail.com"
+                 placeholder="Enter Your Email Address"
                 className="w-full rounded-lg outline-none text-sm"
               />
             </Field>
 
             <Field label="Phone Number*">
               <input
-                defaultValue="+91 965 326 6958"
+                 placeholder="Enter Your Phone Number"
                 className="w-full rounded-lg outline-none text-sm"
               />
             </Field>
@@ -86,15 +121,13 @@ export default function ProfileSettings() {
           <div className="flex justify-end gap-3 pt-8">
             <button
               type="button"
-              className="rounded-lg border px-5 py-2 text-sm font-medium text-gray-700"
-            >
+              className="rounded-lg border px-5 py-2 text-sm font-medium text-gray-700">
               Cancel
             </button>
 
             <button
               type="submit"
-              className="rounded-lg bg-black px-5 py-2 text-sm font-semibold text-white"
-            >
+              className="rounded-lg bg-black px-5 py-2 text-sm font-semibold text-white">
               Save Profile
             </button>
           </div>

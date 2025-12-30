@@ -23,17 +23,17 @@ export default function Settings() {
     },
     {
       id: 2,
-      title: "User & Roles",
-      isActive: true,
-      icon: <ACSVG />,
-      component: <UserAndRoles />,
-    },
-    {
-      id: 3,
       title: "Access Control",
       isActive: true,
       icon: <Users />,
       component: <AccessControl />,
+    },
+    {
+      id: 3,
+      title: "User & Roles",
+      isActive: true,
+      icon: <ACSVG />,
+      component: <UserAndRoles />,
     },
   ];
 

@@ -230,7 +230,6 @@ export default function AddNewProperty() {
 
     dispatch(fetchPropertyById(propertyId)).then((res: any) => {
       const property = res.payload;
-      console.log("property is :-", property);
       if (!property) return;
 
       methods.reset(property);

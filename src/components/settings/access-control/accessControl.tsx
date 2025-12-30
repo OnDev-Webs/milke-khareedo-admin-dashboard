@@ -81,7 +81,7 @@ export default function AccessControl() {
                       }}
                       className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 `}
                     >
-                      Edit
+                      Edit Role
                     </button>
                     <button
                       onClick={() => {
@@ -92,7 +92,7 @@ export default function AccessControl() {
                             
                         `}
                     >
-                      Edit
+                      Delete Role
                     </button>
                   </div>
                 )}

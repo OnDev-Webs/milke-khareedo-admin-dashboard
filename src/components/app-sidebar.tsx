@@ -7,6 +7,7 @@ import {
   Settings2,
   SquareTerminal,
   FileText,
+  Settings,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -52,6 +53,14 @@ const navMain = [
   },
 ]
 
+const navSetting = [
+  {
+    title: "Setting",
+    url: "/settings",
+    icon: Settings,
+  },
+]
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { name, email, profileImage } = useAppSelector((state) => state.auth);
 
@@ -82,6 +91,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={navMain} />
       </SidebarContent>
       <SidebarFooter>
+        <NavMain items={navSetting}/>
         <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
