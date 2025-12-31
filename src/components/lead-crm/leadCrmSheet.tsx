@@ -400,7 +400,7 @@ export default function LeadCRMSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent className="w-[420px] p-0 overflow-hidden flex flex-col">
+        <SheetContent className="w-full lg:w-[420px] p-0 overflow-hidden flex flex-col">
           <SheetHeader className="border-b px-4 py-3 bg-white">
             <SheetTitle>
               <div className="flex items-center justify-between">

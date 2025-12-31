@@ -14,6 +14,7 @@ export interface Lead {
   projectId: string;
   status: string;
   dateTime: string;
+  source: string;
   createdAt: string;
   updatedAt: string;
   profileImage?: string | null;

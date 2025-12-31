@@ -17,12 +17,12 @@ export default function Login() {
   const router = useRouter();
   const [rememberMe, setRememberMeChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const {
     register,
     handleSubmit,
     setValue,
-    formState: {  isSubmitting, errors },
+    formState: { isSubmitting, errors },
   } = useForm<loginFrom & { rememberMe?: boolean }>({
     resolver: zodResolver(loginSchema),
     mode: "onSubmit",
@@ -37,19 +37,19 @@ export default function Login() {
   useEffect(() => {
     const rememberedEmail = getRememberMeEmail();
     const rememberedData = getRememberMe();
-    
+
     // Pre-fill email if available
     if (rememberedEmail) {
       setValue("email", rememberedEmail);
       setRememberMeChecked(true);
     }
-    
+
     // If valid remember me token exists, auto-login
     if (rememberedData && rememberedData.token) {
       // Restore session token
       localStorage.setItem("token", rememberedData.token);
       localStorage.setItem("user", rememberedData.userData);
-      
+
       // Try to parse user data and restore auth state
       try {
         const userData = JSON.parse(rememberedData.userData);
@@ -70,7 +70,7 @@ export default function Login() {
       if (adminLogin.fulfilled.match(response)) {
         const token = response?.payload?.token;
         const user = response?.payload;
-        
+
         // Ensure we have valid user data before storing
         if (!user?.id || !user?.email) {
           console.error("Invalid user data received from login API");
@@ -137,6 +137,16 @@ export default function Login() {
             <div className="flex justify-center mb-2">
               <img src={logo.src} alt="login-img" className="h-16 w-auto" />
             </div>
+
+            {/* Mobile Image */}
+            <div className="block lg:hidden w-full h-54 rounded-2xl overflow-hidden">
+              <img
+                src={loginImg.src}
+                alt="login-mobile"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
 
             {/* Email Field */}
             <fieldset className="border border-black px-3 py-2 rounded-md min-h-[56px] flex flex-col justify-center">

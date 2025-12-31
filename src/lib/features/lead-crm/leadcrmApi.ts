@@ -15,6 +15,7 @@ export const fetchLeads = createAsyncThunk<
         url += `&search=${encodeURIComponent(search.trim())}`;
       }
       const res = await axiosInstance.get(url);
+      console.log("response is :-",res.data);
       return res.data;
     } catch (error: any) {
       return rejectWithValue(
