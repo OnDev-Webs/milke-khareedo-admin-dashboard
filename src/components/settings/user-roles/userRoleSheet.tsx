@@ -1,7 +1,10 @@
 "use client";
 
-import {Sheet,SheetContent,SheetHeader,SheetTitle,} from "@/components/ui/sheet";
-import {Eye,EyeOff, Mail,Phone,Upload, X,} from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, } from "@/components/ui/sheet";
+import { fetchRoles } from "@/lib/features/role/roleApi";
+import { createUser, fetchUserById, updateUser } from "@/lib/features/user/userApi";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { Eye, EyeOff, Mail, Phone, Upload, X, } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export type User = {
@@ -39,72 +42,99 @@ function Field({
 }
 
 function UserView({ data, onEdit }: any) {
+  if (!data) return null;
+
   return (
-    <div className="mx-auto  bg-white  h-[86vh] px-4 flex flex-col justify-between">
+    <div className="mx-auto bg-white h-[86vh] px-4 flex flex-col justify-between">
       <div>
+        {/* HEADER */}
         <div className="mb-6 flex items-start gap-4">
-          <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-black text-white">
-            <span className="text-sm font-semibold">homy</span>
+          <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-black text-white overflow-hidden">
+            {data.profileImage ? (
+              <img
+                src={data.profileImage}
+                alt="profile"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="text-sm font-semibold">
+                {data.name?.[0]?.toUpperCase()}
+              </span>
+            )}
           </div>
 
           <div>
-            <p className="text-sm font-semibold text-gray-900">homy homes</p>
-            <p className="text-xs text-gray-500">Ahmadabad</p>
+            <p className="text-sm font-semibold text-gray-900">
+              {data.name}
+            </p>
+            <p className="text-xs text-gray-500">
+              {typeof data.role === "object" ? data.role.name : ""}
+            </p>
           </div>
         </div>
 
+        {/* DETAILS */}
         <div className="space-y-4">
           <h3 className="text-sm font-semibold text-gray-900">
-            Sourcing Manager
+            User Details
           </h3>
 
           <div>
             <p className="text-xs font-semibold text-gray-600">
-              Contact Person Name
+              Full Name
             </p>
-            <p className="mt-1 text-sm text-gray-800">Mansukh Khben</p>
-          </div>
-
-          <div className="flex reflect-items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold text-gray-600">
-                Phone Number
-              </p>
-              <p className="mt-1 text-sm text-gray-800">+91 965 265 2648</p>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <button className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
-                <Phone size={16} />
-              </button>
-              <button className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
-                <Mail size={16} />
-              </button>
-            </div>
+            <p className="mt-1 text-sm text-gray-800">
+              {data.name}
+            </p>
           </div>
 
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold text-gray-600">Email ID</p>
-              <p className="mt-1 text-sm text-gray-800">example@gmail.com</p>
+              <p className="text-xs font-semibold text-gray-600">
+                Phone Number
+              </p>
+              <p className="mt-1 text-sm text-gray-800">
+                {data.countryCode} {data.phoneNumber}
+              </p>
             </div>
 
-            <button className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100">
-              <Mail size={16} />
-            </button>
+            <div className="flex items-center gap-3">
+              <a
+                href={`tel:${data.phoneNumber}`}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100"
+              >
+                <Phone size={16} />
+              </a>
+
+              <a
+                href={`mailto:${data.email}`}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100"
+              >
+                <Mail size={16} />
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold text-gray-600">
+              Email ID
+            </p>
+            <p className="mt-1 text-sm text-gray-800">
+              {data.email}
+            </p>
           </div>
         </div>
       </div>
 
+      {/* ACTION */}
       <div className="mt-10">
         <button
           type="button"
           onClick={onEdit}
           className="w-full rounded-lg bg-black py-3 text-sm font-semibold text-white"
         >
-          Edit Developer
+          Edit User
         </button>
-
       </div>
     </div>
   );
@@ -114,16 +144,65 @@ function UserEdit({ data }: any) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
+  const dispatch = useAppDispatch();
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    role: "",
+  });
+
 
   useEffect(() => {
-    setPreview(data?.image || "");
+    if (data) {
+      setForm({
+        name: data.name || `${data.firstName ?? ""} ${data.lastName ?? ""}`,
+        email: data.email,
+        phone: data.phoneNumber,
+        role: data.role?._id,
+      });
+    }
   }, [data]);
+
+  const { roles } = useAppSelector((state) => state.roles);
+
+  useEffect(() => {
+    dispatch(fetchRoles());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (data?.profileImage) {
+      setPreview(data.profileImage);
+    } else {
+      setPreview("");
+    }
+  }, [data]);
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setImageFile(file);
     setPreview(URL.createObjectURL(file));
   };
+
+
+  const handleUpdate = async () => {
+    await dispatch(
+      updateUser({
+        id: data._id,
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        role: form.role,
+        profileImage: imageFile || undefined,
+      })
+    ).unwrap();
+  };
+
 
   return (
     <div className="h-[86vh] bg-white overflow-hidden">
@@ -184,8 +263,10 @@ function UserEdit({ data }: any) {
             <Field label="Name*">
               <input
                 type="text"
-                defaultValue={data.name}
-                placeholder="Enter Name"
+                value={form.name}
+                onChange={(e) =>
+                  setForm({ ...form, name: e.target.value })
+                }
                 className="w-full outline-none text-sm"
               />
             </Field>
@@ -193,7 +274,10 @@ function UserEdit({ data }: any) {
             <Field label="Domain ID">
               <input
                 type="text"
-                defaultValue={data.domainId}
+                value={form.email}
+                onChange={(e) =>
+                  setForm({ ...form, email: e.target.value })
+                }
                 placeholder="Enter Your Domain ID"
                 className="w-full outline-none text-sm"
               />
@@ -202,7 +286,10 @@ function UserEdit({ data }: any) {
             <Field label="Phone Number">
               <input
                 type="number"
-                defaultValue={data.phone}
+                value={form.phone}
+                onChange={(e) =>
+                  setForm({ ...form, phone: e.target.value })
+                }
                 placeholder="Enter Your Phone Number"
                 className="w-full outline-none text-sm"
               />
@@ -210,17 +297,18 @@ function UserEdit({ data }: any) {
 
             <Field label="Role">
               <select
-                defaultValue={data.role || ""}
+                value={form.role}
+                onChange={(e) =>
+                  setForm({ ...form, role: e.target.value })
+                }
                 className="w-full outline-none text-sm bg-transparent"
               >
-                <option value="" disabled>
-                  Select Role
-                </option>
-                <option value="SuperAdmin">SuperAdmin</option>
-                <option value="Admin">Admin</option>
-                <option value="Project Manager">Project Manager</option>
-                <option value="Sales Agent">Sales Agent</option>
-                <option value="User">User</option>
+                <option value="" disabled>Select Role</option>
+                {roles.map((r) => (
+                  <option key={r._id} value={r._id}>
+                    {r.name}
+                  </option>
+                ))}
               </select>
             </Field>
 
@@ -228,9 +316,11 @@ function UserEdit({ data }: any) {
               <div className="flex items-center">
                 <input
                   type={showPassword ? "text" : "password"}
-                  defaultValue="xxxxxxxx"
+                  value="********"
+                  readOnly
                   className="w-full outline-none text-sm"
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -244,7 +334,8 @@ function UserEdit({ data }: any) {
           </div>
 
           <button
-            type="submit"
+            type="button"
+            onClick={handleUpdate}
             className="mt-4 w-full rounded-lg bg-black py-3 text-sm font-semibold text-white"
           >
             Update User
@@ -259,12 +350,94 @@ function UserCreate() {
   const [showPassword, setShowPassword] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const dispatch = useAppDispatch();
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const BLOCKED_DOMAINS = [
+    "gmail.com",
+    "yahoo.com",
+    "hotmail.com",
+    "outlook.com",
+    "live.com",
+    "msn.com",
+    "aol.com",
+    "icloud.com",
+    "mail.com",
+    "protonmail.com",
+    "yandex.com",
+    "zoho.com",
+    "rediffmail.com",
+    "inbox.com",
+    "gmx.com",
+    "yopmail.com"
+  ];
+  const [emailError, setEmailError] = useState<string>("");
+
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+    role: "",
+  });
+
+  const validateEmailDomain = (email: string) => {
+    if (!email.includes("@")) {
+      setEmailError("Invalid email format");
+      return false;
+    }
+
+    const domain = email.split("@")[1]?.toLowerCase().trim();
+
+    if (BLOCKED_DOMAINS.includes(domain)) {
+      setEmailError("Please enter a valid company email address");
+      return false;
+    }
+
+    setEmailError("");
+    return true;
+  };
+
+
+  const handleCreate = async () => {
+    if (!validateEmailDomain(form.email)) return;
+    const fd = new FormData();
+
+    fd.append("name", form.name);
+    fd.append("email", form.email);
+    fd.append("phone", form.phone);
+    fd.append("password", form.password);
+    fd.append("role", form.role);
+
+    if (imageFile) {
+      fd.append("profileImage", imageFile);
+    }
+
+    await dispatch(createUser({
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      password: form.password,
+      role: form.role,
+    })).unwrap();
+
+  };
+
+  const { roles } = useAppSelector((state) => state.roles);
+
+  useEffect(() => {
+    dispatch(fetchRoles());
+  }, [dispatch]);
+
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setImageFile(file);
     setPreview(URL.createObjectURL(file));
   };
+
 
   return (
     <div className="h-[86vh] bg-white overflow-hidden">
@@ -322,33 +495,58 @@ function UserCreate() {
             <Field label="Name*">
               <input
                 type="text"
+                value={form.name}
+                onChange={(e) =>
+                  setForm({ ...form, name: e.target.value })
+                }
                 placeholder="Enter Name"
                 className="w-full outline-none text-sm"
               />
             </Field>
 
-            <Field label="Domain ID">
+            <Field label="Email ID">
               <input
-                type="text"
-                placeholder="Enter Domain ID"
+                type="email"
+                value={form.email}
+                onChange={(e) => {
+                  setForm({ ...form, email: e.target.value });
+                  if (emailError) setEmailError("");
+                }}
+                onBlur={(e) => validateEmailDomain(e.target.value)}
+                placeholder="Enter Email"
                 className="w-full outline-none text-sm"
               />
+              {emailError && (
+                <span className="text-xs text-red-500">{emailError}</span>
+              )}
             </Field>
 
             <Field label="Phone Number">
               <input
                 type="tel"
+                value={form.phone}
+                onChange={(e) =>
+                  setForm({ ...form, phone: e.target.value })
+                }
                 placeholder="+91 000 000 0000"
                 className="w-full outline-none text-sm"
               />
             </Field>
 
             <Field label="Role">
-              <select className="w-full outline-none text-sm bg-transparent">
+              <select
+                value={form.role}
+                onChange={(e) =>
+                  setForm({ ...form, role: e.target.value })
+                }
+                className="w-full outline-none text-sm bg-transparent"
+              >
                 <option value="">Select Role</option>
-                <option value="admin">Admin</option>
-                <option value="manager">Manager</option>
-                <option value="agent">Agent</option>
+                {roles.map((r) => (
+                  <option key={r._id} value={r._id}>
+                    {r.name}
+                  </option>
+                ))}
               </select>
             </Field>
 
@@ -356,6 +554,10 @@ function UserCreate() {
               <div className="flex items-center">
                 <input
                   type={showPassword ? "text" : "password"}
+                  value={form.password}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
                   placeholder="xxxxxxxxxx"
                   className="w-full outline-none text-sm"
                 />
@@ -368,11 +570,11 @@ function UserCreate() {
                 </button>
               </div>
             </Field>
-
           </div>
 
           <button
-            type="submit"
+            type="button"
+            onClick={handleCreate}
             className="mt-4 w-full rounded-lg bg-black py-3 text-sm font-semibold text-white"
           >
             Add New User
@@ -399,6 +601,15 @@ export default function UserAndRolesSheet({ open, setOpen, data, mode, setMode }
     setMode("view");
   };
 
+  const dispatch = useAppDispatch();
+  const { selectedUser } = useAppSelector((state) => state.user);
+
+  useEffect(() => {
+    if ((mode === "view" || mode === "edit") && data?._id) {
+      dispatch(fetchUserById(data._id));
+    }
+  }, [mode, data, dispatch]);
+
   return (
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent className="w-[420px]">
@@ -422,12 +633,12 @@ export default function UserAndRolesSheet({ open, setOpen, data, mode, setMode }
         <div className="">
           {mode === "view" && (
             <UserView
-              data={data}
+              data={selectedUser}
               onEdit={() => setMode("edit")}
             />
           )}
 
-          {mode === "edit" && <UserEdit data={data} />}
+          {mode === "edit" && <UserEdit data={selectedUser} />}
           {mode === "create" && <UserCreate />}
         </div>
       </SheetContent>

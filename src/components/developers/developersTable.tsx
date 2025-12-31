@@ -46,7 +46,10 @@ export default function DevelopersTable({
   const [openMenuId, setOpenMenuId] = useState<number | string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-
+  const [menuPosition, setMenuPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
   const [open, setOpen] = useState<boolean>(false);
   const [data, setData] = useState<any>(null);
@@ -99,7 +102,7 @@ export default function DevelopersTable({
         onConfirm={(id) => handleDelete(id)}
       />
       <div className="w-full rounded-xl border bg-white overflow-x-hidden">
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto overflow-y-visible">
           <table className="w-full text-sm">
             {/* TABLE HEADER */}
             <thead className="bg-[#f3f6ff] text-left text-gray-700">
@@ -114,7 +117,6 @@ export default function DevelopersTable({
 
             <tbody className="divide-y">
               {developers?.map((row, index) => {
-                const isLastTwo = index >= developers?.length - 2;
 
                 return (
                   <tr key={row?._id} className="hover:bg-gray-50">
@@ -147,20 +149,34 @@ export default function DevelopersTable({
                         className="relative col-span-2 flex justify-end"
                       >
                         <button
-                          onClick={() =>
-                            setOpenMenuId(openMenuId === row?._id ? null : row?._id)
-                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setMenuPosition({
+                              top: rect.bottom + 8,
+                              left: rect.right - 144,
+                            });
+
+                            setOpenMenuId(openMenuId === row?._id ? null : row?._id);
+                          }}
                           className="rounded-full bg-gray-100 p-2"
                         >
                           <EllipsisVertical size={16} />
                         </button>
 
-                        {openMenuId === row?._id && (
+                        {openMenuId === row?._id && menuPosition && (
                           <div
-                            className={`absolute right-0 z-10 w-36 rounded-lg border bg-white shadow ${isLastTwo ? "bottom-8" : "top-8"}`}
+                            className="fixed z-[9999] w-36 rounded-lg border bg-white shadow"
+                            style={{
+                              top: menuPosition.top,
+                              left: menuPosition.left,
+                            }}
+                            onClick={(e) => e.stopPropagation()}
                           >
+
                             <button
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setOpenMenuId(null);
                                 setData(row);
                                 setMode("edit");
@@ -171,7 +187,8 @@ export default function DevelopersTable({
                               Edit
                             </button>
                             <button
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setOpenMenuId(null);
                                 setData(row);
                                 setMode("view");
@@ -184,7 +201,8 @@ export default function DevelopersTable({
                               Veiw
                             </button>
                             <button
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setOpenMenuId(null);
                                 setDeleteId(row._id);
                                 setIsDeleteOpen(true);

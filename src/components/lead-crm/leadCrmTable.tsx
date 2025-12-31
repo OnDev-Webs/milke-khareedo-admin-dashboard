@@ -75,6 +75,11 @@ export default function LeadCRMTable({
   const [deleteLeadId, setDeleteLeadId] = useState<string | null>(null);
   const [mode, setMode] = useState<SheetMode>("view");
   const actionMenuRef = useRef<HTMLDivElement | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -151,7 +156,7 @@ export default function LeadCRMTable({
         buttonText="Delete Lead"
       />
       <div className="w-full rounded-xl overflow-hidden border bg-white">
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto overflow-y-visible">
           <table className="w-full text-sm">
             <thead className="bg-[#f3f6ff] text-gray-700">
               <tr>
@@ -223,21 +228,33 @@ export default function LeadCRMTable({
                         className="relative col-span-2 flex justify-end"
                       >
                         <button
-                          onClick={() =>
-                            setOpenMenuId(openMenuId === row._id ? null : row._id)
-                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setMenuPosition({
+                              top: rect.bottom + 8,
+                              left: rect.right - 144,
+                            });
+                            setOpenMenuId(openMenuId === row._id ? null : row._id);
+                          }}
                           className="rounded-full bg-gray-100 p-2"
                         >
                           <EllipsisVertical size={16} />
                         </button>
 
-                        {openMenuId === row._id && (
+                        {openMenuId === row._id && menuPosition && (
                           <div
-                            className={`absolute right-0 z-10 w-36 rounded-lg overflow-hidden border bg-white shadow ${isLastTwo ? "bottom-8" : "top-8"
-                              }`}
-                          >
+                            className="fixed z-[9999] w-36 rounded-lg overflow-hidden border bg-white shadow"
+                            style={{
+                              top: menuPosition.top,
+                              left: menuPosition.left,
+                            }}
+                            onClick={(e) => e.stopPropagation()}>
+
                             <button
-                              onClick={() => handleViewLead(row._id)}
+                              onClick={(e) =>{ 
+                                 e.stopPropagation();
+                                handleViewLead(row._id)}}
                               className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
                             
                         `}
@@ -245,7 +262,9 @@ export default function LeadCRMTable({
                               View
                             </button>
                             <button
-                              onClick={() => handleDeleteClick(row._id)}
+                              onClick={(e) => {
+                                 e.stopPropagation();
+                                handleDeleteClick(row._id)}}
                               className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 text-red-600`}
                             >
                               Delete

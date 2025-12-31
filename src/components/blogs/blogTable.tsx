@@ -51,6 +51,11 @@ export default function BlogTable({
   const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
   const [deleteBlogId, setDeleteBlogId] = useState<string | null>(null);
   const actionMenuRef = useRef<HTMLDivElement | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -119,16 +124,15 @@ export default function BlogTable({
         buttonText="Delete Blog"
       />
       <div className="w-full rounded-xl overflow-hidden border bg-white">
-        <div className="overflow-x-auto">
+        <div className="relative overflow-visible">
           <table className="w-full text-sm">
             <thead className="bg-[#f3f6ff] text-gray-700">
               <tr>
                 {headers.map((header) => (
                   <th
                     key={header.key}
-                    className={`px-4 py-3 text-sm font-bold ${header.minW} ${
-                      header.key === "actions" ? "text-center" : "text-left"
-                    }`}
+                    className={`px-4 py-3 text-sm font-bold ${header.minW} ${header.key === "actions" ? "text-center" : "text-left"
+                      }`}
                   >
                     {header.label}
                   </th>
@@ -140,7 +144,7 @@ export default function BlogTable({
               {blogs.map((row, index) => {
 
                 return (
-                  <tr key={row._id} className="hover:bg-gray-50">
+                  <tr key={row._id} className="relative hover:bg-gray-50" style={{ zIndex: openMenuId === row._id ? 50 : 1 }}>
                     <td className="px-4 py-3">
                       <span className="font-semibold text-gray-800">
                         {row.title || "N/A"}
@@ -183,44 +187,66 @@ export default function BlogTable({
                         className="relative col-span-2 flex justify-end"
                       >
                         <button
-                          onClick={() =>
-                            setOpenMenuId(openMenuId === row._id ? null : row._id)
-                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const rect = e.currentTarget.getBoundingClientRect();
+
+                            setMenuPosition({
+                              top: rect.bottom + 8,
+                              left: rect.right - 144,
+                            });
+
+                            setOpenMenuId(openMenuId === row._id ? null : row._id);
+                          }}
                           className="rounded-full bg-gray-100 p-2"
                         >
                           <EllipsisVertical size={16} />
                         </button>
 
-                        {openMenuId === row._id && (
+
+                        {openMenuId === row._id && menuPosition && (
                           <div
-                            className={`absolute right-0 z-50 w-36 rounded-lg overflow-hidden border bg-white shadow`}
+                            className="fixed z-[9999] w-36 rounded-lg overflow-hidden border bg-white shadow"
+                            style={{
+                              top: menuPosition.top,
+                              left: menuPosition.left,
+                            }}
+                            onClick={(e) => e.stopPropagation()}
                           >
                             <button
-                              onClick={() => {
-                                router.push(`/blogs/${row._id}`);
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/blogs/${openMenuId}`);
                                 setOpenMenuId(null);
                               }}
                               className="block w-full px-4 py-2 text-left text-xs hover:bg-gray-50"
                             >
                               View
                             </button>
+
                             <button
-                              onClick={() => {
-                                router.push(`/blogs/${row._id}/edit`);
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/blogs/${openMenuId}/edit`);
                                 setOpenMenuId(null);
                               }}
                               className="block w-full px-4 py-2 text-left text-xs hover:bg-gray-50"
                             >
                               Edit
                             </button>
+
                             <button
-                              onClick={() => handleDeleteClick(row._id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteClick(openMenuId)
+                              }}
                               className="block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 text-red-600"
                             >
                               Delete
                             </button>
                           </div>
                         )}
+
                       </div>
                     </td>
                   </tr>
@@ -244,11 +270,10 @@ export default function BlogTable({
             <button
               key={pageNum}
               onClick={() => onPageChange(pageNum)}
-              className={`rounded-full border px-3 py-1 ${
-                currentPage === pageNum
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "hover:bg-gray-50"
-              }`}
+              className={`rounded-full border px-3 py-1 ${currentPage === pageNum
+                ? "bg-primary text-primary-foreground border-primary"
+                : "hover:bg-gray-50"
+                }`}
             >
               {pageNum}
             </button>

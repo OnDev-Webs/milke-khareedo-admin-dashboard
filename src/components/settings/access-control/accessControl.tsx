@@ -7,26 +7,31 @@ import { useRouter } from "next/navigation";
 import DeletePopUp from "@/components/custom/popups/delete";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { deleteRole, fetchRoles } from "@/lib/features/role/roleApi";
+import { fetchUsers } from "@/lib/features/user/userApi";
 
 export default function AccessControl() {
   const dispatch = useAppDispatch();
+  const { users } = useAppSelector((state) => state.user);
   const router = useRouter();
 
   const { roles, loading } = useAppSelector((state) => state.roles);
 
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
+  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteRoleId, setDeleteRoleId] = useState<string | null>(null);
 
   /* ================= FETCH ROLES ================= */
   useEffect(() => {
     dispatch(fetchRoles());
+    dispatch(fetchUsers());
   }, [dispatch]);
+
 
   return (
     <div className="bg-white">
-      <AccessControlSheet open={open} setOpen={setOpen} />
+      <AccessControlSheet open={open} setOpen={setOpen} roleId={selectedRoleId} />
 
       <DeletePopUp
         open={isDeleteOpen}
@@ -90,13 +95,41 @@ export default function AccessControl() {
             </div>
 
             <div className="col-span-5">
-              <button
-                type="button"
-                className="rounded-lg border px-4 py-1.5 text-xs font-medium text-gray-600"
-                onClick={() => setOpen(true)}
-              >
-                + Assign Employees
-              </button>
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-2">
+                  {users
+                    .filter((u) => {
+                      if (!u.role) return false;
+
+                      if (typeof u.role === "string") {
+                        return u.role === role._id;
+                      }
+
+                      return u.role._id === role._id;
+                    })
+                    .slice(0, 4)
+                    .map((u) => (
+                      <img
+                        key={u._id}
+                        src={u.profileImage || "/1.png"}
+                        className="h-6 w-6 rounded-full border"
+                        title={`${u.firstName} ${u.lastName}`}
+                      />
+                    ))}
+                </div>
+
+                <button
+                  onClick={() => {
+                    setSelectedRoleId(role._id);
+                    setOpen(true);
+                  }}
+                  className="rounded-lg border px-3 py-1 text-xs"
+                >
+                  + Assign Employees
+                </button>
+              </div>
+
+
             </div>
 
             <div className="relative col-span-2 flex justify-end">

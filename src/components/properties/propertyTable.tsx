@@ -38,6 +38,11 @@ export default function PropertiesTable({
   const [openMenuId, setOpenMenuId] = useState<number | string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+
 
   const actionMenuRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
@@ -82,7 +87,7 @@ export default function PropertiesTable({
       />
 
       <div className="w-full rounded-xl border bg-white overflow-x-hidden">
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto overflow-y-visible">
           <table className="w-full text-sm">
             <thead className="bg-[#f3f6ff]">
               <tr>
@@ -97,8 +102,6 @@ export default function PropertiesTable({
 
             <tbody className="divide-y">
               {properties.map((row, index) => {
-                const isLastTwo = index >= properties.length - 2;
-
                 return (
                   <tr key={row._id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
@@ -123,8 +126,8 @@ export default function PropertiesTable({
                     <td className="px-4 py-3 text-center">
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-semibold ${row.isStatus
-                            ? "bg-green-200 text-green-700"
-                            : "bg-red-200 text-red-700"
+                          ? "bg-green-200 text-green-700"
+                          : "bg-red-200 text-red-700"
                           }`}
                       >
                         <Dot className="inline" />
@@ -138,45 +141,58 @@ export default function PropertiesTable({
                         className="flex justify-end"
                       >
                         <button
-                          onClick={() =>
-                            setOpenMenuId(
-                              openMenuId === row._id ? null : row._id
-                            )
-                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+
+                            const rect = e.currentTarget.getBoundingClientRect();
+
+                            setMenuPosition({
+                              top: rect.bottom + 8,
+                              left: rect.right - 144,
+                            });
+
+                            setOpenMenuId(openMenuId === row._id ? null : row._id);
+                          }}
                           className="rounded-full bg-gray-100 p-2"
                         >
                           <EllipsisVertical size={16} />
                         </button>
 
-                        {openMenuId === row._id && (
+                        {openMenuId === row._id && menuPosition && (
                           <div
-                            className={`absolute right-0 z-50 w-36 rounded-lg border bg-white shadow ${isLastTwo ? "bottom-8" : "top-8"
-                              }`}
-                          >
+                            className="fixed z-[9999] w-36 rounded-lg border bg-white shadow"
+                            style={{
+                              top: menuPosition.top,
+                              left: menuPosition.left,
+                            }}
+                            onClick={(e) => e.stopPropagation()}>
                             <button
-                              onClick={() =>
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 router.push(
                                   `/properties/add-property?id=${row._id}&mode=edit`
                                 )
-                              }
+                              }}
                               className="block w-full px-4 py-2 text-left text-xs hover:bg-gray-50"
                             >
                               Edit
                             </button>
 
                             <button
-                              onClick={() =>
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 router.push(
                                   `/properties/add-property?id=${row._id}&mode=view`
                                 )
-                              }
+                              }}
                               className="block w-full px-4 py-2 text-left text-xs hover:bg-gray-50"
                             >
                               View
                             </button>
 
                             <button
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setDeleteId(row._id);
                                 setIsDeleteOpen(true);
                                 setOpenMenuId(null);
