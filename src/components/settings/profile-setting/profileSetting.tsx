@@ -5,6 +5,9 @@ import { useRef, useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { getAdminProfile, updateAdminProfile } from "@/lib/features/auth/adminAuthApi";
 import { AppDispatch } from "@/lib/store/store";
+import { LogOut, Mail, PhoneCallIcon } from "lucide-react";
+import mail from "@/assets/mail.png"
+import call from "@/assets/call.png"
 
 function Field({
   label,
@@ -33,15 +36,17 @@ function Field({
 export default function ProfileSettings() {
   const dispatch = useAppDispatch<AppDispatch>();
   const fileRef = useRef<HTMLInputElement>(null);
-  
-  const { 
-    firstName, 
-    lastName, 
-    email, 
-    phoneNumber, 
+
+  const {
+    firstName,
+    lastName,
+    email,
+    phoneNumber,
+    countryCode,
     profileImage,
     profileLoading,
-    profileError 
+    role,
+    profileError
   } = useAppSelector((state) => state.auth);
 
   const [preview, setPreview] = useState<string>(homy.src);
@@ -110,23 +115,23 @@ export default function ProfileSettings() {
 
     try {
       const updatePayload: { firstname?: string; profileImage?: File } = {};
-      
+
       if (formData.firstName) {
         updatePayload.firstname = formData.firstName;
       }
-      
+
       if (selectedImage) {
         updatePayload.profileImage = selectedImage;
       }
 
       await dispatch(updateAdminProfile(updatePayload)).unwrap();
-      
+
       // Re-fetch profile to get updated data
       await dispatch(getAdminProfile()).unwrap();
-      
+
       setSuccessMessage("Profile updated successfully!");
       setSelectedImage(null);
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => {
         setSuccessMessage(null);
@@ -147,7 +152,7 @@ export default function ProfileSettings() {
       phoneNumber: phoneNumber || "",
     });
     setSelectedImage(null);
-    
+
     // Reset preview to original image
     if (profileImage && profileImage.trim() !== "") {
       setPreview(profileImage);
@@ -157,8 +162,108 @@ export default function ProfileSettings() {
   };
 
   return (
-    <div className="bg-white">
-      <div className="mx-auto w-full">
+    <div className="bg-[#F5F5FA] md:bg-white">
+
+      {/* ================= MOBILE VIEW ================= */}
+      <div className="md:hidden py-4">
+        <h2 className="mb-4 text-lg text-center font-semibold text-gray-900">
+          Setting
+        </h2>
+
+        <div className="bg-white rounded-xl border p-4">
+
+          {/* PROFILE IMAGE */}
+          <div className="flex justify-center my-2">
+            <div className="relative h-28 w-28 rounded-md overflow-hidden bg-gray-200">
+              <Image
+                src={preview}
+                alt="Profile"
+                fill
+                className="object-cover"
+              />
+            </div>
+          </div>
+
+          {/* PROFILE TITLE */}
+          <p className="mt-3 text-[20px] font-bold text-[#000000] text-left">
+            Profile
+          </p>
+
+          <div className="mt-3">
+            <p className="text-[14px] font-medium text-[#929292]">Full Name</p>
+            <p className="text-[16px] text-black">
+              {firstName} {lastName}
+            </p>
+          </div>
+
+
+          {/* PHONE */}
+          <div className="mt-3 flex items-center justify-between">
+            <div>
+              <p className="text-[14px] font-medium text-[#929292]">Phone Number</p>
+              <p className="text-[16px] text-black">
+                {countryCode} {phoneNumber}
+              </p>
+            </div>
+
+            {phoneNumber && (
+              <a
+                href={`tel:${countryCode}${phoneNumber}`}
+                className="h-9 w-9 flex items-center justify-center rounded-full bg-[#F5F5FA]"
+              >
+                <img
+                  src={call.src}
+                  alt="notification"
+                  width={16}
+                  height={16}
+                />
+              </a>
+            )}
+          </div>
+
+          {/* EMAIL */}
+          <div className="mt-3 flex items-center justify-between">
+            <div className="pr-2">
+              <p className="text-[14px] font-medium text-[#929292]">Email</p>
+              <p className="text-[16px] text-black break-all">
+                {email}
+              </p>
+            </div>
+
+            <a
+              href={`mailto:${email}`}
+              className="h-9 w-9 flex items-center justify-center rounded-full bg-[#F5F5FA]"
+            >
+              <img
+                  src={mail.src}
+                  alt="notification"
+                  width={16}
+                  height={16}
+                />
+            </a>
+          </div>
+
+          {/* ROLE */}
+          <div className="mt-3">
+            <p className="text-[14px] font-medium text-[#929292]">Role</p>
+            <p className="text-[16px] text-black">
+              {role?.name || "Admin"}
+            </p>
+          </div>
+
+        </div>
+
+
+        {/* LOGOUT */}
+        <button className="mt-10 w-full flex items-center justify-center gap-2 rounded-lg bg-[#CA111A] py-3 text-sm font-semibold text-white">
+          Logout
+          <LogOut size={16} />
+        </button>
+
+      </div>
+
+      {/* ================= DESKTOP VIEW ================= */}
+      <div className="hidden md:block mx-auto w-full">
         <h2 className="mb-6 text-lg font-semibold text-gray-900">
           Edit General Setting
         </h2>

@@ -1,14 +1,15 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Clock, Phone, MessageCircle,CheckCircle2, Calendar, User,} from "lucide-react";
+import { ArrowLeft, Clock, Phone, MessageCircle, CheckCircle2, Calendar, User, AlertCircle, } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { fetchLeadById, updateLeadRemark,createLeadActivity, updateLeadStatus,} from "@/lib/features/lead-crm/leadcrmApi";
-import {Sheet, SheetContent, SheetTitle,} from "@/components/ui/sheet";
-import {Dialog,DialogContent,} from "@/components/ui/dialog";
+import { fetchLeadById, updateLeadRemark, createLeadActivity, updateLeadStatus, } from "@/lib/features/lead-crm/leadcrmApi";
+import { Sheet, SheetContent, SheetTitle, } from "@/components/ui/sheet";
+import { Dialog, DialogContent, } from "@/components/ui/dialog";
 import Image from "next/image";
 import wp from "@/assets/wp.png"
+import { cn } from "@/lib/utils";
 
 const statusOptions = [
     { label: "Lead Received", value: "lead_received" },
@@ -18,15 +19,17 @@ const statusOptions = [
     { label: "Rejected", value: "rejected" },
 ];
 
+const MONTHS = [
+    "January", "February", "March", "April",
+    "May", "June", "July", "August",
+    "September", "October", "November", "December"
+];
+
 export default function LeadDetailsMobilePage() {
     const { id } = useParams();
     const router = useRouter();
     const dispatch = useAppDispatch();
-    const { selected, loadingDetails } = useAppSelector(
-        (state) => state.leadcrm
-    );
-
-    /* ================= STATE ================= */
+    const { selected, loadingDetails } = useAppSelector((state) => state.leadcrm);
     const [isEditingRemark, setIsEditingRemark] = useState(false);
     const [remarkValue, setRemarkValue] = useState("");
     const [isSavingRemark, setIsSavingRemark] = useState(false);
@@ -37,8 +40,39 @@ export default function LeadDetailsMobilePage() {
     const [timePickerOpen, setTimePickerOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
-    
+    const [calendarDate, setCalendarDate] = useState(() => {
+        const d = new Date();
+        d.setDate(1);
+        return d;
+    });
+    const currentMonth = calendarDate.getMonth();
+    const currentYear = calendarDate.getFullYear();
+    const jsFirstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const firstDayOfMonth = (jsFirstDay + 6) % 7;
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const [tempSelectedDate, setTempSelectedDate] = useState<{ day: number; month: number; year: number; } | null>(null);
+    const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const prevMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+    const daysInPrevMonth = new Date(prevMonthYear, prevMonth + 1, 0).getDate();
+    const handlePrevMonth = () => {
+        setCalendarDate(prev => {
+            const d = new Date(prev);
+            d.setMonth(d.getMonth() - 1);
+            return d;
+        });
+    };
 
+    const handleNextMonth = () => {
+        setCalendarDate(prev => {
+            const d = new Date(prev);
+            d.setMonth(d.getMonth() + 1);
+            return d;
+        });
+    };
+    const [hour, setHour] = useState(6);
+    const [minute, setMinute] = useState(0);
+    const [amPm, setAmPm] = useState<"AM" | "PM">("AM");
+    const [mode, setMode] = useState<"hour" | "minute">("hour");
 
     /* ================= FETCH DETAILS ================= */
     useEffect(() => {
@@ -53,7 +87,6 @@ export default function LeadDetailsMobilePage() {
         }
     }, [selected]);
 
-
     const handleSaveRemark = () => {
         if (!id) return;
         setIsSavingRemark(true);
@@ -67,17 +100,37 @@ export default function LeadDetailsMobilePage() {
     };
 
     const handleNextFollowUp = () => {
-        if (!id) return;
+        if (!id || !selectedDate || !selectedTime) return;
+
+        const dateTime = new Date(`${selectedDate} ${selectedTime}`).toISOString();
 
         dispatch(
             createLeadActivity({
                 leadId: id as string,
                 activityType: "follow_up",
-                description: "Follow-up scheduled from mobile.",
+                description: `Follow-up scheduled on ${selectedDate} at ${selectedTime}`,
+                nextFollowUpDate: dateTime,
             })
         ).then(() => {
             dispatch(fetchLeadById(id as string));
+            setFollowUpOpen(false);
         });
+    };
+
+    const formatDate = (dateString: string) => {
+        if (!dateString) return "N/A";
+        try {
+            return new Date(dateString).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+            });
+        } catch {
+            return dateString;
+        }
     };
 
     const formatPhoneNumber = (phone?: string) => {
@@ -86,20 +139,60 @@ export default function LeadDetailsMobilePage() {
     };
 
     const handleCallNow = () => {
-        const phone = formatPhoneNumber(selected?.phoneNumber);
-        if (!phone) return alert("Phone number not available");
+        if (!id || !selected) return;
 
-        window.location.href = `tel:${phone}`;
+        const phone = formatPhoneNumber(selected.phoneNumber);
+        if (!phone) {
+            alert("Phone number not available");
+            return;
+        }
+
+        dispatch(
+            createLeadActivity({
+                leadId: id as string,
+                activityType: "phone_call",
+                description: "Called the lead from mobile.",
+            })
+        )
+            .unwrap()
+            .then(() => {
+                dispatch(fetchLeadById(id as string));
+                window.location.href = `tel:${phone}`;
+            })
+            .catch((err) => {
+                console.error("Phone call activity failed", err);
+                window.location.href = `tel:${phone}`; // fallback
+            });
     };
 
     const handleWhatsApp = () => {
-        const phone = formatPhoneNumber(selected?.phoneNumber);
-        if (!phone) return alert("Phone number not available");
+        if (!id || !selected) return;
 
-        const whatsappNumber = phone.replace(/^\+/, "");
-        window.open(`https://wa.me/${whatsappNumber}`, "_blank");
+        const phone = formatPhoneNumber(selected.phoneNumber);
+        if (!phone) {
+            alert("Phone number not available");
+            return;
+        }
+
+        const whatsappNumber = phone.replace(/^\+/, "").replace(/^0+/, "");
+
+        dispatch(
+            createLeadActivity({
+                leadId: id as string,
+                activityType: "whatsapp",
+                description: "WhatsApp message sent from mobile.",
+            })
+        )
+            .unwrap()
+            .then(() => {
+                dispatch(fetchLeadById(id as string));
+                window.open(`https://wa.me/${whatsappNumber}`, "_blank");
+            })
+            .catch((err) => {
+                console.error("WhatsApp activity failed", err);
+                window.open(`https://wa.me/${whatsappNumber}`, "_blank"); // fallback
+            });
     };
-
 
     const handleUpdateStatus = () => {
         if (!id || !selectedStatus) return;
@@ -121,13 +214,13 @@ export default function LeadDetailsMobilePage() {
         <div className="min-h-screen bg-[#F5F5FA]">
 
             {/* ================= HEADER ================= */}
-            <div className="sticky top-0 bg-white border-b px-4 py-3 z-10">
+            <div className="sticky top-0 bg-[#F5F5FA] px-4 py-3 z-10">
                 <div className="flex items-center justify-between">
                     <button onClick={() => router.back()}>
                         <ArrowLeft size={20} />
                     </button>
 
-                    <div className="text-center flex-1">
+                    <div className="text-center flex-1 mt-6">
                         <p className="text-[15px] font-semibold">
                             {selected.leadName}
                         </p>
@@ -141,13 +234,47 @@ export default function LeadDetailsMobilePage() {
             </div>
 
             {/* ================= CONTENT ================= */}
+
             <div className="p-4 space-y-4">
+                {/* Next Follow Up Banner */}
+                {selected.nextFollowUp && (
+                    <div
+                        className={cn(
+                            "mb-5 rounded-lg border px-4 py-3 text-xs flex items-center gap-2",
+                            selected.nextFollowUp.isOverdue
+                                ? "border-red-300 bg-red-50 text-red-700"
+                                : "border-green-300 bg-green-50 text-green-700"
+                        )}
+                    >
+                        {selected.nextFollowUp.isOverdue ? (
+                            <AlertCircle size={16} className="flex-shrink-0" />
+                        ) : (
+                            <Calendar size={16} className="flex-shrink-0" />
+                        )}
+                        <div className="flex-1">
+                            {selected.nextFollowUp.isOverdue ? (
+                                <span>
+                                    Next Follow up <span className="font-semibold">Overdue</span> on{" "}
+                                    <span className="font-semibold">
+                                        {selected.nextFollowUp.formattedDate || formatDate(selected.nextFollowUp.date)}
+                                    </span>
+                                </span>
+                            ) : (
+                                <span>
+                                    Next Follow up on{" "}
+                                    <span className="font-semibold">
+                                        {selected.nextFollowUp.formattedDate || formatDate(selected.nextFollowUp.date)}
+                                    </span>
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {/* ===== DETAILS TITLE ===== */}
                 <h3 className="text-[16px] font-bold text-[#000000]">
                     Details
                 </h3>
-
                 {/* ===== DETAILS CARD ===== */}
                 <div className="bg-white text-[#929292] rounded-xl border p-4 space-y-4">
                     {/* Phone Number */}
@@ -190,7 +317,6 @@ export default function LeadDetailsMobilePage() {
                         </p>
                     </div>
                 </div>
-
 
                 {/* ===== REMARKS CARD ===== */}
                 <div className="bg-white rounded-xl border p-4">
@@ -248,7 +374,6 @@ export default function LeadDetailsMobilePage() {
 
                 </div>
 
-
                 {/* ===== TIMELINE CARD ===== */}
                 <h3 className="text-[16px] font-bold text-[#000000] mb-3">
                     Timeline
@@ -264,7 +389,7 @@ export default function LeadDetailsMobilePage() {
 
                                     <div className="flex-1">
                                         <p className="text-[11px] text-gray-500 mb-0.5">
-                                            {item.formattedDate || item.activityDate}
+                                            {item.formattedDate || formatDate(item.activityDate)}
                                         </p>
                                         <p className="text-[13px] text-gray-800 leading-snug">
                                             {item.description}
@@ -287,7 +412,7 @@ export default function LeadDetailsMobilePage() {
                     className="rounded-t-2xl p-4">
                     {/* HEADER */}
                     <div className="flex items-center justify-between">
-                        <SheetTitle className="text-[16px] font-semibold">
+                        <SheetTitle className="text-[17px] font-bold text-[#000000]">
                             Edit Remark
                         </SheetTitle>
 
@@ -321,7 +446,7 @@ export default function LeadDetailsMobilePage() {
             <Sheet open={updateStatusOpen} onOpenChange={setUpdateStatusOpen}>
                 <SheetContent side="bottom" className="rounded-t-2xl p-4">
                     <div className="flex items-center justify-between">
-                        <SheetTitle className="text-[16px] font-semibold">
+                        <SheetTitle className="text-[17px] font-bold text-[#000000]">
                             Update Status
                         </SheetTitle>
 
@@ -361,7 +486,7 @@ export default function LeadDetailsMobilePage() {
                 <SheetContent side="bottom" className="rounded-t-2xl p-4">
                     {/* HEADER */}
                     <div className="flex items-center justify-between mb-2">
-                        <SheetTitle className="text-[16px] font-semibold">
+                        <SheetTitle className="text-[17px] font-bold text-[#000000]">
                             Schedule Follow Up
                         </SheetTitle>
 
@@ -386,7 +511,7 @@ export default function LeadDetailsMobilePage() {
                         ].map((item) => (
                             <button
                                 key={item}
-                                className="w-full border px-4 py-3 rounded-lg text-left"
+                                className="w-full border px-4 py-2 rounded-lg text-left bg-[#F5F5FA] text-[#3A59A6]"
                             >
                                 {item}
                             </button>
@@ -394,14 +519,14 @@ export default function LeadDetailsMobilePage() {
                     </div>
 
                     {/* DATE + TIME ROW */}
-                    <div className="flex gap-3 mt-3">
+                    <div className="flex gap-3">
                         {/* DATE */}
                         <button
                             onClick={() => setDatePickerOpen(true)}
                             className="flex-1 border rounded-lg px-4 py-3 text-left"
                         >
-                            <p className="text-[12px] text-gray-500">Date</p>
-                            <p className="text-[14px] font-semibold">
+                            <p className="text-[13px] text-[#3A59A6]">Date</p>
+                            <p className="text-[15px] font-medium">
                                 {selectedDate || "Select date"}
                             </p>
                         </button>
@@ -409,120 +534,247 @@ export default function LeadDetailsMobilePage() {
                         {/* TIME */}
                         <button
                             onClick={() => setTimePickerOpen(true)}
-                            className="flex-1 border rounded-lg px-4 py-3 text-left"
-                        >
-                            <p className="text-[12px] text-gray-500">Time</p>
-                            <p className="text-[14px] font-semibold">
+                            className="flex-1 border rounded-lg px-4 py-3 text-left">
+                            <p className="text-[13px] text-[#3A59A6]">Time</p>
+                            <p className="text-[15px] font-medium">
                                 {selectedTime || "Select time"}
                             </p>
                         </button>
                     </div>
 
                     {/* SAVE */}
-                    <button className="mt-4 w-full bg-black text-white py-3 rounded-xl">
+                    <button
+                        onClick={handleNextFollowUp}
+                        className="mt-4 w-full bg-black text-white py-3 rounded-xl">
                         Save
                     </button>
                 </SheetContent>
             </Sheet>
 
+            {/* date  */}
             <Dialog open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <DialogContent className="max-w-[320px] rounded-xl p-4">
+                    <p className="text-sm font-semibold mb-2">Select Date</p>
 
-                    {/* HEADER */}
-                    <div className="flex justify-between items-center mb-3">
-                        <p className="text-sm font-semibold">Select Date</p>
-                        <button onClick={() => setDatePickerOpen(false)}>✕</button>
+                    <div className="flex items-center justify-between mb-3">
+                        <button onClick={handlePrevMonth} className="bg-[#F3F8FE] px-3 py-0.5 rounded-full">
+                            ‹
+                        </button>
+
+                        <p className="text-[16px] font-semibold">
+                            {MONTHS[currentMonth]} {currentYear}
+                        </p>
+
+                        <button onClick={handleNextMonth} className="bg-[#F3F8FE] px-3 py-0.5 rounded-full">
+                            ›
+                        </button>
                     </div>
 
-                    {/* MONTH */}
-                    <p className="text-center text-sm font-medium mb-2">
-                        January 2025
-                    </p>
+                    {/* DAYS HEADER */}
+                    <div className="grid grid-cols-7 gap-2 text-center text-xs mb-1">
+                        {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(d => (
+                            <span key={d} className="text-gray-400">{d}</span>
+                        ))}
+                    </div>
 
                     {/* DAYS GRID */}
                     <div className="grid grid-cols-7 gap-2 text-center text-sm">
-                        {["S", "M", "T", "W", "T", "F", "S"].map(d => (
-                            <span key={d} className="text-gray-400">{d}</span>
-                        ))}
 
-                        {[...Array(31)].map((_, i) => (
-                            <button
-                                key={i}
-                                onClick={() => {
-                                    setSelectedDate(`${i + 1} Jan 2025`);
-                                    setDatePickerOpen(false);
-                                }}
-                                className="h-8 w-8 rounded-full hover:bg-black hover:text-white"
-                            >
+                        {/* PREV MONTH DULL DAYS */}
+                        {Array.from({ length: firstDayOfMonth }).map((_, i) => {
+                            const day = daysInPrevMonth - firstDayOfMonth + i + 1;
+                            return (
+                                <span
+                                    key={`prev-${i}`}
+                                    className="h-8 w-8 flex items-center justify-center text-gray-300"
+                                >
+                                    {day}
+                                </span>
+                            );
+                        })}
+
+                        {/* CURRENT MONTH DAYS */}
+                        {Array.from({ length: daysInMonth }).map((_, i) => {
+                            const isSelected =
+                                tempSelectedDate?.day === i + 1 &&
+                                tempSelectedDate?.month === currentMonth &&
+                                tempSelectedDate?.year === currentYear;
+
+                            return (
+                                <button
+                                    key={i}
+                                    onClick={() =>
+                                        setTempSelectedDate({
+                                            day: i + 1,
+                                            month: currentMonth,
+                                            year: currentYear,
+                                        })
+                                    }
+                                    className={`h-8 w-8 rounded-md
+                                        ${isSelected
+                                            ? "bg-black text-white"
+                                            : "hover:bg-black hover:text-white"
+                                        }`}
+                                >
+                                    {i + 1}
+                                </button>
+                            );
+                        })}
+
+                        {/* NEXT MONTH DULL DAYS */}
+                        {Array.from({
+                            length:
+                                (7 - ((firstDayOfMonth + daysInMonth) % 7)) % 7,
+                        }).map((_, i) => (
+                            <span key={`next-${i}`} className="h-8 w-8 flex items-center justify-center text-gray-300">
                                 {i + 1}
-                            </button>
+                            </span>
                         ))}
+                    </div>
+
+                    {/* FOOTER BUTTONS */}
+                    <div className="flex gap-3 mt-4">
+                        <button onClick={() => setDatePickerOpen(false)} className="flex-1 bg-black text-white py-2 rounded-lg">
+                            Cancel
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                if (!tempSelectedDate) return;
+
+                                setSelectedDate(
+                                    `${tempSelectedDate.day} ${MONTHS[tempSelectedDate.month]} ${tempSelectedDate.year}`
+                                );
+                                setDatePickerOpen(false);
+                            }}
+                            className="flex-1 bg-black text-white py-2 rounded-lg">
+                            OK
+                        </button>
                     </div>
                 </DialogContent>
             </Dialog>
 
+            {/* time  */}
             <Dialog open={timePickerOpen} onOpenChange={setTimePickerOpen}>
-                <DialogContent className="max-w-[300px] rounded-xl p-4">
-
+                <DialogContent className="max-w-[320px] rounded-xl p-4">
                     {/* HEADER */}
-                    <div className="flex justify-between items-center mb-3">
-                        <p className="text-sm font-semibold">Select Time</p>
-                        <button onClick={() => setTimePickerOpen(false)}>✕</button>
-                    </div>
+                    <p className="text-sm font-semibold mb-3 text-center">Select Time</p>
 
-                    {/* WATCH UI */}
-                    <div className="flex justify-center gap-4">
-
-                        {/* HOURS */}
-                        <div className="h-40 overflow-y-scroll">
-                            {[...Array(12)].map((_, i) => (
-                                <button
-                                    key={i}
-                                    className="block py-2 px-4 text-sm hover:bg-black hover:text-white rounded"
-                                    onClick={() => setSelectedTime(`${i + 1}:00 AM`)}
-                                >
-                                    {i + 1}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* MINUTES */}
-                        <div className="h-40 overflow-y-scroll">
-                            {["00", "15", "30", "45"].map(m => (
-                                <button
-                                    key={m}
-                                    className="block py-2 px-4 text-sm hover:bg-black hover:text-white rounded"
-                                    onClick={() => setSelectedTime(`6:${m} AM`)}
-                                >
-                                    {m}
-                                </button>
-                            ))}
-                        </div>
+                    <div className="flex justify-between bg-[#F5F5FA] p-4 gap-2">
+                        {/* TIME DISPLAY */}
+                        <p className="text-center text-[40px] font-bold flex justify-center gap-1">
+                            <button
+                                onClick={() => setMode("hour")}
+                                className={`px-1 rounded ${mode === "hour" ? "text-black" : "text-gray-400"
+                                    }`}
+                            >
+                                {hour}
+                            </button>
+                            :
+                            <button
+                                onClick={() => setMode("minute")}
+                                className={`px-1 rounded ${mode === "minute" ? "text-black" : "text-gray-400"
+                                    }`}
+                            >
+                                {minute.toString().padStart(2, "0")}
+                            </button>
+                        </p>
 
                         {/* AM / PM */}
-                        <div className="flex flex-col gap-2">
-                            <button
-                                onClick={() => setSelectedTime(prev => prev?.replace("PM", "AM") || "6:00 AM")}
-                                className="px-4 py-2 border rounded"
-                            >
-                                AM
-                            </button>
-                            <button
-                                onClick={() => setSelectedTime(prev => prev?.replace("AM", "PM") || "6:00 PM")}
-                                className="px-4 py-2 border rounded"
-                            >
-                                PM
-                            </button>
+                        <div className="flex justify-center gap-2 mt-4">
+                            {["AM", "PM"].map((v) => (
+                                <button
+                                    key={v}
+                                    onClick={() => setAmPm(v as "AM" | "PM")}
+                                    className={`h-8 min-w-[60px] rounded-full border text-sm font-medium transition
+                                        ${amPm === v
+                                            ? "border-[#3A59A6] text-[#3A59A6] bg-white"
+                                            : "border-gray-300 text-black bg-white"
+                                        }`}>
+                                    {v}
+                                </button>
+                            ))}
                         </div>
                     </div>
 
-                    {/* SAVE */}
-                    <button
-                        onClick={() => setTimePickerOpen(false)}
-                        className="mt-4 w-full bg-black text-white py-2 rounded-lg"
-                    >
-                        Save
-                    </button>
+                    <div className="border border-[#F1F3F7]"></div>
+
+                    {/* CLOCK */}
+                    <div className="relative mx-auto h-56 w-56 rounded-full bg-[#F5F5FA] flex items-center justify-center">
+
+                        {/* CENTER DOT */}
+                        <div className="absolute h-2 w-2 bg-black rounded-full z-20" />
+
+                        {/* HAND */}
+                        <div
+                            className="absolute bg-black rounded-full transition-transform duration-200"
+                            style={{
+                                width: "4px",
+                                height: "90px",
+                                bottom: "50%",
+                                transformOrigin: "bottom center",
+                                transform: `rotate(${mode === "hour"
+                                    ? (hour % 12) * 30
+                                    : minute * 6
+                                    }deg)`
+                            }}
+                        />
+
+                        {/* NUMBERS */}
+                        {[...Array(12)].map((_, i) => {
+                            const value =
+                                mode === "hour"
+                                    ? i === 0 ? 12 : i
+                                    : i * 5;
+
+                            const angle = (i * 30 - 90) * (Math.PI / 180);
+                            const x = 90 * Math.cos(angle);
+                            const y = 90 * Math.sin(angle);
+
+                            const isActive =
+                                mode === "hour"
+                                    ? value === hour
+                                    : value === minute;
+
+                            return (
+                                <button
+                                    key={i}
+                                    onClick={() => {
+                                        if (mode === "hour") {
+                                            setHour(value);
+                                            setMode("minute");
+                                        } else {
+                                            setMinute(value);
+                                        }
+                                    }}
+                                    className={`absolute h-8 w-8 rounded-full text-sm flex items-center justify-center transition
+                                    ${isActive
+                                            ? "bg-black text-white"
+                                            : "hover:bg-black hover:text-white"
+                                        }`}
+                                    style={{ transform: `translate(${x}px, ${y}px)` }}>
+                                    {value.toString().padStart(2, "0")}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* FOOTER */}
+                    <div className="flex gap-3 mt-4">
+                        <button onClick={() => setTimePickerOpen(false)} className="flex-1 bg-black text-white py-2 rounded-lg">
+                            Cancel
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                setSelectedTime(`${hour}:${minute.toString().padStart(2, "0")} ${amPm}`);
+                                setTimePickerOpen(false);
+                            }}
+                            className="flex-1 bg-black text-white py-2 rounded-lg">
+                            OK
+                        </button>
+                    </div>
+
                 </DialogContent>
             </Dialog>
 

@@ -23,8 +23,8 @@ export default function SettingsHeader() {
   }, []);
 
   // Use profile image or default
-  const displayImage = profileImage && profileImage.trim() !== "" 
-    ? profileImage 
+  const displayImage = profileImage && profileImage.trim() !== ""
+    ? profileImage
     : homy.src;
 
   // Get first name or fallback
@@ -58,7 +58,7 @@ export default function SettingsHeader() {
             Hello, {displayName}!
           </h2>
           <p className="text-xl text-gray-200">
-            Welcome to MilkE Khareedo. it's {currentDate}.
+            Welcome to Milke Khareedo. it's {currentDate}.
           </p>
         </div>
       </div>

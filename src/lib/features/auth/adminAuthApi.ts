@@ -18,7 +18,6 @@ export type AdminUser = {
 }
 
 export type AdminProfile = {
-  countryCode?: string;
   isPhoneVerified?: boolean;
   _id: string;
   name: string;
@@ -30,6 +29,7 @@ export type AdminProfile = {
   city?: string;
   country?: string;
   phoneNumber?: string;
+  countryCode?: string;
   pincode?: string;
   state?: string;
   profileImage?: string | null;

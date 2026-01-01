@@ -31,6 +31,7 @@ export interface IAdmin {
   token: string;
   phone?: string;
   phoneNumber?: string;
+  countryCode? : string;
   profileImage?: string | null;
   firstName?: string;
   lastName?: string;
@@ -151,6 +152,7 @@ const authSlice = createSlice({
         state.firstName = action.payload.firstName || "";
         state.lastName = action.payload.lastName || "";
         state.phoneNumber = action.payload.phoneNumber || "";
+        state.countryCode = action.payload.countryCode || "";
         state.phone = action.payload.phoneNumber || state.phone;
       })
       .addCase(getAdminProfile.rejected, (state, action) => {

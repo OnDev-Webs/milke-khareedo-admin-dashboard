@@ -111,12 +111,15 @@ export default function LeadCRM() {
 
   return (
     <div>
-      <CustomTableSearchBar<Lead>
-        data={leads}
-        onSearch={handleSearch}
-        searchKeys={searchKeys}
-        placeholder="Search by user name, email, phone, date, project ID or status"
-      />
+      {/* SEARCH BAR (DESKTOP ONLY) */}
+      <div className="hidden md:block">
+        <CustomTableSearchBar<Lead>
+          data={leads}
+          onSearch={handleSearch}
+          searchKeys={searchKeys}
+          placeholder="Search by user name, email, phone, date, project ID or status"
+        />
+      </div>
 
       <LeadCRMTable
         leads={leads}
