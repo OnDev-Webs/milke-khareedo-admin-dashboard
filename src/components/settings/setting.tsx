@@ -43,10 +43,13 @@ export default function Settings() {
 
   return (
     <div className="h-full overflow-hidden">
-      <SettingsHeader />
+      <div className="hidden md:block">
+        <SettingsHeader />
+      </div>
 
-      <div className="flex border h-full ">
-        <div className="w-1/6 flex flex-col bg-[#F3F6FF] p-4 ">
+
+      <div className="flex md:border h-full ">
+        <div className="hidden md:flex md:w-1/6 flex-col bg-[#F3F6FF] p-4">
           {settingTab.map((tab) => {
             const isActive = tab.id === activeTabId;
 
@@ -55,11 +58,10 @@ export default function Settings() {
                 key={tab.id}
                 onClick={() => setActiveTabId(tab.id)}
                 className={`relative cursor-pointer  flex items-center gap-2 p-4  text-sm font-normal 
-                    ${
-                      isActive
-                        ? "bg-black rounded-lg text-white after:absolute after:right-2 after:w-0.5 after:h-5 after:bg-white after:rounded-xl"
-                        : "text-[#7B7B7B] border-transparent hover:bg-[#F4F8FF]"
-                    }
+                    ${isActive
+                    ? "bg-black rounded-lg text-white after:absolute after:right-2 after:w-0.5 after:h-5 after:bg-white after:rounded-xl"
+                    : "text-[#7B7B7B] border-transparent hover:bg-[#F4F8FF]"
+                  }
                 `}
               >
                 <span className="w-4 h-4 flex items-center justify-center">
@@ -71,8 +73,9 @@ export default function Settings() {
           })}
         </div>
 
-        <div className="p-4 w-5/6">{currentTab?.component}</div>
+        <div className="p-4 w-full md:w-5/6">{currentTab?.component}</div>
       </div>
+      
     </div>
   );
 }

@@ -15,7 +15,6 @@ export const fetchLeads = createAsyncThunk<
         url += `&search=${encodeURIComponent(search.trim())}`;
       }
       const res = await axiosInstance.get(url);
-      console.log("response is :-",res.data);
       return res.data;
     } catch (error: any) {
       return rejectWithValue(
@@ -145,3 +144,68 @@ export const exportLeadsCSV = createAsyncThunk<
   }
 );
 
+
+export type CRMDashboardParams = {
+  dateRange?: "past_24_hours" | "past_7_days" | "past_30_days";
+  sortBy?: "newest_first" | "oldest_first" | "name_asc" | "name_desc";
+  page?: number;
+  limit?: number;
+};
+
+export type CRMDashboardResponse = {
+  success: boolean;
+  message: string;
+  data: {
+    kpis: {
+      leadsReceived: number;
+      leadsContacted: number;
+      leadsContactedPercentage: number;
+      responseTime: string;
+    };
+    todaysFollowUps: any[];
+    leads: any[];
+    pagination: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    };
+  };
+};
+
+/* ================= THUNK ================= */
+
+export const fetchCRMDashboard = createAsyncThunk<
+  CRMDashboardResponse,
+  CRMDashboardParams | void,
+  { rejectValue: string }
+>(
+  "crmDashboard/fetch",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const {
+        dateRange = "past_24_hours",
+        sortBy = "newest_first",
+        page = 1,
+        limit = 10,
+      } = params as CRMDashboardParams;
+
+      const query = new URLSearchParams({
+        dateRange,
+        sortBy,
+        page: String(page),
+        limit: String(limit),
+      }).toString();
+
+      const res = await axiosInstance.get(
+        `/admin/crm-dashboard?${query}`
+      );
+
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch CRM dashboard"
+      );
+    }
+  }
+);

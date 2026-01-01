@@ -1,12 +1,120 @@
 import { useAppSelector } from "@/lib/store/hooks";
 import { RootState } from "@/lib/store/store";
+import { useState } from "react";
+import more from "@/assets/more.png";
+
+type FollowUpItem = {
+  _id: string;
+  clientName: string;
+  phoneNumber: string;
+  profileImage?: string | null;
+  projectName: string;
+  location: string;
+  date: string;
+  dueTime: string;
+  source: string;
+  status: "visited" | "follow_up" | "pending" | "not_visited";
+  createdAt: string;
+  updatedAt: string;
+};
+
+const TEMP_FOLLOW_UPS: FollowUpItem[] = [
+  {
+    _id: "temp-1",
+    clientName: "Rohit Sharma",
+    phoneNumber: "+91 987 654 3210",
+    profileImage: null,
+    projectName: "Av Residency",
+    location: "Surat",
+    date: "01 January, 2026, 10:30 AM",
+    dueTime: "10:30 AM",
+    source: "Surat - Website",
+    status: "follow_up",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    _id: "temp-2",
+    clientName: "Priya Patel",
+    phoneNumber: "+91 901 234 5678",
+    profileImage: null,
+    projectName: "Av Residency",
+    location: "Surat",
+    date: "01 January, 2026, 02:00 PM",
+    dueTime: "02:00 PM",
+    source: "Surat - WhatsApp",
+    status: "visited",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    _id: "temp-3",
+    clientName: "Amit Verma",
+    phoneNumber: "+91 998 112 3344",
+    profileImage: null,
+    projectName: "Green Heights",
+    location: "Ahmedabad",
+    date: "31 December, 2025, 05:15 PM",
+    dueTime: "05:15 PM",
+    source: "Ahmedabad - Call",
+    status: "pending",
+    createdAt: new Date(
+      new Date().setDate(new Date().getDate() - 1)
+    ).toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
 
 
 export default function RecentLeads() {
   const { recentLeads } = useAppSelector((state: RootState) => state.dashboard);
+  const { crmDashboardData } = useAppSelector(
+    (state: RootState) => state.leadcrm
+  );
 
-  return (
-    <section className="h-full">
+  const [followUpFilter, setFollowUpFilter] = useState<
+    "today" | "yesterday" | "month"
+  >("today");
+
+  const followUps: FollowUpItem[] =
+    crmDashboardData?.data?.todaysFollowUps?.length > 0
+      ? crmDashboardData.data.todaysFollowUps
+      : TEMP_FOLLOW_UPS;
+
+
+  const filteredFollowUps = followUps.filter((item: FollowUpItem) => {
+    if (followUpFilter === "today") return true;
+
+    const createdAt = new Date(item.createdAt);
+    const now = new Date();
+
+    if (followUpFilter === "yesterday") {
+      const yesterday = new Date();
+      yesterday.setDate(now.getDate() - 1);
+      return createdAt.toDateString() === yesterday.toDateString();
+    }
+
+    if (followUpFilter === "month") {
+      return (
+        createdAt.getMonth() === now.getMonth() &&
+        createdAt.getFullYear() === now.getFullYear()
+      );
+    }
+
+    return true;
+  });
+
+  const options = [
+    { value: "today", label: `Today’s Follow Ups (${filteredFollowUps.length})` },
+    { value: "yesterday", label: `Yesterday’s Follow Ups (${filteredFollowUps.length})` },
+    { value: "month", label: `This Month’s Follow Ups (${filteredFollowUps.length})` },
+  ];
+
+  const [open, setOpen] = useState(false);
+
+
+  return <>
+    <section className="h-full hidden md:block">
       <div className="h-full rounded-2xl border bg-white px-5 py-4">
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-bold ">Recent Leads</h3>
@@ -72,5 +180,127 @@ export default function RecentLeads() {
         </div>
       </div>
     </section>
-  );
+
+    {/* ================= MOBILE VIEW ================= */}
+    <section className="block md:hidden bg-[#F5F5FA] px-1 pb-8 space-y-3">
+
+      {/* FILTER HEADER */}
+      <div className="relative w-full">
+        {/* LEFT CALENDAR ICON */}
+        <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center z-10">
+          <svg className="h-4 w-4 text-[#2F3A8F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+
+        {/* BUTTON */}
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          className="w-full bg-[#E6EFFF] text-xs font-semibold text-[#2F3A8F]
+               pl-10 pr-10 py-2.5 rounded-lg border border-[#D6DDFF]
+               flex items-center justify-between"
+        >
+          <span className="truncate">
+            {options.find(o => o.value === followUpFilter)?.label}
+          </span>
+
+          {/* RIGHT ARROW */}
+          <svg className="h-4 w-4 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {/* DROPDOWN */}
+        {open && (
+          <div className="absolute left-0 top-full mt-1 w-full bg-white rounded-lg shadow z-50">
+            {options.map(opt => (
+              <div
+                key={opt.value}
+                onClick={() => {
+                  setFollowUpFilter(opt.value as any);
+                  setOpen(false);
+                }}
+                className="px-4 py-2 text-xs text-[#2F3A8F] hover:bg-[#E6EFFF] cursor-pointer"
+              >
+                {opt.label}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+
+      {/* FOLLOW UP LIST */}
+      {filteredFollowUps.map((lead: any) => (
+        <div
+          key={lead._id}
+          className="bg-white rounded-xl p-4 shadow border border-white"
+        >
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-[15px] font-bold text-black">
+                {lead.clientName}
+              </p>
+              <p className="text-[11px] text-[#929292] mt-1">
+                {lead.date}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span
+                className={`text-[10px] px-2 py-1 rounded-full font-semibold
+                  ${lead.status === "visited"
+                    ? "bg-green-100 text-green-700"
+                    : lead.status === "follow_up"
+                      ? "bg-blue-100 text-blue-700"
+                      : lead.status === "pending"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-gray-100 text-gray-700"
+                  }`}
+              >
+                {lead.status.replace("_", " ").toUpperCase()}
+              </span>
+
+              <button className="h-8 w-8 rounded-full bg-[#EEF0FB] flex items-center justify-center">
+                <img
+                  src={more.src}
+                  alt="notification"
+                  width={14}
+                  height={14}
+                />
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-3 space-y-3 text-sm">
+            <div>
+              <p className="text-[12px] text-[#929292]">Phone</p>
+              <p className="text-[13px] text-black">
+                {lead.phoneNumber}
+              </p>
+            </div>
+
+            <div className="flex justify-between">
+              <div>
+                <p className="text-[12px] text-[#929292]">Project</p>
+                <p className="text-[13px] text-black">
+                  {lead.projectName}
+                </p>
+              </div>
+
+              <div className="text-right">
+                <p className="text-[12px] text-[#929292]">Source</p>
+                <p className="text-[13px] text-black">
+                  {lead.source}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </section>
+
+
+  </>
 }

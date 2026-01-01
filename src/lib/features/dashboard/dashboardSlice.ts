@@ -15,6 +15,7 @@ export type RecentLead = {
   phone: string;
   profileImage: string | null;
   projectName: string;
+  status : string;
   amount: string;
   amountValue: number;
   createdAt: string;

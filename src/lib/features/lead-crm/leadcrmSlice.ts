@@ -4,6 +4,7 @@ import {
   fetchLeadById,
   createLeadActivity,
   updateLeadStatus,
+  fetchCRMDashboard,
 } from "./leadcrmApi";
 
 export interface Lead {
@@ -141,6 +142,8 @@ interface LeadCRMState {
   total: number;
   totalPages: number;
   loadingDetails: boolean;
+  crmDashboardLoading: boolean;
+  crmDashboardData: any | null;
 }
 
 const initialState: LeadCRMState = {
@@ -153,6 +156,8 @@ const initialState: LeadCRMState = {
   total: 0,
   totalPages: 0,
   loadingDetails: false,
+  crmDashboardLoading: false,
+  crmDashboardData: null,
 };
 
 const leadcrmSlice = createSlice({
@@ -199,6 +204,20 @@ const leadcrmSlice = createSlice({
       .addCase(updateLeadStatus.fulfilled, (state) => {
         // Status updated successfully, details will be refetched
       });
+
+    builder
+      .addCase(fetchCRMDashboard.pending, (state) => {
+        state.crmDashboardLoading = true;
+      })
+      .addCase(fetchCRMDashboard.fulfilled, (state, action) => {
+        state.crmDashboardLoading = false;
+        state.crmDashboardData = action.payload;
+      })
+      .addCase(fetchCRMDashboard.rejected, (state, action) => {
+        state.crmDashboardLoading = false;
+        state.error = action.payload || "Failed to fetch CRM dashboard";
+      });
+
   },
 });
 

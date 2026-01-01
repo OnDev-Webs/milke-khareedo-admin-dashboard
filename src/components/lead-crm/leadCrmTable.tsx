@@ -16,6 +16,7 @@ import { User } from "lucide-react";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { deleteLead } from "@/lib/features/lead-crm/leadcrmApi";
 import { useRouter } from "next/navigation";
+import more from "@/assets/more.png"
 
 interface LeadCRMTableProps {
   leads: Lead[];
@@ -354,11 +355,11 @@ export default function LeadCRMTable({
         </div>
       </div>
       {/* ================= MOBILE CARD VIEW ================= */}
-      <div className="block lg:hidden space-y-4 p-4 mb-10">
+      <div className="bg-[#F5F5FA] block lg:hidden space-y-4 px-3 pb-4 pt-2 mb-10">
         {leads.map((row) => (
           <div
             key={row._id}
-            className="bg-white border rounded-xl p-4 shadow-sm"
+            className="bg-white border border-white rounded-xl p-4 shadow"
           >
             {/* Top Row */}
             <div className="flex justify-between items-start">
@@ -385,9 +386,14 @@ export default function LeadCRMTable({
                 {/* View button */}
                 <button
                   onClick={() => handleViewLead(row._id)}
-                  className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center"
+                  className="h-8 w-8 rounded-full bg-[#EEF0FB] flex items-center justify-center"
                 >
-                  <MoreHorizontalIcon size={18} />
+                  <img
+                    src={more.src}
+                    alt="notification"
+                    width={14}
+                    height={14}
+                  />
                 </button>
 
               </div>
