@@ -152,7 +152,7 @@ export default function LeadCRMTable({
   };
 
   return (
-    <div className="w-full bg-white">
+    <div className="w-full bg-[#F5F5FA] md:bg-white">
       <LeadCRMSheet
         mode={mode}
         leadId={selectedLeadId}
@@ -359,6 +359,7 @@ export default function LeadCRMTable({
         {leads.map((row) => (
           <div
             key={row._id}
+            onClick={() => handleViewLead(row._id)}
             className="bg-white border border-white rounded-xl p-4 shadow"
           >
             {/* Top Row */}
@@ -395,7 +396,6 @@ export default function LeadCRMTable({
                     height={14}
                   />
                 </button>
-
               </div>
 
             </div>
@@ -412,25 +412,26 @@ export default function LeadCRMTable({
                 </p>
               </div>
 
-              {/* Project ID */}
-              <div className="flex justify-between">
-                <div>
+              <div className="grid grid-cols-[1.5fr_1fr] gap-4">
+                {/* PROJECT ID */}
+                <div className="min-w-0">
                   <p className="text-[12px] font-medium text-[#929292]">
                     Project ID
                   </p>
-                  <p className="text-[13px] text-[#000000]">
+                  <p className="text-[13px] text-[#000000] truncate">
                     {row.projectId || "N/A"}
                   </p>
                 </div>
-                <div>
+
+                {/* SOURCE */}
+                <div className="min-w-0">
                   <p className="text-[12px] font-medium text-[#929292]">
                     Source
                   </p>
-                  <p className="text-[13px] text-[#000000]">
+                  <p className="text-[13px] text-[#000000] truncate">
                     {row.source || "N/A"}
                   </p>
                 </div>
-
               </div>
             </div>
           </div>

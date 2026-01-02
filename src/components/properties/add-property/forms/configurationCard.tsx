@@ -41,6 +41,7 @@ export function ConfigurationCard({
     "3.5 BHK",
     "4 BHK",
     "4.5 BHK",
+    "5 BHK",
     "5.5 BHK",
     "6 BHK",
     "6.5 BHK",

@@ -18,53 +18,6 @@ type FollowUpItem = {
   updatedAt: string;
 };
 
-const TEMP_FOLLOW_UPS: FollowUpItem[] = [
-  {
-    _id: "temp-1",
-    clientName: "Rohit Sharma",
-    phoneNumber: "+91 987 654 3210",
-    profileImage: null,
-    projectName: "Av Residency",
-    location: "Surat",
-    date: "01 January, 2026, 10:30 AM",
-    dueTime: "10:30 AM",
-    source: "Surat - Website",
-    status: "follow_up",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: "temp-2",
-    clientName: "Priya Patel",
-    phoneNumber: "+91 901 234 5678",
-    profileImage: null,
-    projectName: "Av Residency",
-    location: "Surat",
-    date: "01 January, 2026, 02:00 PM",
-    dueTime: "02:00 PM",
-    source: "Surat - WhatsApp",
-    status: "visited",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: "temp-3",
-    clientName: "Amit Verma",
-    phoneNumber: "+91 998 112 3344",
-    profileImage: null,
-    projectName: "Green Heights",
-    location: "Ahmedabad",
-    date: "31 December, 2025, 05:15 PM",
-    dueTime: "05:15 PM",
-    source: "Ahmedabad - Call",
-    status: "pending",
-    createdAt: new Date(
-      new Date().setDate(new Date().getDate() - 1)
-    ).toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
-
 
 export default function RecentLeads() {
   const { recentLeads } = useAppSelector((state: RootState) => state.dashboard);
@@ -77,10 +30,7 @@ export default function RecentLeads() {
   >("today");
 
   const followUps: FollowUpItem[] =
-    crmDashboardData?.data?.todaysFollowUps?.length > 0
-      ? crmDashboardData.data.todaysFollowUps
-      : TEMP_FOLLOW_UPS;
-
+    crmDashboardData?.data?.todaysFollowUps || [];
 
   const filteredFollowUps = followUps.filter((item: FollowUpItem) => {
     if (followUpFilter === "today") return true;
@@ -188,7 +138,7 @@ export default function RecentLeads() {
       <div className="relative w-full">
         {/* LEFT CALENDAR ICON */}
         <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center z-10">
-          <svg className="h-4 w-4 text-[#2F3A8F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <svg className="h-4 w-4 text-[#000000]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
         </div>
@@ -197,7 +147,7 @@ export default function RecentLeads() {
         <button
           type="button"
           onClick={() => setOpen(!open)}
-          className="w-full bg-[#E6EFFF] text-xs font-semibold text-[#2F3A8F]
+          className="w-full bg-[#E6EFFF] text-xs font-semibold text-[#000000]
                pl-10 pr-10 py-2.5 rounded-lg border border-[#D6DDFF]
                flex items-center justify-between"
         >
