@@ -5,7 +5,7 @@ import { useRef, useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { getAdminProfile, updateAdminProfile } from "@/lib/features/auth/adminAuthApi";
 import { AppDispatch } from "@/lib/store/store";
-import { LogOut, Mail, PhoneCallIcon } from "lucide-react";
+import logoutIcon from "@/assets/logoutIcon.png"
 import mail from "@/assets/mail.png"
 import call from "@/assets/call.png"
 
@@ -235,11 +235,11 @@ export default function ProfileSettings() {
               className="h-9 w-9 flex items-center justify-center rounded-full bg-[#F5F5FA]"
             >
               <img
-                  src={mail.src}
-                  alt="notification"
-                  width={16}
-                  height={16}
-                />
+                src={mail.src}
+                alt="notification"
+                width={16}
+                height={16}
+              />
             </a>
           </div>
 
@@ -257,7 +257,12 @@ export default function ProfileSettings() {
         {/* LOGOUT */}
         <button className="mt-10 w-full flex items-center justify-center gap-2 rounded-lg bg-[#CA111A] py-3 text-sm font-semibold text-white">
           Logout
-          <LogOut size={16} />
+          <img
+            src={logoutIcon.src}
+            alt="notification"
+            width={18}
+            height={18}
+          />
         </button>
 
       </div>

@@ -9,23 +9,43 @@ import totalLiveProjectImg from "@/assets/liveproject.png";
 import { useEffect, useState } from "react";
 import { fetchCRMDashboard } from "@/lib/features/lead-crm/leadcrmApi";
 import notification from "@/assets/notification.png"
+import { useRouter } from "next/navigation";
+import { Sheet, SheetContent, SheetTitle } from "../ui/sheet";
 
 
+const DATE_RANGE_OPTIONS = [
+  { label: "Past 24 Hours", value: "past_24_hours" },
+  { label: "Past 7 Days", value: "past_7_days" },
+  { label: "Past 30 Days", value: "past_30_days" },
+];
 
 export default function DashboardKPI() {
   const { overview } = useAppSelector((state: RootState) => state.dashboard);
   const dispatch = useAppDispatch();
+  const router = useRouter();
 
   const [dateRange, setDateRange] = useState<
     "past_24_hours" | "past_7_days" | "past_30_days"
   >("past_24_hours");
+
+  const [tempDateRange, setTempDateRange] = useState<
+    "past_24_hours" | "past_7_days" | "past_30_days"
+  >(dateRange);
+
+  const [dateRangeSheetOpen, setDateRangeSheetOpen] = useState(false);
+
+  useEffect(() => {
+    if (dateRangeSheetOpen) {
+      setTempDateRange(dateRange);
+    }
+  }, [dateRangeSheetOpen, dateRange]);
+
 
   const { crmDashboardLoading, crmDashboardData } = useAppSelector(
     (state: RootState) => state.leadcrm
   );
 
   const kpis = crmDashboardData?.data?.kpis;
-
 
   useEffect(() => {
     dispatch(
@@ -159,30 +179,42 @@ export default function DashboardKPI() {
     </section>
 
     {/* ================= MOBILE UI ================= */}
-    <section className="block md:hidden bg-[#F5F5FA] px-3 pt-3 space-y-4">
+    <section className="block md:hidden bg-[#F5F5FA] px-1 pt-3 space-y-4">
 
       {/* HEADER ROW */}
       <div className="flex items-center gap-2 w-full">
-        <div className="w-4/4">
-          <select
-            value={dateRange}
-            onChange={(e) =>
-              setDateRange(e.target.value as typeof dateRange)
-            }
-            className="w-full text-[13px] font-semibold border border-white rounded-lg px-3 py-3 bg-white"
+        <div className="w-full">
+          <button
+            onClick={() => setDateRangeSheetOpen(true)}
+            className="w-full flex items-center justify-between rounded-lg bg-white px-3 py-3 border text-[14px] font-medium"
           >
-            <option value="past_24_hours">Past 24 Hours</option>
-            <option value="past_7_days">Past 7 Days</option>
-            <option value="past_30_days">Past 30 Days</option>
-          </select>
+            <span>
+              {dateRange === "past_24_hours" && "Past 24 Hours"}
+              {dateRange === "past_7_days" && "Past 7 Days"}
+              {dateRange === "past_30_days" && "Past 30 Days"}
+            </span>
+
+            {/* DROPDOWN ICON */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 text-black"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
         </div>
+
         <div className="w-1/8 flex justify-end">
-          <button className="h-9 w-9 flex items-center justify-center rounded-full bg-white border">
+          <button onClick={() => router.push("/notification")} className="p-2.5 rounded-full border border-white bg-white">
             <img
               src={notification.src}
               alt="notification"
-              width={16}
-              height={16}
+              width={12}
+              height={12}
             />
           </button>
         </div>
@@ -211,6 +243,73 @@ export default function DashboardKPI() {
         </div>
       </div>
     </section>
+
+    <Sheet open={dateRangeSheetOpen} onOpenChange={setDateRangeSheetOpen}>
+      <SheetContent side="bottom" className="rounded-t-2xl p-4">
+
+        {/* HEADER */}
+        <div className="flex items-center justify-between mb-3">
+          <SheetTitle className="text-[17px] font-bold">
+            Date Range Options
+          </SheetTitle>
+
+          <button
+            onClick={() => setDateRangeSheetOpen(false)}
+            className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* OPTIONS */}
+        <div className="space-y-2">
+          {DATE_RANGE_OPTIONS.map(option => (
+            <button
+              key={option.value}
+              onClick={() => setTempDateRange(option.value as any)}
+              className="w-full px-4 py-3 rounded-lg border bg-[#F5F5FA] text-[#3A59A6] text-left text-[16px] font-medium flex items-center justify-between"
+            >
+              <span>
+                {option.label}
+              </span>
+
+              {/* CHECK ICON */}
+              {tempDateRange === option.value && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-[#3A59A6]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              )}
+            </button>
+
+          ))}
+        </div>
+
+        <div className="flex gap-3 mt-4">
+          <button
+            onClick={() => {
+              setDateRange(tempDateRange);
+              setDateRangeSheetOpen(false);
+            }}
+            className="flex-1 bg-black text-white py-3 rounded-lg font-medium"
+          >
+            Save
+          </button>
+        </div>
+
+
+      </SheetContent>
+    </Sheet>
 
   </>
 

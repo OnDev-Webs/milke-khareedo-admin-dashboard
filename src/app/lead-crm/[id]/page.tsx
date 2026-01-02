@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Clock, Phone, MessageCircle, CheckCircle2, Calendar, User, AlertCircle, } from "lucide-react";
+import { ArrowLeft, Clock, Phone, MessageCircle, CheckCircle2, Calendar, User, AlertCircle, Check, ArrowUp, } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchLeadById, updateLeadRemark, createLeadActivity, updateLeadStatus, } from "@/lib/features/lead-crm/leadcrmApi";
@@ -10,6 +10,76 @@ import { Dialog, DialogContent, } from "@/components/ui/dialog";
 import Image from "next/image";
 import wp from "@/assets/wp.png"
 import { cn } from "@/lib/utils";
+
+const buildFollowUpISO = (
+    dateStr: string,
+    timeStr: string
+) => {
+    let year: number, month: number, day: number;
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+        const parts = dateStr.split("-").map(Number);
+        year = parts[0];
+        month = parts[1] - 1; 
+        day = parts[2];
+    }
+    else {
+        const parts = dateStr.split(" ");
+        if (parts.length !== 3) {
+            throw new Error("Invalid date format");
+        }
+
+        day = Number(parts[0]);
+        month = MONTHS.indexOf(parts[1]);
+        year = Number(parts[2]);
+    }
+
+    let [time, period] = timeStr.split(" ");
+    let [hours, minutes] = time.split(":").map(Number);
+
+    if (period === "PM" && hours < 12) hours += 12;
+    if (period === "AM" && hours === 12) hours = 0;
+
+    const date = new Date(
+        year,
+        month,
+        day,
+        hours,
+        minutes,
+        0
+    );
+
+    if (isNaN(date.getTime())) {
+        throw new Error("Invalid Date constructed");
+    }
+
+    return date.toISOString();
+};
+
+type TimelineIconProps = {
+    type: string;
+    className?: string;
+};
+
+function TimelineIcon({ type, className = "" }: TimelineIconProps) {
+    switch (type?.toLowerCase()) {
+        case "phone_call":
+            return <Phone size={18} className={`text-green-600 ${className}`} />;
+        case "whatsapp":
+        case "message":
+            return <MessageCircle size={18} className={`text-green-600 ${className}`} />;
+        case "status_change":
+            return <CheckCircle2 size={18} className={`text-blue-600 ${className}`} />;
+        case "visit":
+            return <Calendar size={18} className={`text-blue-600 ${className}`} />;
+        case "follow_up":
+            return <Clock size={18} className={`text-blue-600 ${className}`} />;
+        case "created":
+            return <ArrowUp size={16} className="text-gray-600" />;
+        default:
+            return <User size={18} className={`text-gray-500 ${className}`} />;
+    }
+}
 
 const statusOptions = [
     { label: "Lead Received", value: "lead_received" },
@@ -73,6 +143,23 @@ export default function LeadDetailsMobilePage() {
     const [minute, setMinute] = useState(0);
     const [amPm, setAmPm] = useState<"AM" | "PM">("AM");
     const [mode, setMode] = useState<"hour" | "minute">("hour");
+    const [selectedOption, setSelectedOption] = useState<string | null>(null);
+
+    const formatDateForBackend = (date: Date) => {
+        return date.toISOString().split("T")[0];
+    };
+
+    const addDays = (days: number) => {
+        const d = new Date();
+        d.setDate(d.getDate() + days);
+        return d;
+    };
+
+    const addMonths = (months: number) => {
+        const d = new Date();
+        d.setMonth(d.getMonth() + months);
+        return d;
+    };
 
     /* ================= FETCH DETAILS ================= */
     useEffect(() => {
@@ -99,16 +186,85 @@ export default function LeadDetailsMobilePage() {
             .finally(() => setIsSavingRemark(false));
     };
 
-    const handleNextFollowUp = () => {
-        if (!id || !selectedDate || !selectedTime) return;
+    const handleQuickOption = (option: string) => {
+        setSelectedOption(option);
+        setDatePickerOpen(false);
+        setTimePickerOpen(false);
 
-        const dateTime = new Date(`${selectedDate} ${selectedTime}`).toISOString();
+        let date: Date | null = null;
+
+        switch (option) {
+            case "Today":
+                date = new Date();
+                setTimePickerOpen(true);
+                break;
+
+            case "Tomorrow":
+                date = addDays(1);
+                setTimePickerOpen(true);
+                break;
+
+            case "3 days from now":
+                date = addDays(3);
+                setTimePickerOpen(true);
+                break;
+
+            case "1 week from now":
+                date = addDays(7);
+                setTimePickerOpen(true);
+                break;
+
+            case "1 month from now":
+                date = addMonths(1);
+                setTimePickerOpen(true);
+                break;
+
+            case "Select custom data and time":
+                setDatePickerOpen(true);
+                setTimePickerOpen(true);
+                return;
+
+            case "No Follow Up":
+                setSelectedDate(null);
+                setSelectedTime(null);
+                return;
+
+            default:
+                return;
+        }
+
+        if (date) {
+            setSelectedDate(formatDateForBackend(date));
+        }
+    };
+
+    const handleNextFollowUp = () => {
+        if (!id) return;
+
+        if (selectedOption === "No Follow Up") {
+            setFollowUpOpen(false);
+            return;
+        }
+
+        if (!selectedDate || !selectedTime) {
+            alert("Please select time");
+            return;
+        }
+
+        let dateTime: string;
+
+        try {
+            dateTime = buildFollowUpISO(selectedDate, selectedTime);
+        } catch (e) {
+            alert("Invalid date or time selected");
+            return;
+        }
 
         dispatch(
             createLeadActivity({
                 leadId: id as string,
                 activityType: "follow_up",
-                description: `Follow-up scheduled on ${selectedDate} at ${selectedTime}`,
+                description: "Follow-up scheduled",
                 nextFollowUpDate: dateTime,
             })
         ).then(() => {
@@ -216,8 +372,24 @@ export default function LeadDetailsMobilePage() {
             {/* ================= HEADER ================= */}
             <div className="sticky top-0 bg-[#F5F5FA] px-4 py-3 z-10">
                 <div className="flex items-center justify-between">
-                    <button onClick={() => router.back()}>
-                        <ArrowLeft size={20} />
+                    <button
+                        onClick={() => window.history.back()}
+                        className="p-2"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 text-black"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M15 19l-7-7 7-7"
+                            />
+                        </svg>
                     </button>
 
                     <div className="text-center flex-1 mt-6">
@@ -234,7 +406,6 @@ export default function LeadDetailsMobilePage() {
             </div>
 
             {/* ================= CONTENT ================= */}
-
             <div className="p-4 space-y-4">
                 {/* Next Follow Up Banner */}
                 {selected.nextFollowUp && (
@@ -276,7 +447,7 @@ export default function LeadDetailsMobilePage() {
                     Details
                 </h3>
                 {/* ===== DETAILS CARD ===== */}
-                <div className="bg-white text-[#929292] rounded-xl border p-4 space-y-4">
+                <div className="bg-white text-[#929292] rounded-xl border-white p-4 space-y-4">
                     {/* Phone Number */}
                     <div>
                         <p className="text-[13px] font-medium text-[#929292]">
@@ -319,7 +490,7 @@ export default function LeadDetailsMobilePage() {
                 </div>
 
                 {/* ===== REMARKS CARD ===== */}
-                <div className="bg-white rounded-xl border p-4">
+                <div className="bg-white rounded-xl border-white p-4">
                     <div className="flex justify-between items-center mb-2">
                         <p className="text-[13px] font-medium text-[#929292]">
                             Remarks
@@ -378,25 +549,43 @@ export default function LeadDetailsMobilePage() {
                 <h3 className="text-[16px] font-bold text-[#000000] mb-3">
                     Timeline
                 </h3>
-                <div className="bg-white rounded-xl border p-4 mb-16">
+                <div className="bg-white rounded-xl border-white p-4 mb-16">
                     {selected.timeline && selected.timeline.length > 0 ? (
-                        <div className="space-y-4">
-                            {selected.timeline.map((item) => (
-                                <div key={item.id} className="flex gap-3">
-                                    <div className="mt-0.5">
-                                        <TimelineIcon type={item.activityType} />
-                                    </div>
+                        <div className="relative space-y-6">
+                            {selected.timeline.map((item, index) => {
+                                const isLast = index === selected.timeline.length - 1;
 
-                                    <div className="flex-1">
-                                        <p className="text-[11px] text-gray-500 mb-0.5">
-                                            {item.formattedDate || formatDate(item.activityDate)}
-                                        </p>
-                                        <p className="text-[13px] text-gray-800 leading-snug">
-                                            {item.description}
-                                        </p>
+                                return (
+                                    <div key={item.id} className="flex gap-4">
+                                        <div className="relative flex flex-col items-center">
+                                            {/* CONTINUOUS LINE */}
+                                            {!isLast && (
+                                                <div
+                                                    className="absolute top-[30px] bottom-[-24px] w-px bg-[#D9D9D9]"
+                                                />
+                                            )}
+
+                                            {/* ICON */}
+                                            <div className="relative z-10 bg-[#F5F5FA] p-2 rounded-full">
+                                                <TimelineIcon
+                                                    type={item.activityType}
+                                                    className="h-5 w-5"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex-1">
+                                            <p className="text-[11px] text-gray-500 mb-0.5">
+                                                {item.formattedDate ||
+                                                    formatDate(item.activityDate)}
+                                            </p>
+                                            <p className="text-[13px] text-gray-800 leading-snug">
+                                                {item.description}
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     ) : (
                         <p className="text-xs text-gray-500">
@@ -492,8 +681,7 @@ export default function LeadDetailsMobilePage() {
 
                         <button
                             onClick={() => setFollowUpOpen(false)}
-                            className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100"
-                        >
+                            className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100">
                             ✕
                         </button>
                     </div>
@@ -506,41 +694,56 @@ export default function LeadDetailsMobilePage() {
                             "3 days from now",
                             "1 week from now",
                             "1 month from now",
-                            "Someday",
+                            "Select custom data and time",
                             "No Follow Up",
                         ].map((item) => (
                             <button
                                 key={item}
-                                className="w-full border px-4 py-2 rounded-lg text-left bg-[#F5F5FA] text-[#3A59A6]"
-                            >
-                                {item}
+                                onClick={() => handleQuickOption(item)}
+                                className={`w-full border px-4 py-2 rounded-lg text-left flex items-center justify-between
+                                    ${item === "No Follow Up"
+                                        ? "bg-[#FAF5F5] text-[#CA111A] border-[#FAF5F5]"
+                                        : "bg-[#F5F5FA] text-[#3A59A6]"
+                                    }`}>
+                                <span>{item}</span>
+                                {selectedOption === item && (
+                                    <Check
+                                        size={18}
+                                        className={
+                                            item === "No Follow Up" ? "text-red-600" : "text-[#3A59A6]"
+                                        }
+                                    />
+                                )}
                             </button>
                         ))}
                     </div>
 
                     {/* DATE + TIME ROW */}
-                    <div className="flex gap-3">
-                        {/* DATE */}
-                        <button
-                            onClick={() => setDatePickerOpen(true)}
-                            className="flex-1 border rounded-lg px-4 py-3 text-left"
-                        >
-                            <p className="text-[13px] text-[#3A59A6]">Date</p>
-                            <p className="text-[15px] font-medium">
-                                {selectedDate || "Select date"}
-                            </p>
-                        </button>
+                    {selectedOption !== "No Follow Up" && (
+                        <div className="flex gap-3">
+                            {/* DATE */}
+                            {selectedOption === "Select custom data and time" && (
+                                <button
+                                    onClick={() => setDatePickerOpen(true)}
+                                    className="flex-1 border rounded-lg px-4 py-3 text-left">
+                                    <p className="text-[13px] text-[#3A59A6]">Date</p>
+                                    <p className="text-[15px] font-medium">
+                                        {selectedDate || "Select date"}
+                                    </p>
+                                </button>
+                            )}
 
-                        {/* TIME */}
-                        <button
-                            onClick={() => setTimePickerOpen(true)}
-                            className="flex-1 border rounded-lg px-4 py-3 text-left">
-                            <p className="text-[13px] text-[#3A59A6]">Time</p>
-                            <p className="text-[15px] font-medium">
-                                {selectedTime || "Select time"}
-                            </p>
-                        </button>
-                    </div>
+                            {/* TIME */}
+                            <button
+                                onClick={() => setTimePickerOpen(true)}
+                                className="flex-1 border rounded-lg px-4 py-3 text-left">
+                                <p className="text-[13px] text-[#3A59A6]">Time</p>
+                                <p className="text-[15px] font-medium">
+                                    {selectedTime || "Select time"}
+                                </p>
+                            </button>
+                        </div>
+                    )}
 
                     {/* SAVE */}
                     <button
@@ -807,43 +1010,4 @@ export default function LeadDetailsMobilePage() {
 
         </div>
     );
-}
-
-/* ================= SMALL COMPONENTS ================= */
-
-function Info({
-    label,
-    value,
-}: {
-    label: string;
-    value?: string | null;
-}) {
-    return (
-        <div>
-            <p className="text-[12px] text-gray-500 font-medium">
-                {label}
-            </p>
-            <p className="text-[13px] text-black font-semibold">
-                {value || "N/A"}
-            </p>
-        </div>
-    );
-}
-
-function TimelineIcon({ type }: { type: string }) {
-    switch (type?.toLowerCase()) {
-        case "phone_call":
-            return <Phone size={14} className="text-green-600" />;
-        case "whatsapp":
-        case "message":
-            return <MessageCircle size={14} className="text-green-600" />;
-        case "status_change":
-            return <CheckCircle2 size={14} className="text-blue-600" />;
-        case "visit":
-            return <Calendar size={14} className="text-blue-600" />;
-        case "follow_up":
-            return <Clock size={14} className="text-blue-600" />;
-        default:
-            return <User size={14} className="text-gray-500" />;
-    }
 }

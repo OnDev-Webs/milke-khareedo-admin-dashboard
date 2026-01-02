@@ -4,7 +4,7 @@ import { Lead, LeadResponse, LeadDetailsResponse } from "./leadcrmSlice";
 
 export const fetchLeads = createAsyncThunk<
   LeadResponse,
-  { page?: number; limit?: number; search?: string | undefined },
+  { page?: number; limit?: number; search?: string | undefined , dateRange?: "past_24_hours" | "past_7_days" | "past_30_days"; },
   { rejectValue: string }
 >(
   "leadcrm/fetchAll",
@@ -144,6 +144,7 @@ export const exportLeadsCSV = createAsyncThunk<
   }
 );
 
+// CRM DASHBOARD 
 
 export type CRMDashboardParams = {
   dateRange?: "past_24_hours" | "past_7_days" | "past_30_days";
@@ -205,6 +206,75 @@ export const fetchCRMDashboard = createAsyncThunk<
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch CRM dashboard"
+      );
+    }
+  }
+);
+
+// notificationTypes
+export type NotificationItem = {
+  _id: string;
+  title: string;
+  message: string;
+  source?: string;
+  timeAgo: string;
+  isRead: boolean;
+  notificationType: string;
+  metadata?: any;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type NotificationGroup = {
+  dateLabel: string; // Today | Yesterday | 12 Sep 2025
+  notifications: NotificationItem[];
+};
+
+export type NotificationResponse = {
+  success: boolean;
+  message: string;
+  data: NotificationGroup[];
+};
+
+
+/* ================= GET NOTIFICATIONS ================= */
+
+export const fetchNotifications = createAsyncThunk<
+  NotificationResponse,
+  void,
+  { rejectValue: string }
+>(
+  "notifications/fetchAll",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get("/admin/notifications");
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch notifications"
+      );
+    }
+  }
+);
+
+/* ================= MARK ALL AS READ ================= */
+
+export const markAllNotificationsAsRead = createAsyncThunk<
+  { success: boolean; message: string; data: { updatedCount: number } },
+  void,
+  { rejectValue: string }
+>(
+  "notifications/markAllRead",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.put(
+        "/admin/notifications/mark-all-read"
+      );
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          "Failed to mark notifications as read"
       );
     }
   }

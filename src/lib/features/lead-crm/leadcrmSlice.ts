@@ -5,6 +5,9 @@ import {
   createLeadActivity,
   updateLeadStatus,
   fetchCRMDashboard,
+  NotificationGroup,
+  fetchNotifications,
+  markAllNotificationsAsRead,
 } from "./leadcrmApi";
 
 export interface Lead {
@@ -144,6 +147,8 @@ interface LeadCRMState {
   loadingDetails: boolean;
   crmDashboardLoading: boolean;
   crmDashboardData: any | null;
+  notifications: NotificationGroup[];
+  notificationLoading: boolean;
 }
 
 const initialState: LeadCRMState = {
@@ -158,6 +163,9 @@ const initialState: LeadCRMState = {
   loadingDetails: false,
   crmDashboardLoading: false,
   crmDashboardData: null,
+
+  notifications: [],
+  notificationLoading: false,
 };
 
 const leadcrmSlice = createSlice({
@@ -217,6 +225,29 @@ const leadcrmSlice = createSlice({
         state.crmDashboardLoading = false;
         state.error = action.payload || "Failed to fetch CRM dashboard";
       });
+
+    /* ================= NOTIFICATIONS ================= */
+
+    builder
+      .addCase(fetchNotifications.pending, (state) => {
+        state.notificationLoading = true;
+      })
+      .addCase(fetchNotifications.fulfilled, (state, action) => {
+        state.notificationLoading = false;
+        state.notifications = action.payload?.data || [];
+      })
+      .addCase(fetchNotifications.rejected, (state, action) => {
+        state.notificationLoading = false;
+        state.error = action.payload || "Failed to fetch notifications";
+      });
+
+    builder.addCase(markAllNotificationsAsRead.fulfilled, (state) => {
+      state.notifications.forEach((group) => {
+        group.notifications.forEach((notification) => {
+          notification.isRead = true;
+        });
+      });
+    });
 
   },
 });

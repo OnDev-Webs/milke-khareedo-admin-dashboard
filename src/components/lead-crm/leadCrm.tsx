@@ -15,7 +15,12 @@ export type HeaderLeadCRM = {
   minW: string;
 };
 
-export default function LeadCRM() {
+export default function LeadCRM({
+  dateRange,
+}: {
+  dateRange: "past_24_hours" | "past_7_days" | "past_30_days";
+}) {
+
   const dispatch = useAppDispatch();
   const { leads, loading, page, limit, total, totalPages } = useAppSelector(
     (state: RootState) => state.leadcrm
@@ -44,16 +49,16 @@ export default function LeadCRM() {
 
   const fetchLeadsData = useCallback(
     (pageNum: number, search?: string) => {
-      const params: { page: number; limit: number; search?: string } = {
-        page: pageNum,
-        limit: 10,
-      };
-      if (search && search.trim() !== "") {
-        params.search = search.trim();
-      }
-      dispatch(fetchLeads(params));
+      dispatch(
+        fetchLeads({
+          page: pageNum,
+          limit: 10,
+          search,
+          dateRange, 
+        })
+      );
     },
-    [dispatch]
+    [dispatch, dateRange]
   );
 
   useEffect(() => {
