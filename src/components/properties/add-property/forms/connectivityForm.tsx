@@ -56,31 +56,31 @@ export default function ConnectivityForm() {
     restaurants: [],
   };
 
+  const projectLocation = watch("location"); 
+
   const [activeCategory, setActiveCategory] =
     useState<ConnectivityCategoryKey>("schools");
 
   const [searchText, setSearchText] = useState("");
 
-  const [inputs, setInputs] = useState<Record<ConnectivityCategoryKey, string>>(
-    {
-      schools: "",
-      hospitals: "",
-      transportation: "",
-      restaurants: "",
-    }
-  );
+  const [inputs, setInputs] = useState<Record<ConnectivityCategoryKey, string>>({
+    schools: "",
+    hospitals: "",
+    transportation: "",
+    restaurants: "",
+  });
 
   const [selectedCoords, setSelectedCoords] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
 
+
   const addItem = (key: ConnectivityCategoryKey) => {
     const name = inputs[key].trim();
     if (!name || !selectedCoords) return;
 
     const current = connectivity[key];
-
     if (current.some((i) => i.name === name)) return;
 
     const newItem: ConnectivityItem = {
@@ -105,39 +105,40 @@ export default function ConnectivityForm() {
     );
   };
 
+
+  const mapCenter = useMemo(() => {
+    if (projectLocation?.latitude && projectLocation?.longitude) {
+      return {
+        lat: projectLocation.latitude,
+        lng: projectLocation.longitude,
+      };
+    }
+    return { lat: 28.6139, lng: 77.209 }; 
+  }, [projectLocation]);
+
+
   const mapMarkers = useMemo(() => {
-    const connectivityMarkers = Object.values(connectivity)
-      .flat()
-      .map((item) => ({
-        lat: item.latitude,
-        lng: item.longitude,
-        title: item.name,
-      }));
+    const categoryMarkers = connectivity[activeCategory].map((item) => ({
+      lat: item.latitude,
+      lng: item.longitude,
+      title: item.name,
+    }));
 
-    const mainLocationMarker = selectedCoords
-      ? [
-        {
-          lat: selectedCoords.latitude,
-          lng: selectedCoords.longitude,
-          title: "Project Location",
-          type: "main",
-        },
-      ]
-      : [];
+    const mainMarker =
+      projectLocation?.latitude && projectLocation?.longitude
+        ? [
+          {
+            lat: projectLocation.latitude,
+            lng: projectLocation.longitude,
+            title: "Project Location",
+            type: "main",
+          },
+        ]
+        : [];
 
-    return [...mainLocationMarker, ...connectivityMarkers];
-  }, [connectivity, selectedCoords]);
+    return [...mainMarker, ...categoryMarkers];
+  }, [connectivity, activeCategory, projectLocation]);
 
-
-  const [mapCenter, setMapCenter] = useState(
-    mapMarkers[0] ?? { lat: 28.6139, lng: 77.209 }
-  );
-
-  const activeConfig = CONNECTIVITY_CATEGORIES.find(
-    (c) => c.key === activeCategory
-  )!;
-
-  const items = connectivity[activeCategory];
 
   async function handleTextSearch() {
     const response = await fetch(
@@ -160,17 +161,26 @@ export default function ConnectivityForm() {
     const location = data?.places?.[0]?.location;
     if (!location) return;
 
-    setMapCenter({
-      lat: location.latitude,
-      lng: location.longitude,
-      title: "",
-    });
+    setValue(
+      "location",
+      {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      },
+      { shouldDirty: true }
+    );
 
     setSelectedCoords({
       latitude: location.latitude,
       longitude: location.longitude,
     });
   }
+
+  const activeConfig = CONNECTIVITY_CATEGORIES.find(
+    (c) => c.key === activeCategory
+  )!;
+
+  const items = connectivity[activeCategory];
 
   return (
     <div className="p-4 space-y-6">
@@ -181,23 +191,22 @@ export default function ConnectivityForm() {
           <GoogleMapComponent
             center={mapCenter}
             markers={mapMarkers}
-            onMapClick={({ lat, lng }) =>
-              setSelectedCoords({
-                latitude: lat,
-                longitude: lng,
-              })
-            }
+            onMapClick={({ lat, lng }) => {
+              setValue(
+                "location",
+                { latitude: lat, longitude: lng },
+                { shouldDirty: true }
+              );
+            }}
           />
+
           <div className="border absolute top-2 left-4 rounded-full bg-white px-4 py-2 text-xs font-medium text-gray-800 shadow-md flex items-center gap-2">
             <input
               type="text"
               placeholder="Search location"
               className="bg-transparent border-none focus:outline-none text-xs"
               value={searchText}
-              onChange={(e) => {
-                const address = e.target.value;
-                setSearchText(address);
-              }}
+              onChange={(e) => setSearchText(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -223,6 +232,7 @@ export default function ConnectivityForm() {
         </div>
       </div>
 
+      {/* TABS */}
       <div className="flex gap-4 border-b">
         {CONNECTIVITY_CATEGORIES.map((cat) => (
           <button
@@ -239,9 +249,10 @@ export default function ConnectivityForm() {
         ))}
       </div>
 
+      {/* INPUT */}
       <fieldset className="rounded-md border bg-white px-3 pt-1 pb-2">
         <legend className="px-1">
-          {activeConfig?.label} <span className="text-red-500">*</span>
+          {activeConfig.label} <span className="text-red-500">*</span>
         </legend>
         <div className="flex items-center gap-2">
           <input
@@ -271,6 +282,7 @@ export default function ConnectivityForm() {
         </div>
       </fieldset>
 
+      {/* CHIPS */}
       {items.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {items.map((item) => (

@@ -37,7 +37,7 @@ export default function AddNewProperty() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const propertyId = searchParams.get("id");
-  const mode = searchParams.get("mode"); 
+  const mode = searchParams.get("mode");
   const isViewMode = mode === "view";
   const isEditMode = mode === "edit";
 
@@ -232,7 +232,17 @@ export default function AddNewProperty() {
       const property = res.payload;
       if (!property) return;
 
-      methods.reset(property);
+      methods.reset({
+        ...property,
+
+        images: property.images?.map((img: any) => img.url) || [],
+
+        relationshipManager: property.relationshipManager?._id || null,
+        leadDistributionAgents: Array.isArray(property.leadDistributionAgents)
+          ? property.leadDistributionAgents.map((a: any) => a._id)
+          : [],
+      });
+
 
       if (property.developer?._id) {
         methods.setValue("developer", property.developer._id);
@@ -246,23 +256,23 @@ export default function AddNewProperty() {
         methods.setValue("configurations", property.configurations);
       }
 
+      // 🔥 SET LAYOUT IMAGES (VERY IMPORTANT)
+      const layoutsData: Record<string, string[]> = {};
+
+      property.configurations?.forEach((config: any) => {
+        config.subConfigurations?.forEach((sub: any) => {
+          const key = `${config.unitType.replace(/\s+/g, "")}_${sub.carpetArea.replace(/\D/g, "")}`;
+
+          layoutsData[key] = sub.layoutPlanImages || [];
+        });
+      });
+
+      methods.setValue("layouts", layoutsData);
+
+
       if (property.connectivity) {
         methods.setValue("connectivity", property.connectivity);
       }
-    });
-  }, [propertyId]);
-
-  useEffect(() => {
-    if (!propertyId) return;
-
-    dispatch(fetchPropertyById(propertyId)).then((res: any) => {
-      const data = res.payload;
-      if (!data) return;
-
-      methods.reset({
-        ...data,
-        images: data.images?.map((img: any) => img.url) || [],
-      });
     });
   }, [propertyId]);
 

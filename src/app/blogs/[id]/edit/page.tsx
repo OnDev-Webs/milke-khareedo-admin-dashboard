@@ -19,6 +19,7 @@ import { fetchBlogById, updateBlog, fetchBlogs } from "@/lib/features/blogs/blog
 import { RootState } from "@/lib/store/store";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import Loader from "@/components/ui/loader";
 
 export default function EditBlogPage() {
   const dispatch = useAppDispatch();
@@ -57,7 +58,7 @@ export default function EditBlogPage() {
         <AppSidebar />
         <SidebarInset className="p-2 bg-[#F5F5FA] overflow-hidden">
           <div className="border rounded-sm bg-background h-full w-full overflow-hidden flex items-center justify-center">
-            <div className="text-gray-500">Loading...</div>
+            <div className="text-gray-500"><Loader size={38}/></div>
           </div>
         </SidebarInset>
       </SidebarProvider>

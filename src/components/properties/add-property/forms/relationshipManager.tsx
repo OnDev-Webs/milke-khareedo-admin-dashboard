@@ -10,6 +10,7 @@ import {
 } from "@/lib/features/role/roleApi";
 import { FiChevronDown } from "react-icons/fi";
 import { useFormContext } from "react-hook-form";
+import Loader from "@/components/ui/loader";
 
 export default function AddRelationshipManagerForm() {
   const dispatch = useAppDispatch();
@@ -88,7 +89,7 @@ export default function AddRelationshipManagerForm() {
 
   return (
     <div className="h-[80vh] bg-white p-6 overflow-y-auto">
-      {loading && <p>Loading...</p>}
+      {loading && <p><Loader size={38}/></p>}
 
       {/* ================= RELATIONSHIP MANAGER ================= */}
       <div className="mb-6 relative" ref={rmRef}>

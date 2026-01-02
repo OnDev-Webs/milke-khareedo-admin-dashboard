@@ -4,6 +4,7 @@ import { Search, X, Check } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchUsers, updateUser } from "@/lib/features/user/userApi";
+import Loader from "@/components/ui/loader";
 
 export default function AssignEmployee({ roleId }: { roleId: string | null }) {
   const dispatch = useAppDispatch();
@@ -85,7 +86,7 @@ export default function AssignEmployee({ roleId }: { roleId: string | null }) {
       <div className="flex-1 min-h-[68vh] overflow-y-auto px-4 py-4">
         {loading ? (
           <p className="text-sm text-gray-500 text-center">
-            Loading users...
+            <Loader size={38}/>
           </p>
         ) : filteredUsers.length === 0 ? (
           <div className="flex h-full items-center justify-center">
@@ -111,7 +112,7 @@ export default function AssignEmployee({ roleId }: { roleId: string | null }) {
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-full bg-gray-300 overflow-hidden">
                       <img
-                        src={user.profileImage || "/1.png"}
+                        src={user.profileImage || "/images/user.jfif"}
                         alt={`${user.firstName} ${user.lastName}`}
                         className="h-full w-full object-cover"
                       />

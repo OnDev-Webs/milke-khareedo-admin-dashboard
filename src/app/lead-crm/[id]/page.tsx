@@ -10,6 +10,7 @@ import { Dialog, DialogContent, } from "@/components/ui/dialog";
 import Image from "next/image";
 import wp from "@/assets/wp.png"
 import { cn } from "@/lib/utils";
+import Loader from "@/components/ui/loader";
 
 const buildFollowUpISO = (
     dateStr: string,
@@ -363,7 +364,7 @@ export default function LeadDetailsMobilePage() {
 
     /* ================= LOADING ================= */
     if (loadingDetails || !selected) {
-        return <div className="p-4">Loading...</div>;
+        return <div className="p-4"><Loader size={38}/></div>;
     }
 
     return (

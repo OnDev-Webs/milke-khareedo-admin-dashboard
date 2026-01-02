@@ -8,6 +8,7 @@ import DeletePopUp from "@/components/custom/popups/delete";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { deleteRole, fetchRoles } from "@/lib/features/role/roleApi";
 import { fetchUsers } from "@/lib/features/user/userApi";
+import Loader from "@/components/ui/loader";
 
 export default function AccessControl() {
   const dispatch = useAppDispatch();
@@ -79,7 +80,7 @@ export default function AccessControl() {
 
         {/* ===== LOADING ===== */}
         {loading && (
-          <p className="text-sm text-gray-500 px-4">Loading roles...</p>
+          <p className="text-sm text-gray-500 px-4"><Loader size={38}/></p>
         )}
 
         {/* ===== ROLES LIST ===== */}
@@ -111,7 +112,7 @@ export default function AccessControl() {
                     .map((u) => (
                       <img
                         key={u._id}
-                        src={u.profileImage || "/1.png"}
+                        src={u.profileImage || "/images/user.jfif"}
                         className="h-6 w-6 rounded-full border"
                         title={`${u.firstName} ${u.lastName}`}
                       />

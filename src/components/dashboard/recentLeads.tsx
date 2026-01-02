@@ -70,7 +70,6 @@ export default function RecentLeads() {
           <h3 className="text-xl font-bold ">Recent Leads</h3>
 
           <div className="flex items-center gap-4  font-medium text-blue-600">
-            <button>Export Data</button>
             <button>View All</button>
           </div>
         </div>

@@ -39,6 +39,9 @@ import {
 import { Input } from "@/components/ui/input";
 import CustomDropdown from "@/components/custom/dropdawn";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import wp from "@/assets/wp.png"
+import Loader from "../ui/loader";
 
 export type SheetMode = "view" | "edit" | "";
 
@@ -290,7 +293,7 @@ export default function LeadCRMSheet({
   const handlePhoneCall = () => {
     if (!leadId || !selected) return;
     const phoneNumber = formatPhoneNumber(selected.phoneNumber);
-    
+
     if (!phoneNumber) {
       alert("Phone number is not available");
       return;
@@ -317,7 +320,7 @@ export default function LeadCRMSheet({
   const handleWhatsApp = () => {
     if (!leadId || !selected) return;
     const phoneNumber = formatPhoneNumber(selected.phoneNumber);
-    
+
     if (!phoneNumber) {
       alert("Phone number is not available");
       return;
@@ -325,7 +328,7 @@ export default function LeadCRMSheet({
 
     // Remove + sign and any leading zeros for WhatsApp URL
     const whatsappNumber = phoneNumber.replace(/^\+/, "").replace(/^0+/, "");
-    
+
     dispatch(
       createLeadActivity({
         leadId,
@@ -418,7 +421,7 @@ export default function LeadCRMSheet({
 
           {loadingDetails ? (
             <div className="flex items-center justify-center h-full">
-              <div className="text-gray-500">Loading...</div>
+              <div className="text-gray-500"><Loader size={38}/></div>
             </div>
           ) : selected ? (
             <div className="flex-1 overflow-y-auto bg-white px-4 py-4">
@@ -518,7 +521,7 @@ export default function LeadCRMSheet({
                       {selected.ipAddress || "N/A"}
                     </p>
                   </div>
-                  
+
                   {/* Remark Section */}
                   <div className="border-t pt-4">
                     <div className="mb-3 flex items-center justify-between">
@@ -535,7 +538,7 @@ export default function LeadCRMSheet({
                         </button>
                       )}
                     </div>
-                    
+
                     {isEditingRemark ? (
                       <div className="space-y-3">
                         <textarea
@@ -594,23 +597,33 @@ export default function LeadCRMSheet({
                   Timeline
                 </h3>
 
-                <div className="space-y-4 text-sm">
+                <div className="space-y-6 text-sm">
                   {selected.timeline && selected.timeline.length > 0 ? (
-                    selected.timeline.map((item: TimelineItem) => (
-                      <div key={item.id} className="flex gap-3">
-                        <div className="mt-0.5 flex-shrink-0">
-                          <TimelineIcon activityType={item.activityType} />
+                    selected.timeline.map((item: TimelineItem, index: number) => {
+                      const isLast = index === selected.timeline.length - 1;
+
+                      return (
+                        <div key={item.id} className="flex gap-4">
+                          <div className="relative flex flex-col items-center">
+                            {!isLast && (
+                              <div className="absolute top-[28px] bottom-[-24px] w-px bg-[#D9D9D9]" />
+                            )}
+
+                            <div className="relative z-10 bg-[#F5F5FA] p-2 rounded-full">
+                              <TimelineIcon activityType={item.activityType} />
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-gray-500 mb-1">
+                              {item.formattedDate || formatDate(item.activityDate)}
+                            </p>
+                            <p className="text-sm font-medium text-gray-800 leading-relaxed">
+                              {item.description}
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-gray-500 mb-1">
-                            {item.formattedDate || formatDate(item.activityDate)}
-                          </p>
-                          <p className="text-sm font-medium text-gray-800 leading-relaxed">
-                            {item.description}
-                          </p>
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <p className="text-xs text-gray-500">No timeline entries</p>
                   )}
@@ -639,7 +652,12 @@ export default function LeadCRMSheet({
                   className="flex h-11 w-11 items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
                   title="WhatsApp"
                 >
-                  <MessageCircle size={18} className="text-gray-700" />
+                  <Image
+                    src={wp}
+                    alt="WhatsApp"
+                    width={20}
+                    height={20}
+                  />
                 </button>
               </div>
             </div>
