@@ -17,6 +17,10 @@ import { useForm } from "react-hook-form";
 import upload from "@/assets/uploadimg.svg";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { createDeveloper, fetchDevelopers, updateDeveloper } from "@/lib/features/developers/developerApi";
+import Image from "next/image";
+import wp from "@/assets/wp.png"
+import call from "@/assets/call.png"
+import mail from "@/assets/mail.png"
 
 export type Developer = {
   _id: string;
@@ -92,11 +96,21 @@ function DeveloperView({ developer }: { developer: Developer }) {
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
-              <Phone size={16} />
+            <button className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F4F8FF]">
+              <Image
+                src={wp}
+                alt="WhatsApp"
+                width={18}
+                height={18}
+              />
             </button>
-            <button className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
-              <Mail size={16} />
+            <button className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F4F8FF]">
+              <Image
+                src={call}
+                alt="WhatsApp"
+                width={18}
+                height={18}
+              />
             </button>
           </div>
         </div>
@@ -109,8 +123,13 @@ function DeveloperView({ developer }: { developer: Developer }) {
             </p>
           </div>
 
-          <button className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100">
-            <Mail size={16} />
+          <button className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F4F8FF]">
+            <Image
+              src={mail}
+              alt="WhatsApp"
+              width={18}
+              height={18}
+            />
           </button>
         </div>
       </div>

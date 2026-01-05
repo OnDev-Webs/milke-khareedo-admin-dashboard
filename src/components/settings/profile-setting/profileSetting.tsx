@@ -362,6 +362,17 @@ export default function ProfileSettings() {
                 readOnly
               />
             </Field>
+
+            <Field label="Role">
+              <input
+                name="role"
+                value={role?.name || "Admin"}
+                className="w-full rounded-lg outline-none text-sm bg-gray-100 cursor-not-allowed"
+                disabled
+                readOnly
+              />
+            </Field>
+
           </div>
 
           <div className="flex justify-end gap-3 pt-8">

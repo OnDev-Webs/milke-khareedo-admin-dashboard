@@ -539,8 +539,7 @@ function UserCreate() {
                 onChange={(e) =>
                   setForm({ ...form, role: e.target.value })
                 }
-                className="w-full outline-none text-sm bg-transparent"
-              >
+                className="w-full outline-none text-sm bg-transparent">
                 <option value="">Select Role</option>
                 {roles.map((r) => (
                   <option key={r._id} value={r._id}>

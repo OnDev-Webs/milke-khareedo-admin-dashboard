@@ -138,16 +138,6 @@ export default function Login() {
               <img src={logo.src} alt="login-img" className="h-16 w-auto" />
             </div>
 
-            {/* Mobile Image */}
-            <div className="block lg:hidden w-full h-54 rounded-2xl overflow-hidden">
-              <img
-                src={loginImg.src}
-                alt="login-mobile"
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-
             {/* Email Field */}
             <fieldset className="border border-black px-3 py-2 rounded-md min-h-[56px] flex flex-col justify-center">
               <legend className="text-sm px-1 text-black font-medium">

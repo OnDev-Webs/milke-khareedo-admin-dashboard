@@ -21,14 +21,43 @@ export const createProperty = createAsyncThunk<
   }
 });
 
+// export const fetchProperties = createAsyncThunk<
+//   Property[],
+//   void,
+//   { rejectValue: string }
+// >("properties/fetchAll", async (_, { rejectWithValue }) => {
+//   try {
+//     const res = await axiosInstance.get("/admin/get_all_property");
+//     return res.data.data;
+//   } catch (error: any) {
+//     return rejectWithValue(
+//       error.response?.data?.message || "Failed to fetch properties"
+//     );
+//   }
+// });
+
+
 export const fetchProperties = createAsyncThunk<
-  Property[],
-  void,
+  {
+    data: Property[];
+    total: number;
+    page: number;
+    totalPages: number;
+  },
+  { page?: number; limit?: number; search?: string },
   { rejectValue: string }
->("properties/fetchAll", async (_, { rejectWithValue }) => {
+>("properties/fetchAll", async ({ page = 1, limit = 12, search }, { rejectWithValue }) => {
   try {
-    const res = await axiosInstance.get("/admin/get_all_property");
-    return res.data.data;
+    const res = await axiosInstance.get("/admin/get_all_property", {
+      params: { page, limit, search },
+    });
+
+    return {
+      data: res.data.data,
+      total: res.data.total,
+      page: res.data.page,
+      totalPages: res.data.totalPages,
+    };
   } catch (error: any) {
     return rejectWithValue(
       error.response?.data?.message || "Failed to fetch properties"

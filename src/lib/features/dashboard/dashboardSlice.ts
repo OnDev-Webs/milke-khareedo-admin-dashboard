@@ -15,10 +15,12 @@ export type RecentLead = {
   phone: string;
   profileImage: string | null;
   projectName: string;
+  projectId : string;
   status : string;
   amount: string;
   amountValue: number;
   createdAt: string;
+  dateTime : string;
 };
 
 export type SalesPerformance = {

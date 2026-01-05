@@ -34,7 +34,6 @@ export default function Page() {
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink href="#">Developers</BreadcrumbLink>
                 </BreadcrumbItem>
-
               </BreadcrumbList>
             </Breadcrumb>
           </header>

@@ -11,7 +11,7 @@ import ConnectivityForm from "./forms/connectivityForm";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { FormProvider } from "react-hook-form";
 import { useAppDispatch } from "@/lib/store/hooks";
-import { createProperty } from "@/lib/features/properties/propertiesApi";
+import { createProperty, fetchProperties } from "@/lib/features/properties/propertiesApi";
 import { PropertyFormValues } from "@/schema/property/propertySchema";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
@@ -328,6 +328,7 @@ export default function AddNewProperty() {
       createProperty.fulfilled.match(resultAction) ||
       updateProperty.fulfilled.match(resultAction)
     ) {
+       dispatch(fetchProperties({ page: 1, limit: 10 }));
       router.push("/properties");
     }
   };
@@ -336,8 +337,8 @@ export default function AddNewProperty() {
     <div>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className=" h-full  grid grid-cols-24">
-            <aside className="col-span-5 border-r h-[92.1vh]  bg-white p-4 flex flex-col justify-between">
+          <div className="h-full grid grid-cols-24">
+            <aside className="col-span-5 border-r h-[92vh]  bg-white p-4 flex flex-col justify-between">
               <div>
                 <h3 className="mb-4 text-sm font-semibold text-gray-900">
                   {currentStep?.title}

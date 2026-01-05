@@ -14,7 +14,7 @@ export default function Dashboard() {
   async function getDashboardData() {
     await dispatch(fetchDashboard());
 
-    await dispatch(fetchProperties())
+    await dispatch(fetchProperties({page : 1 , limit : 10}))
   }
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function Dashboard() {
   }, [dispatch]);
 
   return (
-    <div className="space-y-5 pt-5">
+    <div className="space-y-5 pt-3">
       {/* <DashboardHeader /> */}
       <DashboardKPI />
       <DashboardRecentLeads />

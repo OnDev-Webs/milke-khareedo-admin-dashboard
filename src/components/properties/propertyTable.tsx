@@ -10,21 +10,17 @@ import {
 import { useEffect, useRef, useState } from "react";
 import DeletePopUp from "../custom/popups/delete";
 import { Property } from "@/lib/features/properties/propertiesSlice";
-import { deletePropertyById } from "@/lib/features/properties/propertiesApi";
+import { deletePropertyById, fetchProperties } from "@/lib/features/properties/propertiesApi";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { useRouter } from "next/navigation";
 
-interface IProperty extends Property { }
 
 interface PropertiesTableProps {
-  properties: IProperty[];
+  properties: Property[];
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
   getPageNumbers: () => number[];
-  dataLength: number;
-  indexOfFirstItem: number;
-  indexOfLastItem: number;
 }
 
 export default function PropertiesTable({
@@ -69,6 +65,7 @@ export default function PropertiesTable({
 
   async function deleteProperty(id: string) {
     await dispatch(deletePropertyById(id));
+    dispatch(fetchProperties({ page: currentPage, limit: 10 }));
   }
 
   return (

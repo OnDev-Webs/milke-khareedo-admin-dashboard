@@ -61,43 +61,34 @@ export default function DashboardKPI() {
   return <>
 
     <section className="w-full hidden md:block">
-      <div className="mx-auto rounded-2xl bg-white p-6 border border-gray-200">
+      <div className="mx-auto rounded-2xl bg-white p-4 border border-gray-200">
         <h3 className="mb-4 text-xl font-bold">Dashboard</h3>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* cards */}
-          <div
-            className="relative flex flex-col justify-between overflow-hidden rounded-2xl bg-linear-to-b from-card via-card to-transparent p-4"
-          >
-            <div className="mb-4 flex items-start justify-end">
-              <div className="h-44 w-48 rounded-lg overflow-hidden">
+          <div className="relative overflow-hidden rounded-2xl bg-linear-to-b from-card via-card to-transparent p-3">
+            <div className="flex justify-end">
+              <div className="h-28 w-28 rounded-lg overflow-hidden">
                 <Image
                   src={totaldeveloperImg}
                   alt="totaldeveloperImg"
-                  className="h-full w-full object-cover [mask-image:linear-gradient(to_top,transparent,black_40%)] [-webkit-mask-image:linear-gradient(to_top,transparent,black_40%)]"
+                  className="h-full w-full object-cover [mask-image:linear-gradient(to_top,transparent,black_45%)] [-webkit-mask-image:linear-gradient(to_top,transparent,black_45%)]"
                 />
               </div>
             </div>
-
-            <div className="flex justify-between">
-              <div>
-                <div className="text-4xl font-bold text-orange-500">
-                  {overview?.totalDevelopers}
-                </div>
-                <p
-                  className="mb-2 text-2xl font-medium text-gray-600"
-                >
-                  Total Developers
-                </p>
+            <div className="absolute bottom-6 left-3">
+              <div className="text-3xl font-bold text-orange-500 leading-tight">
+                {overview?.totalDevelopers}
               </div>
+              <p className="text-xl font-medium text-gray-600">
+                Total Developers
+              </p>
             </div>
           </div>
 
-          <div
-            className="relative flex flex-col justify-between overflow-hidden rounded-2xl bg-linear-to-b from-card via-card to-transparent p-4"
-          >
-            <div className="mb-4 flex items-start justify-end">
-              <div className="h-44 w-48 rounded-lg overflow-hidden">
+          <div className="relative overflow-hidden rounded-2xl bg-linear-to-b from-card via-card to-transparent p-3">
+            <div className="flex justify-end">
+              <div className="h-28 w-28 rounded-lg overflow-hidden">
                 <Image
                   src={totalLiveProjectImg}
                   alt="totalLiveProjectImg"
@@ -106,13 +97,13 @@ export default function DashboardKPI() {
               </div>
             </div>
 
-            <div className="flex justify-between">
+            <div className="-mt-8">
               <div>
-                <div className="text-4xl font-bold text-orange-500">
+                <div className="text-3xl font-bold text-orange-500">
                   {overview?.liveProjects}
                 </div>
                 <p
-                  className="mb-2 text-2xl font-medium text-gray-600"
+                  className="mb-2 text-xl font-medium text-gray-600"
                 >
                   live Projects
                 </p>
@@ -120,11 +111,9 @@ export default function DashboardKPI() {
             </div>
           </div>
 
-          <div
-            className="relative flex flex-col justify-between overflow-hidden rounded-2xl bg-linear-to-b from-card via-card to-transparent p-4"
-          >
-            <div className="mb-4 flex items-start justify-end">
-              <div className="h-44 w-48 rounded-lg overflow-hidden">
+          <div className="relative overflow-hidden rounded-2xl bg-linear-to-b from-card via-card to-transparent p-3">
+            <div className="flex justify-end">
+              <div className="h-28 w-28 rounded-lg overflow-hidden">
                 <Image
                   src={totalLeadImg}
                   alt="totalLeadImg"
@@ -133,13 +122,13 @@ export default function DashboardKPI() {
               </div>
             </div>
 
-            <div className="flex justify-between">
+            <div className="-mt-8">
               <div>
-                <div className="text-4xl font-bold text-orange-500">
+                <div className="text-3xl font-bold text-orange-500">
                   {overview?.totalLeads}
                 </div>
                 <p
-                  className="mb-2 text-2xl font-medium text-gray-600"
+                  className="mb-2 text-xl font-medium text-gray-600"
                 >
                   Total Leads
                 </p>
@@ -147,12 +136,9 @@ export default function DashboardKPI() {
             </div>
           </div>
 
-
-          <div
-            className="relative flex flex-col justify-between overflow-hidden rounded-2xl bg-linear-to-b from-card via-card to-transparent p-4"
-          >
-            <div className="mb-4 flex items-start justify-end">
-              <div className="h-44 w-48 rounded-lg overflow-hidden">
+          <div className="relative overflow-hidden rounded-2xl bg-linear-to-b from-card via-card to-transparent p-3">
+            <div className="flex justify-end">
+              <div className="h-28 w-28 rounded-lg overflow-hidden">
                 <Image
                   src={totalbooking}
                   alt="totalbooking"
@@ -161,15 +147,15 @@ export default function DashboardKPI() {
               </div>
             </div>
 
-            <div className="flex justify-between">
+            <div className="-mt-8">
               <div>
-                <div className="text-4xl font-bold text-orange-500">
+                <div className="text-3xl font-bold text-orange-500">
                   {overview?.totalBookingsThisMonth}
                 </div>
                 <p
-                  className="mb-2 text-2xl font-medium text-gray-600"
+                  className="mb-2 text-xl font-medium text-gray-600"
                 >
-                  Total Booking <span className="text-xs">{"(This month)"}</span>
+                  Total Booking <span className="text-[10px]">{"(This month)"}</span>
                 </p>
               </div>
             </div>

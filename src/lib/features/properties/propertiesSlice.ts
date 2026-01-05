@@ -98,10 +98,10 @@ const initialState: PropertyState = {
   selected: null,
   loading: false,
   error: null,
-  count:0,
-  page:0,
-  total:0,
-  totalPages:0
+  count: 0,
+  page: 0,
+  total: 0,
+  totalPages: 0
 };
 
 const propertySlice = createSlice({
@@ -119,9 +119,13 @@ const propertySlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchProperties.fulfilled, (state, action: PayloadAction<Property[]>) => {
+      .addCase(fetchProperties.fulfilled, (state, action) => {
         state.loading = false;
-        state.PropertiesList = action.payload;
+        state.PropertiesList = action.payload.data;
+        state.total = action.payload.total;
+        state.page = action.payload.page;
+        state.totalPages = action.payload.totalPages;
+        state.count = action.payload.data.length;
       })
       .addCase(fetchProperties.rejected, (state, action) => {
         state.loading = false;
@@ -147,7 +151,9 @@ const propertySlice = createSlice({
       })
       .addCase(deletePropertyById.fulfilled, (state, action) => {
         state.loading = false;
-        // state.selected = action.payload;
+        state.PropertiesList = state.PropertiesList.filter(
+          (p: Property) => p._id !== action.meta.arg
+        );
       })
       .addCase(deletePropertyById.rejected, (state, action) => {
         state.loading = false;
