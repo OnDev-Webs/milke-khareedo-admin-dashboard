@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchNotifications, markAllNotificationsAsRead } from "@/lib/features/lead-crm/leadcrmApi";
 import { CheckCheck } from "lucide-react";
+import Loader from "@/components/ui/loader";
 
 
 export default function NotificationsPage() {
@@ -67,7 +68,7 @@ export default function NotificationsPage() {
 
             {/* LOADING */}
             {notificationLoading && (
-                <p className="text-sm text-gray-500">Loading notifications...</p>
+                <p className="text-sm text-gray-500"><Loader size={38}/></p>
             )}
 
             {/* EMPTY STATE */}

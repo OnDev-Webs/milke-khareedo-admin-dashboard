@@ -6,7 +6,6 @@ import Image from "next/image";
 import { useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { PropertyFormValues } from "@/schema/property/propertySchema";
-import { formatCurrency } from "@/utils/numbertoWord";
 
 export default function AddLayoutPlanForm() {
   const { control, setValue, watch } = useFormContext<PropertyFormValues>();
@@ -77,14 +76,18 @@ export default function AddLayoutPlanForm() {
                 {config.subConfigurations?.map((sub, subIndex) => {
                   const key = makeKey(config.unitType, sub.carpetArea);
 
-                  const images: File[] = layouts[key] || [];
+                  const images: (File | string)[] = layouts[key] || [];
 
                   return (
                     <div key={subIndex} className="rounded-xl border p-3">
                       {images.length > 0 ? (
                         <div className="rounded-lg overflow-hidden h-56">
                           {images.map((file, i) => {
-                            const url = URL.createObjectURL(file);
+                            const url =
+                              typeof file === "string"
+                                ? file
+                                : URL.createObjectURL(file);
+
 
                             return (
                               <div key={i} className="h-full relative">

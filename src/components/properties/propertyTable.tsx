@@ -123,14 +123,14 @@ export default function PropertiesTable({
                       {row.joinedGroupCount} / {row.minGroupMembers}
                     </td>
 
-                    <td className="px-4 py-3 text-center">
+                    <td className="px-4 py-3 text-center whitespace-nowrap">
                       <span
-                        className={`px-3 py-1 rounded-full text-sm font-semibold ${row.isStatus
-                          ? "bg-green-200 text-green-700"
-                          : "bg-red-200 text-red-700"
+                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap ${row.isStatus
+                            ? "bg-green-200 text-green-700"
+                            : "bg-red-200 text-red-700"
                           }`}
                       >
-                        <Dot className="inline" />
+                        <Dot size={14} />
                         {row.isStatus ? "Active" : "Inactive"}
                       </span>
                     </td>

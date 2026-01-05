@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchBlogs } from "@/lib/features/blogs/blogApi";
 import { RootState } from "@/lib/store/store";
 import { Blog } from "@/lib/features/blogs/blogSlice";
+import Loader from "../ui/loader";
 
 export type HeaderBlog = {
   key: keyof Blog | "actions";
@@ -117,7 +118,7 @@ export default function Blogs() {
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Loading...</div>
+          <div className="text-gray-500"><Loader size={38}/></div>
         </div>
       ) : blogs.length === 0 ? (
         <NotFound />

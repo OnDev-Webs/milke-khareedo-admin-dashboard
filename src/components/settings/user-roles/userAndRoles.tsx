@@ -10,6 +10,7 @@ import {
   deleteUser,
 } from "@/lib/features/user/userApi";
 import { fetchRoles } from "@/lib/features/role/roleApi";
+import Loader from "@/components/ui/loader";
 
 export type SheetMode = "view" | "edit" | "create";
 
@@ -94,7 +95,7 @@ export default function UserAndRoles() {
         {/* ===== LOADING ===== */}
         {loading && (
           <p className="p-4 text-sm text-gray-500">
-            Loading users...
+            <Loader size={38}/>
           </p>
         )}
 
