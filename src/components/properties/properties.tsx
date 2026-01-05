@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { RootState } from "@/lib/store/store";
 import { Property } from "@/lib/features/properties/propertiesSlice";
 import { fetchProperties } from "@/lib/features/properties/propertiesApi";
+import Loader from "../ui/loader";
 
 type Iproperties = {
   id: number | string;
@@ -30,32 +31,21 @@ type SortState<T> = {
 };
 
 export default function Properties() {
- 
 
-  const {PropertiesList} =  useAppSelector((state:RootState)=>state.properties)
+  const {PropertiesList,totalPages,loading,} = useAppSelector((state: RootState) => state.properties);
+
+  const [filteredData, setFilteredData] = useState<Property[]>([]);
+
+  useEffect(() => {
+    setFilteredData(PropertiesList);
+  }, [PropertiesList]);
 
   const dispatch = useAppDispatch();
-  
-    async function getPropertiesData() {
-  
-      await dispatch(fetchProperties())
-    }
-  
-    useEffect(() => {
-      getPropertiesData();
-  
-      
-    }, [dispatch]);
-
-  console.log("PropertiesList",PropertiesList)
-
-  const [data, setData] = useState<Property[]>(PropertiesList);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [sort, setSort] = useState<SortState<Iproperties>>({
-    key: null,
-    dir: null,
-  });
+
+  useEffect(() => {
+    dispatch(fetchProperties({ page: currentPage, limit: 10 }));
+  }, [currentPage, dispatch]);
 
   const headers: Header[] = [
     { key: "propertyName", label: "PROPERTY", minW: "min-w-[200px]" },
@@ -75,11 +65,6 @@ export default function Properties() {
     [headers]
   );
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
-
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
@@ -87,7 +72,7 @@ export default function Properties() {
   const getPageNumbers = () => {
     const pageNumbers = [];
     const maxVisiblePages = 5;
-    
+
     if (totalPages <= maxVisiblePages) {
       for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i);
@@ -95,18 +80,18 @@ export default function Properties() {
     } else {
       let startPage = Math.max(1, currentPage - 2);
       let endPage = Math.min(totalPages, currentPage + 2);
-      
+
       if (currentPage <= 3) {
         endPage = maxVisiblePages;
       } else if (currentPage >= totalPages - 2) {
         startPage = totalPages - maxVisiblePages + 1;
       }
-      
+
       for (let i = startPage; i <= endPage; i++) {
         pageNumbers.push(i);
       }
     }
-    
+
     return pageNumbers;
   };
 
@@ -114,7 +99,7 @@ export default function Properties() {
     <div>
       <CustomTableSearchBar<Property>
         data={PropertiesList}
-        setFilteredData={setData}
+        setFilteredData={setFilteredData}
         searchKeys={searchKeys}
         placeholder="Search by property, developer, city, amount or status"
         addButton={{
@@ -123,19 +108,20 @@ export default function Properties() {
         }}
       />
 
-      <div className="h-179 p-4">
-        {data.length === 0 ? (
+      <div className="h-full p-4">
+        {loading ? (
+          <div className="flex justify-center py-10">
+            <span className="text-sm text-gray-500"><Loader /></span>
+          </div>
+        ) : filteredData.length === 0 ? (
           <NotFound />
         ) : (
-          <PropertiesTable 
-            properties={currentItems}
+          <PropertiesTable
+            properties={filteredData}
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
             getPageNumbers={getPageNumbers}
-            dataLength={data.length}
-            indexOfFirstItem={indexOfFirstItem}
-            indexOfLastItem={indexOfLastItem}
           />
         )}
       </div>

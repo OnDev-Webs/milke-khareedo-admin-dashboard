@@ -114,7 +114,7 @@ export default function UserAndRoles() {
                   <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden">
                     {user.profileImage && (
                       <img
-                        src={user.profileImage}
+                        src={user.profileImage || "/images/user.jfif"}
                         alt={user.firstName}
                         className="h-full w-full object-cover"
                       />
