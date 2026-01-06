@@ -8,7 +8,7 @@ import { fetchLeadById, updateLeadRemark, createLeadActivity, updateLeadStatus, 
 import { Sheet, SheetContent, SheetTitle, } from "@/components/ui/sheet";
 import { Dialog, DialogContent, } from "@/components/ui/dialog";
 import Image from "next/image";
-import wp from "@/assets/wp.png"
+import wp from "@/assets/wp.svg"
 import { cn } from "@/lib/utils";
 import Loader from "@/components/ui/loader";
 
