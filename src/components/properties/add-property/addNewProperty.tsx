@@ -16,6 +16,7 @@ import { PropertyFormValues } from "@/schema/property/propertySchema";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { fetchPropertyById, updateProperty } from "@/lib/features/properties/propertiesApi";
+import Image from "next/image";
 
 
 type Step = {
@@ -328,7 +329,7 @@ export default function AddNewProperty() {
       createProperty.fulfilled.match(resultAction) ||
       updateProperty.fulfilled.match(resultAction)
     ) {
-       dispatch(fetchProperties({ page: 1, limit: 10 }));
+      dispatch(fetchProperties({ page: 1, limit: 10 }));
       router.push("/properties");
     }
   };
@@ -338,11 +339,21 @@ export default function AddNewProperty() {
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="h-full grid grid-cols-24">
-            <aside className="col-span-5 border-r h-[92vh]  bg-white p-4 flex flex-col justify-between">
+            <aside className="col-span-5 border-r h-[92vh]  bg-white px-4 py-6 flex flex-col justify-between">
               <div>
-                <h3 className="mb-4 text-sm font-semibold text-gray-900">
-                  {currentStep?.title}
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    {currentStep?.title}
+                  </h3>
+                  <Image
+                    src="/images/propertyOverView.svg"
+                    alt="Guide"
+                    width={16}
+                    height={16}
+                    className="object-cover"
+                  />
+                </div>
+
 
                 <ul className=" mb-4 space-y-2 text-xs text-gray-500 list-disc pl-4">
                   <li>{currentStep?.description}</li>
@@ -401,7 +412,7 @@ export default function AddNewProperty() {
 
             </aside>
 
-            <div className="col-span-19 ">
+            <div className="col-span-19">
               <div className="flex gap-4 border-b px-4">
                 {newProperty.map((item) => {
                   const isActive = item.step === activeStep;
@@ -412,7 +423,7 @@ export default function AddNewProperty() {
                       key={item.id}
                       onClick={() => setActiveStep(item.step)}
                       className={`px-4 py-2  text-sm font-medium transition
-                ${isActive
+                        ${isActive
                           ? "border-b-2 border-black"
                           : "text-[#7B7B7B] hover:bg-[#F4F8FF]"
                         }`}

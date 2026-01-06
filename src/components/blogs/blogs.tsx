@@ -114,11 +114,14 @@ export default function Blogs() {
         onSearch={handleSearch}
         searchKeys={searchKeys}
         placeholder="Search by developer name, email, or phone number"
+        addButton={{
+          buttonName: "Add New Blog",
+          url: "/blogs/add",
+        }}
       />
-
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500"><Loader size={38}/></div>
+          <div className="text-gray-500"><Loader size={38} /></div>
         </div>
       ) : blogs.length === 0 ? (
         <NotFound />

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { PropertyFormValues } from "@/schema/property/propertySchema";
+import layoutEdit from "@/assets/layoutEdit.svg";
 
 export default function AddLayoutPlanForm() {
   const { control, setValue, watch } = useFormContext<PropertyFormValues>();
@@ -100,11 +101,10 @@ export default function AddLayoutPlanForm() {
                                   onClick={() => removeImage(key, i)}
                                   className="absolute right-2 top-2 rounded-full text-red-500 bg-white p-2 shadow"
                                 >
-                                  <Trash2 size={14} />
+                                  <Trash2 size={14} className="text-[#F00004]"/>
                                 </button>
                                 <label className="absolute right-2 top-12 cursor-pointer rounded-full bg-white p-2 shadow">
-                                  <SquarePen size={14} />
-
+                                 <Image src={layoutEdit} alt="edit" width={14} height={14} />
                                   <input
                                     type="file"
                                     accept="image/*"

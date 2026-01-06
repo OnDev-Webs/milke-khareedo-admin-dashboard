@@ -1,6 +1,16 @@
-import { X } from "lucide-react";
+"use client"
 
-export default function DeactivatePopUp() {
+import { X } from "lucide-react"
+
+type DeactivatePopUpProps = {
+  onClose: () => void
+  onConfirm: () => void
+}
+
+export default function DeactivatePopUp({
+  onClose,
+  onConfirm,
+}: DeactivatePopUpProps) {
   return (
     <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
       <div className="flex justify-center">
@@ -12,7 +22,9 @@ export default function DeactivatePopUp() {
       </div>
 
       <div className="mt-4 text-center">
-        <h2 className="text-xl font-bold text-gray-900">Deactivate Profile</h2>
+        <h2 className="text-xl font-bold text-gray-900">
+          Deactivate Profile
+        </h2>
         <p className="mt-2 text-base text-gray-500">
           Are you sure you want to deactivate
           <br />
@@ -23,6 +35,7 @@ export default function DeactivatePopUp() {
       <div className="mt-6 grid grid-cols-2 gap-4">
         <button
           type="button"
+          onClick={onClose}
           className="rounded-lg bg-black py-3 text-sm font-semibold text-white"
         >
           Cancel
@@ -30,11 +43,12 @@ export default function DeactivatePopUp() {
 
         <button
           type="button"
+          onClick={onConfirm}
           className="rounded-lg bg-red-600 py-3 text-sm font-semibold text-white hover:bg-red-700"
         >
           Deactivate
         </button>
       </div>
     </div>
-  );
+  )
 }

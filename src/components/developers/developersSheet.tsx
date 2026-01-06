@@ -18,9 +18,10 @@ import upload from "@/assets/uploadimg.svg";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { createDeveloper, fetchDevelopers, updateDeveloper } from "@/lib/features/developers/developerApi";
 import Image from "next/image";
-import wp from "@/assets/wp.png"
-import call from "@/assets/call.png"
-import mail from "@/assets/mail.png"
+import developerWp from "@/assets/developerWp.svg"
+import call from "@/assets/call.svg"
+import mail from "@/assets/mail.svg"
+import Success from "../custom/popups/success";
 
 export type Developer = {
   _id: string;
@@ -74,23 +75,23 @@ function DeveloperView({ developer }: { developer: Developer }) {
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-gray-900">
+        <h3 className="text-[16px] font-bold text-[#000000]">
           Sourcing Manager
         </h3>
 
         <div>
-          <p className="text-xs font-semibold text-gray-600">
+          <p className="text-[14px] font-medium text-[#929292]">
             Contact Person Name
           </p>
-          <p className="mt-1 text-sm text-gray-800">
+          <p className="mt-1 text-[16px] text-[#000000]">
             {developer?.sourcingManager?.name}
           </p>
         </div>
 
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold text-gray-600">Phone Number</p>
-            <p className="mt-1 text-sm text-gray-800">
+            <p className="text-[14px] font-medium text-[#929292]">Phone Number</p>
+            <p className="mt-1 text-[16px] text-[#000000]">
               {developer?.sourcingManager?.mobile}
             </p>
           </div>
@@ -98,18 +99,18 @@ function DeveloperView({ developer }: { developer: Developer }) {
           <div className="flex items-center gap-3">
             <button className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F4F8FF]">
               <Image
-                src={wp}
+                src={developerWp}
                 alt="WhatsApp"
-                width={18}
-                height={18}
+                width={20}
+                height={20}
               />
             </button>
             <button className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F4F8FF]">
               <Image
                 src={call}
-                alt="WhatsApp"
-                width={18}
-                height={18}
+                alt="Call"
+                width={20}
+                height={20}
               />
             </button>
           </div>
@@ -117,8 +118,8 @@ function DeveloperView({ developer }: { developer: Developer }) {
 
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold text-gray-600">Email ID</p>
-            <p className="mt-1 text-sm text-gray-800">
+            <p className="text-[14px] font-medium text-[#929292]">Email ID</p>
+            <p className="mt-1 text-[16px] text-[#000000]">
               {developer?.sourcingManager?.email}
             </p>
           </div>
@@ -126,9 +127,9 @@ function DeveloperView({ developer }: { developer: Developer }) {
           <button className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F4F8FF]">
             <Image
               src={mail}
-              alt="WhatsApp"
-              width={18}
-              height={18}
+              alt="Mail"
+              width={20}
+              height={20}
             />
           </button>
         </div>
@@ -362,7 +363,14 @@ function DeveloperEdit({
   );
 }
 
-function AddNewDeveloper({ setOpen }: { setOpen: (open: boolean) => void }) {
+function AddNewDeveloper({
+  setOpen,
+  onSuccess,
+}: {
+  setOpen: (open: boolean) => void;
+  onSuccess: (msg: string) => void;
+}) {
+
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -410,8 +418,7 @@ function AddNewDeveloper({ setOpen }: { setOpen: (open: boolean) => void }) {
 
     try {
       await dispatch(createDeveloper(formData)).unwrap();
-
-      setOpen(false);
+      onSuccess("Developer created successfully");
       dispatch(fetchDevelopers({ page: 1, limit: 10 }));
     } catch (err) {
       console.error("Failed to create developer:", err);
@@ -484,7 +491,7 @@ function AddNewDeveloper({ setOpen }: { setOpen: (open: boolean) => void }) {
             <input
               {...register("name")}
               placeholder="Enter name"
-              className="w-full  outline-none text-sm"
+              className="w-full outline-none text-sm"
             />
             {errors.name && (
               <p className="text-xs text-red-500">{errors.name.message}</p>
@@ -591,7 +598,7 @@ function Field({
 }) {
   return (
     <div>
-      <fieldset className="rounded-md border-2 border-black px-4 pb-1">
+      <fieldset className="rounded-md border-1 border-black px-4 pb-1">
         <legend className="px-1 text-xs font-semibold text-gray-700">
           {label}
         </legend>
@@ -610,35 +617,62 @@ export default function DeveloperSheet({
   data,
   mode,
 }: DeveloperSheetProps) {
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className="w-[420px]">
-        <SheetHeader className="border-b">
-          <SheetTitle>
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">
-                {mode === "view" && "Developer Details"}
-                {mode === "edit" && "Edit Developer"}
-                {mode === "create" && "Add New Developer"}
-              </h2>
+    <>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent className="w-[420px]">
+          <SheetHeader className="border-b">
+            <SheetTitle>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {mode === "view" && "Developer Details"}
+                  {mode === "edit" && "Edit Developer"}
+                  {mode === "create" && "Add New Developer"}
+                </h2>
 
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="rounded-full bg-gray-100 p-2"
-              >
-                <X size={16} className="text-red-500" />
-              </button>
-            </div>
-          </SheetTitle>
-        </SheetHeader>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="rounded-full bg-gray-100 p-2"
+                >
+                  <X size={16} className="text-red-500" />
+                </button>
+              </div>
+            </SheetTitle>
+          </SheetHeader>
 
-        {mode === "view" && data && <DeveloperView developer={data} />}
-        {mode === "edit" && data && (
-          <DeveloperEdit developer={data} setOpen={setOpen} />
-        )}
-        {mode === "create" && <AddNewDeveloper setOpen={setOpen} />}
-      </SheetContent>
-    </Sheet>
+          {mode === "view" && data && <DeveloperView developer={data} />}
+          {mode === "edit" && data && (
+            <DeveloperEdit developer={data} setOpen={setOpen} />
+          )}
+          {mode === "create" && (
+            <AddNewDeveloper
+              setOpen={setOpen}
+              onSuccess={(msg) => {
+                setSuccessMessage(msg);
+                setShowSuccess(true);
+              }}
+            />
+          )}
+        </SheetContent>
+      </Sheet>
+
+      {showSuccess && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
+          <Success
+            message={successMessage}
+            onClose={() => {
+              setShowSuccess(false);
+              setOpen(false);
+            }}
+          />
+        </div>
+      )}
+
+    </>
   );
 }
+

@@ -19,11 +19,9 @@ type Header = {
 
 export default function Developers() {
   const dispatch = useAppDispatch();
-  const { developers } = useAppSelector((state: RootState) => state.developers);
+  const { developers, page, total, loading } = useAppSelector((state: RootState) => state.developers);
 
   const [data, setData] = useState<IDeveloper[]>(developers);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
   const [open, setOpen] = useState<boolean>(false);
   const [mode, setMode] = useState<SheetMode>("create");
 
@@ -46,39 +44,10 @@ export default function Developers() {
     [headers]
   );
 
-  const totalPages = Math.ceil(data?.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data?.slice(indexOfFirstItem, indexOfLastItem);
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
-
-  const getPageNumbers = () => {
-    const pageNumbers = [];
-    const maxVisiblePages = 5;
-
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
-      }
-    } else {
-      let startPage = Math.max(1, currentPage - 2);
-      let endPage = Math.min(totalPages, currentPage + 2);
-
-      if (currentPage <= 3) {
-        endPage = maxVisiblePages;
-      } else if (currentPage >= totalPages - 2) {
-        startPage = totalPages - maxVisiblePages + 1;
-      }
-
-      for (let i = startPage; i <= endPage; i++) {
-        pageNumbers.push(i);
-      }
+  const loadMore = () => {
+    if (developers.length < total && !loading) {
+      dispatch(fetchDevelopers({ page: page + 1, limit: 10 }));
     }
-
-    return pageNumbers;
   };
 
   return (
@@ -96,19 +65,14 @@ export default function Developers() {
         mode={mode}
       />
 
-      <div className="h-179 p-4">
+      <div className="p-4">
         {data?.length === 0 ? (
           <NotFound />
         ) : (
           <DevelopersTable
-            developers={currentItems}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            getPageNumbers={getPageNumbers}
-            dataLength={data?.length}
-            indexOfFirstItem={indexOfFirstItem}
-            indexOfLastItem={indexOfLastItem}
+            developers={developers}
+            onLoadMore={loadMore}
+            hasMore={developers.length < total}
           />
         )}
       </div>

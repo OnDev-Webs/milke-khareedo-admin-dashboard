@@ -6,8 +6,9 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { getAdminProfile, updateAdminProfile } from "@/lib/features/auth/adminAuthApi";
 import { AppDispatch } from "@/lib/store/store";
 import logoutIcon from "@/assets/logoutIcon.png"
-import mail from "@/assets/mail.png"
-import call from "@/assets/call.png"
+import mail from "@/assets/mail.svg"
+import call from "@/assets/call.svg"
+import camera from "@/assets/camera.svg"
 
 function Field({
   label,
@@ -302,9 +303,24 @@ export default function ProfileSettings() {
                 type="button"
                 onClick={handleEditClick}
                 disabled={profileLoading || isSubmitting}
-                className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-sm bg-gray-900 border border-gray-600 px-1 py-1 text-xs text-white disabled:opacity-50 disabled:cursor-not-allowed">
-                Edit Profile
+                className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2
+             rounded-md bg-gray-900 border border-gray-600
+             px-3 py-1.5 min-w-[110px]
+             text-xs text-white
+             disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Image
+                  src={camera}
+                  alt="edit"
+                  width={16}
+                  height={16}
+                  className="object-cover object-center"
+                />
+                <span className="whitespace-nowrap">Edit Profile</span>
               </button>
+
+
+
 
               <input
                 ref={fileRef}
@@ -346,7 +362,7 @@ export default function ProfileSettings() {
                 type="email"
                 value={formData.email}
                 placeholder="Enter Your Email Address"
-                className="w-full rounded-lg outline-none text-sm bg-gray-100 cursor-not-allowed"
+                className="w-full rounded-lg outline-none text-sm  cursor-not-allowed"
                 disabled
                 readOnly
               />
@@ -357,7 +373,7 @@ export default function ProfileSettings() {
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 placeholder="Enter Your Phone Number"
-                className="w-full rounded-lg outline-none text-sm bg-gray-100 cursor-not-allowed"
+                className="w-full rounded-lg outline-none text-sm cursor-not-allowed"
                 disabled
                 readOnly
               />
@@ -367,7 +383,7 @@ export default function ProfileSettings() {
               <input
                 name="role"
                 value={role?.name || "Admin"}
-                className="w-full rounded-lg outline-none text-sm bg-gray-100 cursor-not-allowed"
+                className="w-full rounded-lg outline-none text-sm cursor-not-allowed"
                 disabled
                 readOnly
               />

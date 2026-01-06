@@ -1,27 +1,14 @@
-import {
-  ChevronLeft,
-  ChevronRight,
-  Dot,
-  EllipsisVertical,
-  EllipsisVerticalIcon,
-} from "lucide-react";
+import { EllipsisVertical } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import DeveloperSheet, { SheetMode } from "./developersSheet";
-import PropertiesSheet from "../properties/propertiesSheet";
 import DeletePopUp from "../custom/popups/delete";
 import { Developer } from "@/lib/features/developers/developerSlice";
 import { deleteDeveloper } from "@/lib/features/developers/developerApi";
 import { useAppDispatch } from "@/lib/store/hooks";
-
 interface DevelopersTableProps {
   developers: Developer[];
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-  getPageNumbers: () => number[];
-  dataLength: number;
-  indexOfFirstItem: number;
-  indexOfLastItem: number;
+  onLoadMore: () => void;
+  hasMore: boolean;
 }
 
 const TABLE_HEADERS = [
@@ -33,16 +20,11 @@ const TABLE_HEADERS = [
 
 export default function DevelopersTable({
   developers,
-  currentPage,
-  totalPages,
-  onPageChange,
-  getPageNumbers,
-  dataLength,
-  indexOfFirstItem,
-  indexOfLastItem,
+  onLoadMore,
+  hasMore,
 }: DevelopersTableProps) {
+
   const dispatch = useAppDispatch();
-  const pageNumbers = getPageNumbers();
   const [openMenuId, setOpenMenuId] = useState<number | string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -78,9 +60,6 @@ export default function DevelopersTable({
   const handleDelete = async (id: string) => {
     try {
       await dispatch(deleteDeveloper(id)).unwrap();
-
-      // setIsDeleteOpen(false);
-      // setDeleteId(null);
     } catch (error) {
       console.error("Delete failed:", error);
     }
@@ -116,8 +95,7 @@ export default function DevelopersTable({
             </thead>
 
             <tbody className="divide-y">
-              {developers?.map((row, index) => {
-
+              {developers.map((row) => {
                 return (
                   <tr key={row?._id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
@@ -196,8 +174,7 @@ export default function DevelopersTable({
                               }}
                               className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
                             
-                        `}
-                            >
+                        `}>
                               Veiw
                             </button>
                             <button
@@ -223,54 +200,17 @@ export default function DevelopersTable({
           </table>
         </div>
 
-        <div className="flex items-center justify-center gap-2 border-t p-4 text-sm text-gray-600">
-          <button
-            className="flex items-center gap-2 rounded-full border px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => onPageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            <ChevronLeft size={16} /> Back
-          </button>
-
-          {pageNumbers.map((page) => (
+        {hasMore && (
+          <div className="flex justify-center border-t p-4">
             <button
-              key={page}
-              className={`flex h-7 w-7 items-center justify-center rounded-full ${page === currentPage
-                ? "bg-black text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              onClick={() => onPageChange(page)}
+              onClick={onLoadMore}
+              className="rounded-full border px-6 py-2 font-semibold hover:bg-gray-100"
             >
-              {page}
+              Learn more
             </button>
-          ))}
+          </div>
+        )}
 
-          {totalPages > 5 && currentPage < totalPages - 2 && (
-            <button className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100">
-              <EllipsisVerticalIcon size={16} className="rotate-90" />
-            </button>
-          )}
-
-          {totalPages > 5 && currentPage < totalPages - 1 && (
-            <button
-              className={`flex h-7 w-7 items-center justify-center rounded-full ${currentPage === totalPages
-                ? "bg-black text-white"
-                : "bg-gray-100 hover:bg-gray-200"
-                }`}
-              onClick={() => onPageChange(totalPages)}
-            >
-              {totalPages}
-            </button>
-          )}
-
-          <button
-            className="flex items-center gap-2 rounded-full border px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => onPageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            Next <ChevronRight size={16} />
-          </button>
-        </div>
       </div>
     </div>
   );

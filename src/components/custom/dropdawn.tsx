@@ -6,9 +6,9 @@ import { ChevronDown } from "lucide-react";
 type DropdownItem =
   | string
   | {
-      label: string;
-      value: any;
-    };
+    label: string;
+    value: any;
+  };
 
 type DropdownProps = {
   items: DropdownItem[];
@@ -17,7 +17,7 @@ type DropdownProps = {
   onSelect?: (item: DropdownItem) => void;
   className?: string;
   bordernone?: boolean;
-  searchable?: boolean; 
+  searchable?: boolean;
 };
 
 export default function CustomDropdown({
@@ -72,14 +72,14 @@ export default function CustomDropdown({
     <div ref={wrapperRef} className={`relative min-w-44 ${className}`}>
       <div
         onClick={() => setOpen((prev) => !prev)}
-        className={`rounded-md flex items-center justify-between gap-2 cursor-pointer select-none
+        className={`relative rounded-md flex items-center justify-between gap-2 cursor-pointer select-none
         ${bordernone ? "" : "border p-2"}`}>
         <span className="truncate text-sm">{selectedLabel}</span>
 
         <ChevronDown
-          className={`transition-transform duration-200 ${
-            open ? "rotate-0" : "-rotate-90"
-          }`}
+          size={16}
+          className={`pointer-events-none absolute right-3 top-[50%] -translate-y-1/2 transition-transform duration-200 ${open ? "rotate-180" : "rotate-0"
+            }`}
         />
       </div>
 

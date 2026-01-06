@@ -40,7 +40,8 @@ import { Input } from "@/components/ui/input";
 import CustomDropdown from "@/components/custom/dropdawn";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import wp from "@/assets/wp.png"
+import wp from "@/assets/wp.svg"
+import TimelineCall from "@/assets/TimelineCall.svg"
 import Loader from "../ui/loader";
 
 export type SheetMode = "view" | "edit" | "";
@@ -421,7 +422,7 @@ export default function LeadCRMSheet({
 
           {loadingDetails ? (
             <div className="flex items-center justify-center h-full">
-              <div className="text-gray-500"><Loader size={38}/></div>
+              <div className="text-gray-500"><Loader size={38} /></div>
             </div>
           ) : selected ? (
             <div className="flex-1 overflow-y-auto bg-white px-4 py-4">
@@ -483,11 +484,11 @@ export default function LeadCRMSheet({
 
               {/* Details Section */}
               <div className="mb-6">
-                <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                <h3 className="text-[16px] font-bold text-black mb-4">
                   Details
                 </h3>
 
-                <div className="space-y-4 text-sm">
+                <div className="space-y-4 text-sm bg-[#FBFBFF] ps-4">
                   <div>
                     <p className="text-xs font-semibold text-gray-500 mb-1">
                       Phone Number
@@ -523,17 +524,16 @@ export default function LeadCRMSheet({
                   </div>
 
                   {/* Remark Section */}
-                  <div className="border-t pt-4">
+                  <div className="border-t pt-2">
                     <div className="mb-3 flex items-center justify-between">
-                      <p className="text-xs font-semibold text-gray-500">
-                        Remarks
+                      <p className="text-xs font-semibold text-[#929292]">
+                        Remark
                       </p>
                       {!isEditingRemark && (
                         <button
                           onClick={handleStartEditRemark}
-                          className="text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"
+                          className="text-xs font-medium text-[#3A59A6] hover:text-blue-700 transition-colors flex items-center gap-1"
                         >
-                          <Edit2 size={12} />
                           Edit
                         </button>
                       )}
@@ -586,18 +586,18 @@ export default function LeadCRMSheet({
               {/* Next Follow Up Button */}
               <button
                 onClick={() => setFollowUpOpen(true)}
-                className="mb-6 flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors w-full"
+                className="mb-6 flex items-center justify-center gap-2 rounded-lg border border-[#FBFBFF] px-4 py-2.5 text-sm font-medium text-[#3A59A6] transition-colors w-full"
               >
-                <Clock size={16} /> Next Follow up
+                <Calendar size={16} /> Next Follow up
               </button>
 
               {/* Timeline Section */}
               <div className="mb-6">
-                <h3 className="mb-4 text-sm font-semibold text-gray-900">
+                <h3 className="mb-4 text-[16px] font-bold text-black">
                   Timeline
                 </h3>
 
-                <div className="space-y-6 text-sm">
+                <div className="space-y-6 text-sm px-6">
                   {selected.timeline && selected.timeline.length > 0 ? (
                     selected.timeline.map((item: TimelineItem, index: number) => {
                       const isLast = index === selected.timeline.length - 1;
@@ -634,22 +634,29 @@ export default function LeadCRMSheet({
               <div className="flex items-center gap-3 pt-2 border-t">
                 <button
                   onClick={() => setUpdateStatusOpen(true)}
-                  className="flex-1 rounded-lg bg-black py-3 text-sm font-semibold text-white hover:bg-gray-800 transition-colors"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-black py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800"
                 >
-                  Update Status
+                  <Calendar size={16} />
+                  <span>Update Status</span>
                 </button>
+
 
                 <button
                   onClick={handlePhoneCall}
-                  className="flex h-11 w-11 items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                  className="flex h-11 w-11 items-center justify-center rounded-lg border border-[#F8F8F8] hover:bg-gray-50 transition-colors"
                   title="Phone Call"
                 >
-                  <Phone size={18} className="text-gray-700" />
+                  <Image
+                    src={TimelineCall}
+                    alt="TimelineCall"
+                    width={20}
+                    height={20}
+                  />
                 </button>
 
                 <button
                   onClick={handleWhatsApp}
-                  className="flex h-11 w-11 items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                  className="flex h-11 w-11 items-center justify-center rounded-lg border border-[#F8F8F8] hover:bg-gray-50 transition-colors"
                   title="WhatsApp"
                 >
                   <Image
