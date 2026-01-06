@@ -84,7 +84,7 @@ export function ConfigurationCard({
           <button
             type="button"
             onClick={() => removeConfig(index)}
-            className="bg-orange-500 p-2 rounded-md text-white"
+            className="bg-[#F00004] p-2 rounded-md text-white"
           >
             <Trash size={16} />
           </button>

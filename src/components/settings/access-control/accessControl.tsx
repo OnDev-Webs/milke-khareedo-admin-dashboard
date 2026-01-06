@@ -124,7 +124,7 @@ export default function AccessControl() {
                     setSelectedRoleId(role._id);
                     setOpen(true);
                   }}
-                  className="rounded-lg border px-3 py-1 text-xs"
+                  className="rounded border border-[#DCDCDC] bg-[#F8F8F8] text-[#AFAFAF] px-4 py-1.5 text-xs"
                 >
                   + Assign Employees
                 </button>

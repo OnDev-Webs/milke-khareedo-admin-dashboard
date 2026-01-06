@@ -68,6 +68,11 @@ export default function PropertiesTable({
     dispatch(fetchProperties({ page: currentPage, limit: 10 }));
   }
 
+  const formatCount = (count: number) => {
+    return count < 10 ? `0${count}` : `${count}`;
+  };
+
+
   return (
     <div className="w-full bg-white">
       <DeletePopUp
@@ -85,13 +90,20 @@ export default function PropertiesTable({
 
       <div className="w-full rounded-xl border bg-white overflow-x-hidden">
         <div className="relative overflow-x-auto overflow-y-visible">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm ">
             <thead className="bg-[#f3f6ff]">
               <tr>
-                <th className="px-4 py-3 font-bold">Property Name</th>
+                {/* <th className="px-4 py-3 font-bold">Property Name</th> */}
+                <th className="px-4 py-3 font-bold">
+                  <div className="flex items-center">
+                    <span className="inline-block h-8 w-8 -mr-6 opacity-0" />
+                    <span>Property Name</span>
+                  </div>
+                </th>
+
                 <th className="px-4 py-3 font-bold">Developer</th>
                 <th className="px-4 py-3 font-bold">City</th>
-                <th className="px-4 py-3 font-bold text-center">Group's Count</th>
+                <th className="px-4 py-3 font-bold text-center whitespace-nowrap">Group's Count</th>
                 <th className="px-4 py-3 font-bold text-center">Status</th>
                 <th className="px-4 py-3 font-bold text-center">Actions</th>
               </tr>
@@ -117,14 +129,14 @@ export default function PropertiesTable({
                     <td className="px-4 py-3">{row.location}</td>
 
                     <td className="px-4 py-3 text-center">
-                      {row.joinedGroupCount} / {row.minGroupMembers}
+                      {formatCount(row.joinedGroupCount)} / {formatCount(row.minGroupMembers)}
                     </td>
 
                     <td className="px-4 py-3 text-center whitespace-nowrap">
                       <span
                         className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap ${row.isStatus
-                            ? "bg-green-200 text-green-700"
-                            : "bg-red-200 text-red-700"
+                          ? "bg-[#BCE288] text-[#2E6B2B]"
+                          : "bg-[#FAA2A4] text-[#B44445]"
                           }`}
                       >
                         <Dot size={14} />

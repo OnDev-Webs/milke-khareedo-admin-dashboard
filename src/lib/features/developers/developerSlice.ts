@@ -81,10 +81,15 @@ const developerSlice = createSlice({
       })
       .addCase(fetchDevelopers.fulfilled, (state, action) => {
         state.loading = false;
-        state.developers = action.payload?.data;
-        state.page = action.payload.page;
-        state.limit = action.payload.limit;
-        state.total = action.payload.total;
+        const { data, page, limit, total } = action.payload;
+        if (page === 1) {
+          state.developers = data;           
+        } else {
+          state.developers = [...state.developers, ...data]; 
+        }
+        state.page = page;
+        state.limit = limit;
+        state.total = total;
       })
       .addCase(fetchDevelopers.rejected, (state, action) => {
         state.loading = false;

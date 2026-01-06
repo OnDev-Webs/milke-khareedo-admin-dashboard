@@ -47,9 +47,6 @@ export default function AddBlogPage() {
             <Breadcrumb className="w-full">
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/blogs">Blogs</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbItem>
                   <BreadcrumbLink href="#">Create New Blog</BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>

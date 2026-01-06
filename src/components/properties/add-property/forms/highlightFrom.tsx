@@ -85,10 +85,19 @@ export default function AddHighlightsForm() {
           </div>
         )}
 
-        <div className="rounded-xl border-2 border-dashed border-blue-400 bg-blue-50/40 py-5">
+        <div
+          className={`rounded-xl border-2 border-dashed py-5 transition
+           ${showHighlight
+              ? "border-gray-300 bg-gray-100 opacity-60 cursor-not-allowed"
+              : "border-blue-400 bg-blue-50/40 hover:bg-blue-50"}
+            `}>
+
           <button
             type="button"
-            onClick={() => setShowHightlight(true)}
+            onClick={() => {
+              if (showHighlight) return;
+              setShowHightlight(true);
+            }}
             className="mx-auto flex items-center justify-center gap-2 text-xs font-medium text-gray-700 hover:text-black"
           >
             <Plus className="size-5" />

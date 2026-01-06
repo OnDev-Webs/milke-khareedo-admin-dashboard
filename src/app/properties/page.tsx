@@ -33,7 +33,6 @@ export default function Page() {
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink href="#">Properties</BreadcrumbLink>
                 </BreadcrumbItem>
-
               </BreadcrumbList>
             </Breadcrumb>
           </header>

@@ -30,23 +30,12 @@ export default function Page() {
             <Breadcrumb className="w-full">
               <BreadcrumbList className="flex items-center justify-between">
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#" className="flex items-center gap-2">
-                    <span>📄</span>
-                    <span>Blogs</span>
-                  </BreadcrumbLink>
+                  <BreadcrumbLink href="#">Blogs</BreadcrumbLink>
                 </BreadcrumbItem>
-                <div className="flex items-center">
-                  <button
-                    onClick={() => router.push("/blogs/add")}
-                    className="flex items-center gap-2 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-                  >
-                    Add New Blog
-                  </button>
-                </div>
               </BreadcrumbList>
             </Breadcrumb>
           </header>
-          <div className="w-full h-full overflow-hidden p-4">
+          <div className="w-full h-full overflow-hidden">
             <Blogs />
           </div>
         </div>

@@ -109,11 +109,11 @@ export default function CustomTableSearchBar<T extends Record<string, any>>({
   return (
     <div
       className={`px-3 border-b py-1 flex gap-3 items-center ${className} ${
-        addButton ? "" : "py-3"
+        addButton ? "" : "py-1"
       }`}
       role="search"
     >
-      <div className="relative flex-1 flex items-center">
+      <div className="relative flex-1 flex items-center py-3">
         <Search className="w-4 h-4 text-neutral-400 absolute left-0" />
         <input
           ref={inputRef}
@@ -135,7 +135,7 @@ export default function CustomTableSearchBar<T extends Record<string, any>>({
       </div>
 
       {addButton?.url && (
-        <button className="p-2 border rounded bg-foreground text-white hover:bg-foreground/90 transition-colors">
+        <button className="px-2 py-1 border rounded bg-foreground text-white hover:bg-foreground/90 transition-colors">
           <a href={addButton.url} className="whitespace-nowrap px-1">
             {addButton.buttonName}
           </a>
@@ -145,7 +145,7 @@ export default function CustomTableSearchBar<T extends Record<string, any>>({
       {mode && (
         <button
           onClick={() => mode && setSheetOpen?.((open) => !open)}
-          className="p-2 border rounded bg-foreground text-white hover:bg-foreground/90 transition-colors"
+          className="px-2 py-1 border rounded bg-foreground text-white hover:bg-foreground/90 transition-colors"
         >
           {addButton?.buttonName}
         </button>

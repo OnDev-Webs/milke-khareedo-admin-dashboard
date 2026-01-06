@@ -4,8 +4,11 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, } from "@/components/ui/s
 import { fetchRoles } from "@/lib/features/role/roleApi";
 import { createUser, fetchUserById, updateUser } from "@/lib/features/user/userApi";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { Eye, EyeOff, Mail, Phone, Upload, X, } from "lucide-react";
+import { Camera, Eye, EyeOff, Mail, Phone, Upload, X, } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import camera from "@/assets/camera.svg";
+import upload from "@/assets/uploadimg.svg"
 
 export type User = {
   id: number;
@@ -28,7 +31,7 @@ function Field({
 }) {
   return (
     <div>
-      <fieldset className="border-2 border-black px-4 pb-1 rounded-md">
+      <fieldset className="border-1 border-black px-4 pb-1 rounded-md">
         <legend className="text-xs font-semibold text-gray-700 px-1">
           {label}
         </legend>
@@ -212,51 +215,54 @@ function UserEdit({ data }: any) {
 
             {/* IMAGE EDIT SECTION (FIXED) */}
             <div className="flex items-start gap-4">
+              {/* IMAGE BOX */}
               <div
-                onClick={() => fileRef.current?.click()}
-                className="flex h-20 w-20 cursor-pointer items-center justify-center rounded-lg border border-dashed overflow-hidden text-gray-400"
-              >
-                {preview ? (
-                  <img
-                    src={preview}
-                    alt="profile"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <Upload size={20} />
-                )}
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-gray-800">
-                  Upload Photo{" "}
-                  <span
-                    onClick={() => fileRef.current?.click()}
-                    className="cursor-pointer font-semibold text-blue-600 underline"
-                  >
-                    browse
-                  </span>
-                </p>
-                <p className="mt-1 text-xs text-gray-500">
-                  Max 10 MB files are allowed
-                </p>
-
-                {/* EDIT PROFILE BUTTON */}
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  className="mt-2 rounded-sm bg-black px-3 py-1 text-xs text-white"
-                >
-                  Edit Profile
-                </button>
-
+                className={`${preview ? "" : "border-dashed border-blue-400 border"} relative flex h-20 w-20 items-center justify-center rounded-lg bg-blue-50`}>
                 <input
                   ref={fileRef}
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
-                  className="hidden"
+                  className="absolute h-20 w-20 cursor-pointer opacity-0"
                 />
+
+                {preview ? (
+                  <img
+                    src={preview}
+                    alt="profile"
+                    className="h-20 w-20 rounded-lg object-cover"
+                  />
+                ) : (
+                  <img src={upload.src} alt="upload" />
+                )}
+              </div>
+
+              {/* TEXT + BUTTON */}
+              <div>
+                <p className="text-sm font-medium text-gray-800">
+                  Upload Photo{" "}
+                  <span className="font-semibold text-blue-600 cursor-pointer">
+                    browse
+                  </span>
+                </p>
+
+                <p className="mt-1 text-xs text-gray-500">
+                  Max 10 MB files are allowed
+                </p>
+
+                <button
+                  type="button"
+                  className="mt-2 bg-black text-white rounded-sm border px-2 py-1 text-xs flex gap-1 items-center"
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="absolute opacity-0 cursor-pointer"
+                  />
+                  <Camera className="size-3.5" />
+                  Edit Profile
+                </button>
               </div>
             </div>
 
@@ -371,7 +377,13 @@ function UserCreate() {
     "yopmail.com"
   ];
   const [emailError, setEmailError] = useState<string>("");
+  const [roleError, setRoleError] = useState("");
 
+  const { roles } = useAppSelector((state) => state.roles);
+
+  useEffect(() => {
+    dispatch(fetchRoles());
+  }, [dispatch]);
 
   const [form, setForm] = useState({
     name: "",
@@ -398,9 +410,15 @@ function UserCreate() {
     return true;
   };
 
-
   const handleCreate = async () => {
+
+    if (!form.role) {
+      setRoleError("Role is required");
+      return;
+    }
+
     if (!validateEmailDomain(form.email)) return;
+
     const fd = new FormData();
 
     fd.append("name", form.name);
@@ -413,22 +431,16 @@ function UserCreate() {
       fd.append("profileImage", imageFile);
     }
 
-    await dispatch(createUser({
-      name: form.name,
-      email: form.email,
-      phone: form.phone,
-      password: form.password,
-      role: form.role,
-    })).unwrap();
-
+    await dispatch(
+      createUser({
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        password: form.password,
+        role: form.role,
+      })
+    ).unwrap();
   };
-
-  const { roles } = useAppSelector((state) => state.roles);
-
-  useEffect(() => {
-    dispatch(fetchRoles());
-  }, [dispatch]);
-
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -437,7 +449,6 @@ function UserCreate() {
     setImageFile(file);
     setPreview(URL.createObjectURL(file));
   };
-
 
   return (
     <div className="h-[86vh] bg-white overflow-hidden">
@@ -448,8 +459,7 @@ function UserCreate() {
             <div className="flex items-start gap-4">
               <div
                 onClick={() => fileRef.current?.click()}
-                className="flex h-20 w-20 cursor-pointer items-center justify-center rounded-lg border border-dashed overflow-hidden text-gray-400"
-              >
+               className={`${preview ? "" : "border-dashed border-blue-400 border"} flex h-20 w-20 items-center justify-center rounded-lg  bg-blue-50  text-white`}>
                 {preview ? (
                   <img
                     src={preview}
@@ -457,7 +467,7 @@ function UserCreate() {
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <Upload size={20} />
+                 <img src={upload.src} alt="logo" />
                 )}
               </div>
 
@@ -478,8 +488,16 @@ function UserCreate() {
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="mt-2 rounded-sm bg-black px-3 py-1 text-xs text-white">
-                  Edit Profile
+                  className="mt-2 flex items-center gap-2 rounded-sm bg-black border border-gray-600 px-3 py-1.5 text-xs text-white"
+                >
+                  <Image
+                    src={camera}
+                    alt="camera"
+                    width={14}
+                    height={14}
+                    className="object-contain"
+                  />
+                  <span className="whitespace-nowrap">Edit Profile</span>
                 </button>
 
                 <input
@@ -536,10 +554,12 @@ function UserCreate() {
             <Field label="Role">
               <select
                 value={form.role}
-                onChange={(e) =>
-                  setForm({ ...form, role: e.target.value })
-                }
-                className="w-full outline-none text-sm bg-transparent">
+                onChange={(e) => {
+                  setForm({ ...form, role: e.target.value });
+                  if (roleError) setRoleError("");
+                }}
+                className="w-full outline-none text-sm bg-transparent"
+              >
                 <option value="">Select Role</option>
                 {roles.map((r) => (
                   <option key={r._id} value={r._id}>
@@ -547,6 +567,10 @@ function UserCreate() {
                   </option>
                 ))}
               </select>
+
+              {roleError && (
+                <p className="text-xs text-red-500 mt-1">{roleError}</p>
+              )}
             </Field>
 
             <Field label="Password">

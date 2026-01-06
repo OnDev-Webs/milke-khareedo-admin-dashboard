@@ -335,9 +335,9 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
           </div>
           {/* Rich Text Editor Toolbar */}
           <div>
-            <div className="border border-gray-300 rounded-md overflow-hidden">
+            <div className="border border-[#F3F3F3] rounded-md overflow-hidden py-4 px-4">
               {!readOnly && (
-                <div className="flex items-center gap-2 p-2 bg-gray-50 border-b border-gray-300 flex-wrap">
+                <div className="flex items-center gap-2 p-2 bg-[#FFFFFF] border border-[#F3F3F3] flex-wrap">
                   <button
                     type="button"
                     onClick={() => formatText("bold")}
@@ -434,7 +434,7 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
                   </button>
                 </div>
               )}
-              <fieldset className="m-3 border border-gray-300 rounded-md min-h-[400px] focus-within:border-primary">
+              <fieldset className="mt-2 border border-gray-300 rounded-md min-h-[400px] focus-within:border-primary">
                 <legend className="px-1 text-sm text-gray-700 font-medium">
                   Content <span className="text-red-500">*</span>
                 </legend>

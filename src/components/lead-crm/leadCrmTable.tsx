@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  ChevronLeft,
-  ChevronRight,
-  Dot,
-  EllipsisVertical,
-  EllipsisVerticalIcon,
-  MoreHorizontalIcon,
-} from "lucide-react";
+import { Dot,EllipsisVertical,} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import LeadCRMSheet, { SheetMode } from "./leadCrmSheet";
 import DeletePopUp from "../custom/popups/delete";
@@ -60,18 +53,10 @@ const formatStatus = (status: string) => {
 
 export default function LeadCRMTable({
   leads,
-  currentPage,
-  totalPages,
-  onPageChange,
-  getPageNumbers,
-  dataLength,
-  indexOfFirstItem,
-  indexOfLastItem,
   onRefreshLeads,
 }: LeadCRMTableProps) {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const pageNumbers = getPageNumbers();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
@@ -84,6 +69,10 @@ export default function LeadCRMTable({
     left: number;
   } | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const INITIAL_COUNT = 7;
+  const LOAD_MORE_COUNT = 6;
+
+  const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
@@ -172,7 +161,7 @@ export default function LeadCRMTable({
         description="Are you sure you want to delete this lead? Once completed, it cannot be undone."
         buttonText="Delete Lead"
       />
-      <div className="hidden lg:block">
+      <div className="hidden lg:block p-4">
         <div className="w-full rounded-xl overflow-hidden border bg-white">
           <div className="relative overflow-x-auto overflow-y-visible">
             <table className="w-full text-sm">
@@ -193,8 +182,7 @@ export default function LeadCRMTable({
               </thead>
 
               <tbody className="divide-y">
-                {leads.map((row, index) => {
-                  const isLastTwo = index >= leads.length - 2;
+                {leads.slice(0, visibleCount).map((row, index) => {
 
                   return (
                     <tr key={row._id} className="hover:bg-gray-50">
@@ -275,8 +263,7 @@ export default function LeadCRMTable({
                                   handleViewLead(row._id)
                                 }}
                                 className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
-                            
-                        `}
+                            `}
                               >
                                 View
                               </button>
@@ -300,58 +287,21 @@ export default function LeadCRMTable({
             </table>
           </div>
 
-          <div className="flex items-center justify-center gap-2 border-t p-4 text-sm text-gray-600">
-            <button
-              className="flex items-center gap-2 rounded-full border px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={() => onPageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft size={16} /> Back
-            </button>
-
-            {pageNumbers.map((page) => (
+          {visibleCount < leads.length && (
+            <div className="flex justify-center border-t p-4">
               <button
-                key={page}
-                className={`h-7 w-7 rounded-full flex items-center justify-center ${page === currentPage
-                  ? "bg-black text-white"
-                  : "bg-gray-100 hover:bg-gray-200"
-                  }`}
-                onClick={() => onPageChange(page)}
+                onClick={() =>
+                  setVisibleCount((prev) =>
+                    Math.min(prev + LOAD_MORE_COUNT, leads.length)
+                  )
+                }
+                className="rounded-full border border-[#F5F5F5] px-6 py-2 text-[15px] font-semibold text-[#2D2D2D] hover:bg-gray-100"
               >
-                {page}
+                Learn more
               </button>
-            ))}
+            </div>
+          )}
 
-            {totalPages > 5 && currentPage < totalPages - 2 && (
-              <button className="h-7 w-7 rounded-full bg-gray-100 flex items-center justify-center">
-                <EllipsisVerticalIcon size={16} className="rotate-90" />
-              </button>
-            )}
-
-            {totalPages > 5 && currentPage < totalPages - 1 && (
-              <button
-                className={`h-7 w-7 rounded-full flex items-center justify-center ${currentPage === totalPages
-                  ? "bg-black text-white"
-                  : "bg-gray-100 hover:bg-gray-200"
-                  }`}
-                onClick={() => onPageChange(totalPages)}
-              >
-                {totalPages}
-              </button>
-            )}
-
-            <button
-              className="flex items-center gap-2 rounded-full border px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={() => onPageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              Next <ChevronRight size={16} />
-            </button>
-
-            {/* <div className="ml-4 text-sm text-gray-500">
-            Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, dataLength)} of {dataLength} entries
-          </div> */}
-          </div>
         </div>
       </div>
       {/* ================= MOBILE CARD VIEW ================= */}

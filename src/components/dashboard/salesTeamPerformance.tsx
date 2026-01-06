@@ -8,7 +8,7 @@ export default function SalesTeamPerformance() {
 
   return (
     <section>
-      <div className="rounded-2xl border bg-white py-1 px-3">
+      <div className="rounded-2xl border bg-white py-2 px-3">
         <h3 className="mb-2 text-[18px] font-bold">
           Sales Team Performance
         </h3>
@@ -24,7 +24,7 @@ export default function SalesTeamPerformance() {
               </tr>
             </thead>
 
-            <tbody className="block max-h-[224px] overflow-y-auto hide-scrollbar">
+            <tbody className="block max-h-[220px] overflow-y-auto hide-scrollbar">
               {salesTeamPerformance.map((row) => (
                 <tr
                   key={row.userId}

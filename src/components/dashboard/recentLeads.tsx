@@ -65,8 +65,8 @@ export default function RecentLeads() {
 
   return <>
     <section className="h-full hidden md:block">
-      <div className="h-full rounded-2xl border bg-white px-3 py-2">
-        <div className="flex items-center justify-between">
+      <div className="h-full rounded-2xl border bg-white px-3 py-3">
+        <div className="flex items-center justify-between px-1">
           <h3 className="text-[18px] text-[#000000] font-bold ">Recent Leads</h3>
 
           <div className="flex items-center gap-4 font-medium text-[17px] text-[#3A59A6]">

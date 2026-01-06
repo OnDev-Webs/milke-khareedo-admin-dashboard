@@ -43,8 +43,10 @@ export default function AddAmenitiesForm() {
     );
   };
 
+  const isDisabled = !amenity.trim();
+
   return (
-    <div className="bg-white p-6">
+    <div className="bg-white p-3">
       <div className="mx-auto max-w-6xl border-b border-gray-400 pb-2">
         <fieldset className="rounded-md border bg-white px-3 pt-1 pb-2">
           <legend className="text-xs font-semibold text-gray-700">
@@ -63,21 +65,27 @@ export default function AddAmenitiesForm() {
                 }
               }}
               placeholder="Ex: Swimming Pool"
-              className="flex-1 rounded-lg py-2 text-sm outline-none"
+              className="flex-1 rounded-lg py-2 text-[15px] text-black font-medium outline-none"
             />
-
             <button
               type="button"
+              disabled={isDisabled}
               onClick={addAmenity}
-              className="rounded-lg bg-gray-100 px-4 py-1.5 text-sm font-medium text-black flex gap-2 items-center"
+              className={`rounded-lg px-4 py-1 text-sm font-medium flex gap-2 items-center transition
+              ${isDisabled
+                  ? "bg-[#F8F8F8] text-[#AFAFAF] border border-[#DCDCDC] cursor-not-allowed"
+                  : "bg-black text-white border border-[#DCDCDC] hover:bg-gray-900"
+                }
+              `}
             >
               Add
               <Plus size={16} strokeWidth={1} />
             </button>
+
           </div>
         </fieldset>
 
-        <p className="px-3 text-xs text-gray-400">
+        <p className="px-3 text-xs text-gray-400 pb-2">
           Enter one amenity at a time.
         </p>
       </div>
@@ -88,7 +96,7 @@ export default function AddAmenitiesForm() {
             {amenities.map((item) => (
               <span
                 key={item}
-                className="flex items-center gap-2 rounded-md bg-blue-50 px-3 py-1 text-sm text-gray-700"
+                className="flex items-center gap-2 rounded-md bg-[#F4F8FF] px-3 py-1 text-[14px] font-medium text-[#000000]"
               >
                 {item}
                 <button

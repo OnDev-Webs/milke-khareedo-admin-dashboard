@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2, X } from "lucide-react";
+import { GripVertical, Trash2, X } from "lucide-react";
 import React, { useRef } from "react";
 import { useFormContext } from "react-hook-form";
 import upload from "@/assets/upload.svg";
@@ -10,6 +10,7 @@ export default function AddProjectPhotoUpload() {
   const { setValue, watch } = useFormContext<any>();
   const files: File[] = watch("images") || [];
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const dragIndex = useRef<number | null>(null);
 
   const pickFiles = () => inputRef.current?.click();
 
@@ -35,8 +36,18 @@ export default function AddProjectPhotoUpload() {
     setValue("images", updated, { shouldValidate: true });
   };
 
+  const moveItem = (from: number, to: number) => {
+    if (from === to) return;
+
+    const updated = [...files];
+    const [item] = updated.splice(from, 1);
+    updated.splice(to, 0, item);
+
+    setValue("images", updated, { shouldValidate: true });
+  };
+
   return (
-    <div className="h-[85svh] p-4">
+    <div className="h-[80svh] p-4 overflow-y-auto overflow-x-hidden">
       {files.length === 0 && (
         <div className="w-full h-full flex items-center justify-center">
           <div
@@ -68,29 +79,44 @@ export default function AddProjectPhotoUpload() {
             return (
               <div
                 key={idx}
-                className="relative rounded-xl overflow-hidden group  h-58"
+                className="relative rounded-xl overflow-hidden h-58"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => {
+                  if (dragIndex.current !== null) {
+                    moveItem(dragIndex.current, idx);
+                    dragIndex.current = null;
+                  }
+                }}
               >
                 <Image
                   src={previewUrl}
                   alt="preview"
                   fill
-                  className="w-full h-full object-cover"
+                  className="object-cover"
                 />
 
                 <button
                   type="button"
                   onClick={() => removeFile(idx)}
-                  className="absolute top-2 right-2 bg-white p-2 rounded-full opacity-0 group-hover:opacity-100"
+                  className="absolute top-2 right-2 bg-white p-2 rounded-full"
                 >
-                  <Trash2 size={14} className="text-red-400" />
+                  <Trash2 size={14} className="text-[#F00004]" />
                 </button>
 
+                <button
+                  type="button"
+                  draggable
+                  onDragStart={() => (dragIndex.current = idx)}
+                  className="absolute top-12 right-2 bg-white p-2 rounded-full cursor-grab active:cursor-grabbing"
+                  title="Move image"
+                >
+                  <GripVertical size={14} />
+                </button>
 
-                <div className="absolute overflow-hidden bottom-2 right-2 bg-black/20 text-sm px-2.5 py-1.5 rounded-md backdrop-blur-2xl text-white font-normal">
-                  {`${idx + 1} / ${files?.length} ${idx == 0 ? "Preferred cover image" : ""
-                    }`}
+                {/* INFO */}
+                <div className="absolute bottom-2 right-2 bg-black/30 text-xs px-2 py-1 rounded text-white">
+                  {idx + 1}/{files.length} {idx === 0 ? "Preferred cover" : ""}
                 </div>
-
               </div>
             );
           })}

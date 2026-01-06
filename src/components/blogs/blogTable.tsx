@@ -56,6 +56,12 @@ export default function BlogTable({
     left: number;
   } | null>(null);
 
+  const INITIAL_COUNT = 7;
+  const LOAD_MORE_COUNT = 6;
+
+  const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
+
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -110,7 +116,7 @@ export default function BlogTable({
   };
 
   return (
-    <div className="w-full bg-white">
+    <div className="w-full bg-white p-4">
       <DeletePopUp
         open={isDeleteOpen}
         onClose={() => {
@@ -141,12 +147,15 @@ export default function BlogTable({
             </thead>
 
             <tbody className="divide-y">
-              {blogs.map((row, index) => {
+              {blogs.slice(0, visibleCount).map((row, index) => {
 
                 return (
                   <tr key={row._id} className="relative hover:bg-gray-50" style={{ zIndex: openMenuId === row._id ? 50 : 1 }}>
                     <td className="px-4 py-3">
-                      <span className="font-semibold text-gray-800">
+                      <span
+                        className="block max-w-[280px] truncate font-semibold text-gray-800"
+                        title={row.title}
+                      >
                         {row.title || "N/A"}
                       </span>
                     </td>
@@ -161,7 +170,7 @@ export default function BlogTable({
                           row.tags.slice(0, 3).map((tag, idx) => (
                             <span
                               key={idx}
-                              className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full"
+                              className="px-2 py-1 text-xs font-medium bg-[#F4F8FF] text-[#000000] rounded"
                             >
                               {tag.startsWith("#") ? tag : `#${tag}`}
                             </span>
@@ -256,38 +265,21 @@ export default function BlogTable({
           </table>
         </div>
 
-        <div className="flex items-center justify-center gap-2 border-t p-4 text-sm text-gray-600">
-          <button
-            className="flex items-center gap-2 rounded-full border px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => onPageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            <ChevronLeft size={16} />
-            Back
-          </button>
-
-          {pageNumbers.map((pageNum) => (
+        {visibleCount < blogs.length && (
+          <div className="flex justify-center border-t p-4">
             <button
-              key={pageNum}
-              onClick={() => onPageChange(pageNum)}
-              className={`rounded-full border px-3 py-1 ${currentPage === pageNum
-                ? "bg-primary text-primary-foreground border-primary"
-                : "hover:bg-gray-50"
-                }`}
+              onClick={() =>
+                setVisibleCount((prev) =>
+                  Math.min(prev + LOAD_MORE_COUNT, blogs.length)
+                )
+              }
+              className="rounded-full border border-[#F5F5F5] px-6 py-2 text-[15px] font-semibold text-[#2D2D2D] hover:bg-gray-100"
             >
-              {pageNum}
+              Learn more
             </button>
-          ))}
+          </div>
+        )}
 
-          <button
-            className="flex items-center gap-2 rounded-full border px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => onPageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            Next
-            <ChevronRight size={16} />
-          </button>
-        </div>
       </div>
     </div>
   );

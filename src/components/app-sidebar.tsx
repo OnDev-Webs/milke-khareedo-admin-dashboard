@@ -2,39 +2,55 @@
 
 import * as React from "react"
 import { usePathname, useRouter } from "next/navigation"
-import {
-  BookOpen,
-  Bot,
-  Settings2,
-  SquareTerminal,
-  FileText,
-  Settings,
-} from "lucide-react"
-
+import { Settings2,SquareTerminal,Settings,} from "lucide-react"
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarRail,
-} from "@/components/ui/sidebar"
+import { Sidebar,SidebarContent,SidebarFooter,SidebarHeader,SidebarRail,} from "@/components/ui/sidebar"
 import { useAppSelector } from "@/lib/store/hooks"
 import Image from "next/image"
 import logo from "@/assets/logo.png"
 import clsx from "clsx"
+import dashboard from "@/assets/dashboard.svg"
+import property from "@/assets/property.svg"
+import developer from "@/assets/developer.svg"
+import leadCRM from "@/assets/leadCRM.svg"
+import blog from "@/assets/blog.svg"
+import setting from "@/assets/setting.svg"
 
 const navMain = [
-  { title: "Dashboard", url: "/dashboard", icon: SquareTerminal },
-  { title: "Properties", url: "/properties", icon: Bot },
-  { title: "Developers", url: "/developers", icon: BookOpen },
-  { title: "Lead / CRM", url: "/lead-crm", icon: Settings2 },
-  { title: "Blogs", url: "/blogs", icon: FileText },
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: <Image src={dashboard} alt="Dashboard" width={18} height={18} />,
+  },
+  {
+    title: "Properties",
+    url: "/properties",
+    icon: <Image src={property} alt="Properties" width={18} height={18} />,
+  },
+  {
+    title: "Developers",
+    url: "/developers",
+    icon: <Image src={developer} alt="Developers" width={18} height={18} />,
+  },
+  {
+    title: "Lead / CRM",
+    url: "/lead-crm",
+    icon: <Image src={leadCRM} alt="Lead CRM" width={18} height={18} />,
+  },
+  {
+    title: "Blogs",
+    url: "/blogs",
+    icon: <Image src={blog} alt="Blogs" width={18} height={18} />,
+  },
 ]
 
 const navSetting = [
-  { title: "Setting", url: "/settings", icon: Settings },
+  {
+    title: "Setting",
+    url: "/settings",
+    icon: <Image src={setting} alt="Setting" width={18} height={18} />,
+  },
 ]
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
@@ -71,8 +87,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       <Sidebar
         collapsible="icon"
         className="hidden lg:flex"
-        {...props}
-      >
+        {...props}>
         <SidebarHeader>
           <Image
             src={logo}
@@ -99,7 +114,6 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 
         <SidebarRail />
       </Sidebar>
-
       {/* ================= MOBILE BOTTOM NAV ================= */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t overflow-x-hidden">
         <div className="flex items-center h-14">
@@ -125,7 +139,6 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           })}
         </div>
       </div>
-
     </>
   )
 }

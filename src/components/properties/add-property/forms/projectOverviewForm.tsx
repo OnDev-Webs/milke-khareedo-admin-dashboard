@@ -182,7 +182,7 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
 
 
   return (
-    <main className="p-4 h-[87vh] pb-10  overflow-y-auto">
+    <main className="p-4 h-[84vh] pb-10  overflow-y-auto">
       <div className="grid gap-6 md:grid-cols-3">
         <Field
           label="Project Name"
@@ -222,17 +222,6 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
             />
           </div>
         </Field>
-
-        {/* <Field
-          label="Location "
-          description="Primary area or landmark"
-          error={errors.location}
-        >
-          <input
-            className="w-full outline-none"
-            {...register("location", { required: true })}
-          />
-        </Field> */}
 
         <Field
           label="Location"
@@ -350,7 +339,7 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
             />
 
             {offerPrice && (
-              <p className="absolute top-full mt-14 text-xs text-[#9A9A9A] truncate w-full">
+              <p className="absolute top-full mt-8 text-xs text-[#9A9A9A] truncate w-full">
                 {numberToWords(offerPrice)}
               </p>
             )}
@@ -384,7 +373,7 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
           />
         </Field>
 
-        <div className=" ">
+        {/* <div className=" ">
           {!reraFileImg?.state ? (
             <Field
               label="RERA QR Code"
@@ -415,7 +404,53 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
               <X onClick={() => removeReraFile()} size={16} />
             </div>
           )}
+        </div> */}
+
+        <div className=" ">
+          {!reraFileImg?.state ? (
+            <Field
+              label="RERA QR Code"
+              description="Upload project’s RERA QR"
+              error={errors.reraQrImage}
+            >
+              <label
+                htmlFor="rera-upload"
+                className="w-full flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                {/* icon */}
+                <div className="relative">
+                  <img src={file.src} className="size-4" />
+                  <span className="absolute text-[6px] top-1 left-1 font-bold text-white">
+                    IMG
+                  </span>
+                </div>
+                <span>Choose file</span>
+              </label>
+
+              <input
+                id="rera-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleReraFile(e.target.files)}
+              />
+            </Field>
+          ) : (
+            <div className="px-4 py-4 mt-2 rounded-md bg-gray-100 border border-gray-400 border-dashed flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <img src={file.src} className="size-5" />
+                  <span className="absolute text-[6px] top-2 left-1 font-bold text-white">
+                    PNG
+                  </span>
+                </div>
+                <div className="w-40 truncate">{reraFileImg.filename}</div>
+              </div>
+
+              <X onClick={() => removeReraFile()} size={16} />
+            </div>
+          )}
         </div>
+
 
         <Field
           label={`Possession Status`}

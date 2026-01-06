@@ -30,7 +30,7 @@ export default function DeletePopUp({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) { setDeleted(false); onClose(); } }}>
-      <DialogContent className="border-none bg-transparent p-0 shadow-none">
+      <DialogContent showCloseButton={false} className="border-none bg-transparent p-0 shadow-none">
         <VisuallyHidden>
           <DialogTitle>{title}</DialogTitle>
         </VisuallyHidden>
