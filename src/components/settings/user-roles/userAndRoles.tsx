@@ -1,14 +1,11 @@
 "use client";
 
-import { EllipsisVertical } from "lucide-react";
+import { Check, EllipsisVertical, Power, PowerOff, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import UserAndRolesSheet from "./userRoleSheet";
 import DeletePopUp from "@/components/custom/popups/delete";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import {
-  fetchUsers,
-  deleteUser,
-} from "@/lib/features/user/userApi";
+import { fetchUsers, deleteUser } from "@/lib/features/user/userApi";
 import { fetchRoles } from "@/lib/features/role/roleApi";
 import Loader from "@/components/ui/loader";
 
@@ -28,10 +25,25 @@ export default function UserAndRoles() {
   const [data, setData] = useState<any>(null);
   const [mode, setMode] = useState<SheetMode>("view");
 
+  // 🔹 UI-ONLY STATUS MAP (true = active, false = inactive)
+  const [userStatusMap, setUserStatusMap] = useState<Record<string, boolean>>(
+    {}
+  );
+
   useEffect(() => {
     dispatch(fetchUsers());
     dispatch(fetchRoles());
   }, [dispatch]);
+
+  const toggleUserStatusUI = (userId: string) => {
+    setUserStatusMap((prev) => ({
+      ...prev,
+      [userId]: !prev[userId],
+    }));
+  };
+
+  const isUserActive = (userId: string) =>
+    userStatusMap[userId] ?? true;
 
   return (
     <div className="bg-white">
@@ -95,7 +107,7 @@ export default function UserAndRoles() {
         {/* ===== LOADING ===== */}
         {loading && (
           <p className="p-4 text-sm text-gray-500">
-            <Loader size={38}/>
+            <Loader size={38} />
           </p>
         )}
 
@@ -103,22 +115,26 @@ export default function UserAndRoles() {
         {!loading &&
           users.map((user, index) => {
             const isLastTwo = index >= users.length - 2;
+            const active = isUserActive(user._id);
 
             return (
               <div
                 key={user._id}
-                className="grid grid-cols-12 items-center border-b p-4 text-sm"
+                className={`grid grid-cols-12 items-center border-b p-4 text-sm ${!active ? "opacity-60" : ""
+                  }`}
               >
                 {/* ===== USER NAME ===== */}
                 <div className="col-span-6 flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden">
-                    {user.profileImage && (
-                      <img
-                        src={user.profileImage || "/images/user.jfif"}
-                        alt={user.firstName}
-                        className="h-full w-full object-cover"
-                      />
-                    )}
+                    <img
+                      src={
+                        user.profileImage && user.profileImage.trim() !== ""
+                          ? user.profileImage
+                          : "/images/user.jfif"
+                      }
+                      alt={user.name || "User"}
+                      className="h-full w-full object-cover"
+                    />
                   </div>
                   <span className="font-medium text-gray-800">
                     {user.name}
@@ -128,14 +144,35 @@ export default function UserAndRoles() {
                 {/* ===== ROLE ===== */}
                 <div className="col-span-4">
                   <span className="inline-flex rounded-full bg-blue-100 px-4 py-2 text-xs font-semibold text-blue-700">
-                    {typeof user.role === "object"
-                      ? user.role.name
-                      : "—"}
+                    {typeof user.role === "object" ? user.role.name : "—"}
                   </span>
                 </div>
 
                 {/* ===== ACTIONS ===== */}
-                <div className="relative col-span-2 flex justify-end">
+                <div className="relative col-span-2 flex items-center justify-end gap-2">
+                  {/* UI-ONLY TOGGLE */}
+                  <button
+                    onClick={() => toggleUserStatusUI(user._id)}
+                    title={active ? "Active" : "Inactive"}
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-all duration-200
+    ${active ? "bg-green-600" : "bg-gray-300"}
+  `}
+                  >
+                    <span
+                      className={`inline-flex h-4 w-4 items-center justify-center rounded-full bg-white shadow transform transition-all duration-200
+      ${active ? "translate-x-4.5" : "translate-x-0.5"}
+    `}
+                    >
+                      {active ? (
+                        <Check size={10} className="text-green-600" />
+                      ) : (
+                        <X size={10} className="text-gray-400" />
+                      )}
+                    </span>
+                  </button>
+
+
+                  {/* ELLIPSIS */}
                   <button
                     onClick={() =>
                       setOpenMenuId(
@@ -149,9 +186,8 @@ export default function UserAndRoles() {
 
                   {openMenuId === user._id && (
                     <div
-                      className={`absolute right-0 z-10 w-36 rounded-lg border bg-white shadow ${
-                        isLastTwo ? "bottom-8" : "top-8"
-                      }`}
+                      className={`absolute right-0 z-10 w-36 rounded-lg border bg-white shadow ${isLastTwo ? "bottom-8" : "top-8"
+                        }`}
                     >
                       <button
                         onClick={() => {
