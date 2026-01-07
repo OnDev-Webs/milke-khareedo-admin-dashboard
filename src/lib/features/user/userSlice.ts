@@ -7,6 +7,7 @@ import {
   updateUser,
   deleteUser,
   User,
+  toggleUserStatus,
 } from "./userApi";
 
 interface UserState {
@@ -98,7 +99,38 @@ const userSlice = createSlice({
         state.users = state.users.filter(
           (u) => u._id !== action.payload
         );
+      })
+
+      /* ===== TOGGLE USER STATUS ===== */
+      .addCase(toggleUserStatus.pending, (state) => {
+        state.loading = true;
+      })
+      /* ===== TOGGLE USER STATUS ===== */
+      /* ===== TOGGLE USER STATUS ===== */
+      .addCase(toggleUserStatus.fulfilled, (state, action) => {
+        const updatedUser = action.payload.user;
+
+        // 🔥 IMPORTANT: id vs _id mapping
+        const index = state.users.findIndex(
+          (u) => u._id === updatedUser.id
+        );
+
+        if (index !== -1) {
+          // 🔥 DIRECT mutation (RTK handles immutability)
+          state.users[index].isActive = updatedUser.isActive;
+        }
+
+        // 🔥 selectedUser bhi update karo
+        if (state.selectedUser && state.selectedUser._id === updatedUser.id) {
+          state.selectedUser.isActive = updatedUser.isActive;
+        }
+      })
+
+      .addCase(toggleUserStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Toggle user status failed";
       });
+
   },
 });
 

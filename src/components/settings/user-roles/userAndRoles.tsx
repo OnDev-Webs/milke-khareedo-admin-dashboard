@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import UserAndRolesSheet from "./userRoleSheet";
 import DeletePopUp from "@/components/custom/popups/delete";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { fetchUsers, deleteUser } from "@/lib/features/user/userApi";
+import { fetchUsers, deleteUser, toggleUserStatus } from "@/lib/features/user/userApi";
 import { fetchRoles } from "@/lib/features/role/roleApi";
 import Loader from "@/components/ui/loader";
 
@@ -25,25 +25,27 @@ export default function UserAndRoles() {
   const [data, setData] = useState<any>(null);
   const [mode, setMode] = useState<SheetMode>("view");
 
-  // 🔹 UI-ONLY STATUS MAP (true = active, false = inactive)
-  const [userStatusMap, setUserStatusMap] = useState<Record<string, boolean>>(
-    {}
-  );
-
   useEffect(() => {
     dispatch(fetchUsers());
     dispatch(fetchRoles());
   }, [dispatch]);
 
-  const toggleUserStatusUI = (userId: string) => {
-    setUserStatusMap((prev) => ({
-      ...prev,
-      [userId]: !prev[userId],
-    }));
+  const handleToggleUserStatus = async (
+    userId: string,
+    currentStatus: boolean
+  ) => {
+    try {
+      await dispatch(
+        toggleUserStatus({
+          id: userId,
+          isActive: !currentStatus,
+        })
+      ).unwrap();
+      dispatch(fetchUsers());
+    } catch (error) {
+      console.error("Failed to toggle user status", error);
+    }
   };
-
-  const isUserActive = (userId: string) =>
-    userStatusMap[userId] ?? true;
 
   return (
     <div className="bg-white">
@@ -115,7 +117,7 @@ export default function UserAndRoles() {
         {!loading &&
           users.map((user, index) => {
             const isLastTwo = index >= users.length - 2;
-            const active = isUserActive(user._id);
+            const active = user.isActive ?? true;
 
             return (
               <div
@@ -152,16 +154,14 @@ export default function UserAndRoles() {
                 <div className="relative col-span-2 flex items-center justify-end gap-2">
                   {/* UI-ONLY TOGGLE */}
                   <button
-                    onClick={() => toggleUserStatusUI(user._id)}
+                    onClick={() => handleToggleUserStatus(user._id, active)}
                     title={active ? "Active" : "Inactive"}
                     className={`relative inline-flex h-5 w-9 items-center rounded-full transition-all duration-200
-    ${active ? "bg-green-600" : "bg-gray-300"}
-  `}
+                    ${active ? "bg-green-600" : "bg-gray-300"}`}
                   >
                     <span
                       className={`inline-flex h-4 w-4 items-center justify-center rounded-full bg-white shadow transform transition-all duration-200
-      ${active ? "translate-x-4.5" : "translate-x-0.5"}
-    `}
+                      ${active ? "translate-x-4.5" : "translate-x-0.5"}`}
                     >
                       {active ? (
                         <Check size={10} className="text-green-600" />

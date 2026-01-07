@@ -40,7 +40,7 @@ export default function AddHighlightsForm() {
 
   return (
     <div className="bg-white p-4">
-      <div className="mx-auto max-w-6xl space-y-3">
+      <div className="mx-auto space-y-3">
         {highlights.map((item) => (
           <div
             key={item}

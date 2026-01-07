@@ -172,7 +172,7 @@ export default function DashboardKPI() {
         <div className="w-full">
           <button
             onClick={() => setDateRangeSheetOpen(true)}
-            className="w-full flex items-center justify-between rounded-lg bg-white px-3 py-3 border text-[14px] font-medium"
+            className="w-full flex items-center justify-between rounded-lg bg-white px-3 py-2 border text-[14px] font-medium"
           >
             <span>
               {dateRange === "past_24_hours" && "Past 24 Hours"}

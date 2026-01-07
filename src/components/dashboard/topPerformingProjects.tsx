@@ -2,16 +2,20 @@ import cardImg from "@/assets/cardImg.jpg";
 import { useAppSelector } from "@/lib/store/hooks";
 import { RootState } from "@/lib/store/store";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function TopPerformingProjects() {
+  const router = useRouter();
   const { topPerformingProjects } = useAppSelector((state: RootState) => state.dashboard);
 
   return (
     <div className="border rounded-2xl bg-white py-4 px-4 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
       <div className="flex items-start justify-between mb-6.5">
         <h3 className="text-[18px] font-bold text-[#000000]">Top Performing Projects</h3>
-        <div className="text-[17px] text-[#3A59A6]">
-          <button className="hover:underline">View All</button>
+        <div className="text-[17px] font-medium text-[#3A59A6]">
+            <button onClick={() => router.push("/properties")} className="hover:underline">
+              View All
+            </button>
         </div>
       </div>
 

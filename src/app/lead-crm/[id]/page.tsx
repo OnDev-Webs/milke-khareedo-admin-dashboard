@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Clock, Phone, MessageCircle, CheckCircle2, Calendar, User, AlertCircle, Check, ArrowUp, } from "lucide-react";
+import { ArrowLeft, Clock, Phone, MessageCircle, CheckCircle2, Calendar, User, AlertCircle, Check, ArrowUp, CalendarDays, ChevronDown, } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchLeadById, updateLeadRemark, createLeadActivity, updateLeadStatus, } from "@/lib/features/lead-crm/leadcrmApi";
@@ -9,6 +9,10 @@ import { Sheet, SheetContent, SheetTitle, } from "@/components/ui/sheet";
 import { Dialog, DialogContent, } from "@/components/ui/dialog";
 import Image from "next/image";
 import wp from "@/assets/wp.svg"
+import timelineWp from "@/assets/timelineWp.svg"
+import TimelineCall from "@/assets/TimelineCall.svg"
+import call from "@/assets/call.svg";
+import editStatus from "@/assets/editStatus.svg";
 import { cn } from "@/lib/utils";
 import Loader from "@/components/ui/loader";
 
@@ -21,7 +25,7 @@ const buildFollowUpISO = (
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
         const parts = dateStr.split("-").map(Number);
         year = parts[0];
-        month = parts[1] - 1; 
+        month = parts[1] - 1;
         day = parts[2];
     }
     else {
@@ -65,12 +69,12 @@ type TimelineIconProps = {
 function TimelineIcon({ type, className = "" }: TimelineIconProps) {
     switch (type?.toLowerCase()) {
         case "phone_call":
-            return <Phone size={18} className={`text-green-600 ${className}`} />;
+            return <Image src={call} alt="Call" width={16} height={16} className={`text-green-600 ${className}`} />;
         case "whatsapp":
         case "message":
-            return <MessageCircle size={18} className={`text-green-600 ${className}`} />;
+            return <Image src={timelineWp} alt="WhatsApp" width={18} height={18} className={`text-green-600 ${className}`} />;
         case "status_change":
-            return <CheckCircle2 size={18} className={`text-blue-600 ${className}`} />;
+            return <Image src={editStatus} alt="Edit Status" width={18} height={18} className={`text-blue-600 ${className}`} />;
         case "visit":
             return <Calendar size={18} className={`text-blue-600 ${className}`} />;
         case "follow_up":
@@ -85,7 +89,16 @@ function TimelineIcon({ type, className = "" }: TimelineIconProps) {
 const statusOptions = [
     { label: "Lead Received", value: "lead_received" },
     { label: "Interested", value: "interested" },
-    { label: "Pending", value: "pending" },
+    { label: "No Response – Do Not Pick (DNP)", value: "no_response_dnp" },
+    { label: "Unable to Contact", value: "unable_to_contact" },
+    { label: "Call Back Scheduled", value: "call_back_schedule" },
+    { label: "Demo Discussion Ongoing", value: "demo_discussion" },
+    { label: "Site Visit Coordination in Progress", value: "site_visit_coordination" },
+    { label: "Site Visit Confirmed", value: "site_visit_confirmed" },
+    { label: "Commercial Negotiation", value: "commercial_negotiation" },
+    { label: "Deal Closed", value: "deal_closed" },
+    { label: "Declined Interest", value: "declined_interest" },
+    { label: "Does Not Meet Requirements", value: "does_not_meet_requirements" },
     { label: "Approved", value: "approved" },
     { label: "Rejected", value: "rejected" },
 ];
@@ -364,7 +377,7 @@ export default function LeadDetailsMobilePage() {
 
     /* ================= LOADING ================= */
     if (loadingDetails || !selected) {
-        return <div className="p-4"><Loader size={38}/></div>;
+        return <div className="p-4"><Loader size={38} /></div>;
     }
 
     return (
@@ -412,10 +425,10 @@ export default function LeadDetailsMobilePage() {
                 {selected.nextFollowUp && (
                     <div
                         className={cn(
-                            "mb-5 rounded-lg border px-4 py-3 text-xs flex items-center gap-2",
+                            "mb-3 rounded-lg border px-4 py-3 text-xs flex items-center gap-2",
                             selected.nextFollowUp.isOverdue
                                 ? "border-red-300 bg-red-50 text-red-700"
-                                : "border-green-300 bg-green-50 text-green-700"
+                                : "border-[#588F75] bg-[#E6FFF3] text-[#000000]"
                         )}
                     >
                         {selected.nextFollowUp.isOverdue ? (
@@ -427,14 +440,14 @@ export default function LeadDetailsMobilePage() {
                             {selected.nextFollowUp.isOverdue ? (
                                 <span>
                                     Next Follow up <span className="font-semibold">Overdue</span> on{" "}
-                                    <span className="font-semibold">
+                                    <span>
                                         {selected.nextFollowUp.formattedDate || formatDate(selected.nextFollowUp.date)}
                                     </span>
                                 </span>
                             ) : (
                                 <span>
                                     Next Follow up on{" "}
-                                    <span className="font-semibold">
+                                    <span>
                                         {selected.nextFollowUp.formattedDate || formatDate(selected.nextFollowUp.date)}
                                     </span>
                                 </span>
@@ -454,7 +467,7 @@ export default function LeadDetailsMobilePage() {
                         <p className="text-[13px] font-medium text-[#929292]">
                             Phone Number
                         </p>
-                        <p className="text-[14px] font-semibold text-black mt-0.5">
+                        <p className="text-[14px] text-black mt-0.5">
                             {selected.phoneNumber || "N/A"}
                         </p>
                     </div>
@@ -464,7 +477,7 @@ export default function LeadDetailsMobilePage() {
                         <p className="text-[13px] font-medium text-[#929292]">
                             Project ID
                         </p>
-                        <p className="text-[14px] font-semibold text-black mt-0.5">
+                        <p className="text-[14px]  text-black mt-0.5">
                             {selected.projectId || "N/A"}
                         </p>
                     </div>
@@ -474,7 +487,7 @@ export default function LeadDetailsMobilePage() {
                         <p className="text-[13px] font-medium text-[#929292]">
                             Source
                         </p>
-                        <p className="text-[14px] font-semibold text-black mt-0.5">
+                        <p className="text-[15px] text-black mt-0.5">
                             {selected.source || "N/A"}
                         </p>
                     </div>
@@ -484,7 +497,7 @@ export default function LeadDetailsMobilePage() {
                         <p className="text-[13px] font-medium text-[#929292]">
                             IP Address
                         </p>
-                        <p className="text-[14px] font-semibold text-black mt-0.5">
+                        <p className="text-[14px] text-black mt-0.5">
                             {selected.ipAddress || "N/A"}
                         </p>
                     </div>
@@ -505,8 +518,8 @@ export default function LeadDetailsMobilePage() {
                         </button>
                     </div>
 
-                    <div className="rounded-md bg-white border p-3">
-                        <p className="text-[13px] text-black">
+                    <div className="rounded-md bg-white p-2">
+                        <p className="text-[14px] text-[#000000]">
                             {selected.remark || "No remarks"}
                         </p>
                     </div>
@@ -517,10 +530,10 @@ export default function LeadDetailsMobilePage() {
                         {/* ===== NEXT FOLLOW UP ===== */}
                         <button
                             onClick={() => setFollowUpOpen(true)}
-                            className="flex items-center rounded-xl border bg-[#F5F5FA] px-4 py-3 text-[15px] font-medium text-[#3A59A6]"
+                            className="flex items-center rounded-md border border-[#F5F5FA] bg-[#F5F5FA] px-4 py-1 text-[16px] font-medium text-[#3A59A6]"
                         >
-                            <div className="h-9 w-9 flex items-center justify-center">
-                                <Calendar size={20} className="text-[#3A59A6]" />
+                            <div className="h-8 w-8 flex items-center justify-center">
+                                <Calendar size={18} className="text-[#3A59A6]" />
                             </div>
 
                             <span className="text-left">
@@ -531,10 +544,10 @@ export default function LeadDetailsMobilePage() {
                         {/* ===== UPDATE STATUS ===== */}
                         <button
                             onClick={() => setUpdateStatusOpen(true)}
-                            className="flex items-center rounded-xl bg-[#F5F5FA] px-4 py-3 text-[15px] font-semibold text-[#3A59A6]"
+                            className="flex items-center rounded-md border border-[#F5F5FA] bg-[#F5F5FA] px-4 py-1 text-[16px] font-medium text-[#3A59A6]"
                         >
-                            <div className="h-9 w-9 flex items-center justify-center">
-                                <Calendar size={20} className="text-[#3A59A6]" />
+                            <div className="h-8 w-8 flex items-center justify-center">
+                                <Calendar size={18} className="text-[#3A59A6]" />
                             </div>
 
                             <span className="text-left">
@@ -557,7 +570,7 @@ export default function LeadDetailsMobilePage() {
                                 const isLast = index === selected.timeline.length - 1;
 
                                 return (
-                                    <div key={item.id} className="flex gap-4">
+                                    <div key={item.id} className="flex gap-4 px-2">
                                         <div className="relative flex flex-col items-center">
                                             {/* CONTINUOUS LINE */}
                                             {!isLast && (
@@ -567,7 +580,7 @@ export default function LeadDetailsMobilePage() {
                                             )}
 
                                             {/* ICON */}
-                                            <div className="relative z-10 bg-[#F5F5FA] p-2 rounded-full">
+                                            <div className="relative bg-[#F5F5FA] p-2 rounded-full">
                                                 <TimelineIcon
                                                     type={item.activityType}
                                                     className="h-5 w-5"
@@ -648,7 +661,8 @@ export default function LeadDetailsMobilePage() {
                         </button>
                     </div>
 
-                    <div className="space-y-2 mt-4">
+                    {/* <div className="space-y-2 mt-4"> */}
+                    <div className="space-y-2 mt-4 max-h-[55vh] overflow-y-auto pr-3 scrollbar-hide">
                         {statusOptions.map((s) => (
                             <button
                                 key={s.value}
@@ -721,28 +735,49 @@ export default function LeadDetailsMobilePage() {
 
                     {/* DATE + TIME ROW */}
                     {selectedOption !== "No Follow Up" && (
-                        <div className="flex gap-3">
-                            {/* DATE */}
-                            {selectedOption === "Select custom data and time" && (
+                        <div>
+                            {selectedOption === "Select custom data and time" ? (
                                 <button
-                                    onClick={() => setDatePickerOpen(true)}
-                                    className="flex-1 border rounded-lg px-4 py-3 text-left">
-                                    <p className="text-[13px] text-[#3A59A6]">Date</p>
-                                    <p className="text-[15px] font-medium">
-                                        {selectedDate || "Select date"}
-                                    </p>
+                                    className="w-full border rounded-lg px-3 py-3 flex items-center">
+                                    {/* DATE */}
+                                    <div
+                                        onClick={() => setDatePickerOpen(true)}
+                                        className="flex-1 flex items-center justify-between">
+                                        <div className="text-left">
+                                            <p className="text-[16px] font-medium text-[#3A59A6]">Date</p>
+                                            <p className="text-[16px] font-medium text-[#000000] truncate">
+                                                {selectedDate || "Select date"}
+                                            </p>
+                                        </div>
+                                        <CalendarDays size={20} className="text-black mt-5 ms-2" />
+                                    </div>
+
+                                    <div className="h-8 w-[1px] bg-[#DADADA] mx-2" />
+
+                                    {/* TIME */}
+                                    <div
+                                        onClick={() => setTimePickerOpen(true)}
+                                        className="flex-1 flex items-center justify-between pl-3">
+                                        <div className="text-left">
+                                            <p className="text-[16px] font-medium text-[#3A59A6]">Time</p>
+                                            <p className="text-[16px] font-medium text-[#000000]">
+                                                {selectedTime || "Select time"}
+                                            </p>
+                                        </div>
+                                        <ChevronDown size={20} className="text-black mt-4" />
+                                    </div>
+                                </button>
+                            ) : (
+                                <button onClick={() => setTimePickerOpen(true)} className="w-full border rounded-lg px-4 py-3 flex items-center justify-between">
+                                    <p className="text-[16px] font-medium text-[#3A59A6]">Time</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-[16px] font-medium text-[#3A59A6]">
+                                            {selectedTime || "Select time"}
+                                        </p>
+                                        <ChevronDown size={20} className="text-black" />
+                                    </div>
                                 </button>
                             )}
-
-                            {/* TIME */}
-                            <button
-                                onClick={() => setTimePickerOpen(true)}
-                                className="flex-1 border rounded-lg px-4 py-3 text-left">
-                                <p className="text-[13px] text-[#3A59A6]">Time</p>
-                                <p className="text-[15px] font-medium">
-                                    {selectedTime || "Select time"}
-                                </p>
-                            </button>
                         </div>
                     )}
 
@@ -985,26 +1020,31 @@ export default function LeadDetailsMobilePage() {
             {/* ===== BOTTOM FIXED ACTION BAR (MOBILE) ===== */}
             <div className="fixed bottom-0 left-0 right-0 bg-white border-t px-4 py-3 flex gap-3 z-20">
                 {/* Call Now */}
-                <button
-                    onClick={handleCallNow}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-xl py-3 text-[14px] font-semibold text-[#1056ED]"
-                >
-                    <Phone size={18} />
-                    Call Now
+                <button onClick={handleCallNow} className="flex-1 flex items-center justify-center border border-[#F8F8F8] gap-2 rounded-xl py-3 text-[14px] font-semibold text-[#1056ED] leading-none">
+                    <span className="flex items-center justify-center">
+                        <Image
+                            src={TimelineCall}
+                            alt="Call"
+                            width={18}
+                            height={18}
+                            className="block"
+                        />
+                    </span>
+                    <span className="flex items-center leading-none">
+                        Call Now
+                    </span>
                 </button>
 
                 {/* WhatsApp */}
                 <button
                     onClick={handleWhatsApp}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-xl py-3 text-[14px] font-semibold text-[#000000]"
-                >
+                    className="flex-1 flex items-center justify-center border border-[#F8F8F8] gap-2 rounded-xl py-3 text-[14px] font-semibold text-[#000000]">
                     <Image
                         src={wp}
                         alt="WhatsApp"
                         width={18}
                         height={18}
                     />
-
                     WhatsApp
                 </button>
             </div>
