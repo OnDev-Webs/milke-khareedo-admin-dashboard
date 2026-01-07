@@ -140,10 +140,15 @@ export const deleteUser = createAsyncThunk<
 });
 
 
+export interface ToggleUserResponse {
+  id: string;
+  isActive: boolean;
+}
+
 /* ================= TOGGLE USER STATUS ================= */
 // PUT /admin/toggle_user_status/:id
 export const toggleUserStatus = createAsyncThunk<
-  { user: User },
+  { user: ToggleUserResponse },
   { id: string; isActive: boolean },
   { rejectValue: string }
 >(

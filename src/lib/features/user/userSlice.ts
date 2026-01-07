@@ -105,30 +105,27 @@ const userSlice = createSlice({
       .addCase(toggleUserStatus.pending, (state) => {
         state.loading = true;
       })
+      /* ===== TOGGLE USER STATUS ===== */
+      /* ===== TOGGLE USER STATUS ===== */
       .addCase(toggleUserStatus.fulfilled, (state, action) => {
-        state.loading = false;
-
         const updatedUser = action.payload.user;
 
-        // update users list
+        // 🔥 IMPORTANT: id vs _id mapping
         const index = state.users.findIndex(
-          (u) => u._id === updatedUser._id
+          (u) => u._id === updatedUser.id
         );
+
         if (index !== -1) {
-          state.users[index] = {
-            ...state.users[index],
-            isActive: updatedUser.isActive,
-          };
+          // 🔥 DIRECT mutation (RTK handles immutability)
+          state.users[index].isActive = updatedUser.isActive;
         }
 
-        // update selected user if open
-        if (state.selectedUser?._id === updatedUser._id) {
-          state.selectedUser = {
-            ...state.selectedUser,
-            isActive: updatedUser.isActive,
-          };
+        // 🔥 selectedUser bhi update karo
+        if (state.selectedUser && state.selectedUser._id === updatedUser.id) {
+          state.selectedUser.isActive = updatedUser.isActive;
         }
       })
+
       .addCase(toggleUserStatus.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Toggle user status failed";
