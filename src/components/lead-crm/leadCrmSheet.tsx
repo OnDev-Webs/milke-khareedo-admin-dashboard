@@ -41,8 +41,11 @@ import CustomDropdown from "@/components/custom/dropdawn";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import wp from "@/assets/wp.svg"
+import timelineWp from "@/assets/timelineWp.svg"
 import TimelineCall from "@/assets/TimelineCall.svg"
 import Loader from "../ui/loader";
+import editStatus from "@/assets/editStatus.svg";
+import call from "@/assets/call.svg";
 
 export type SheetMode = "view" | "edit" | "";
 
@@ -72,12 +75,12 @@ const statusOptions = [
 function TimelineIcon({ activityType }: { activityType: string }) {
   switch (activityType.toLowerCase()) {
     case "phone_call":
-      return <Phone size={16} className="text-green-600" />;
+      return <Image src={call} alt="Call" width={16} height={16} className="text-green-600" />;
     case "whatsapp":
     case "message":
-      return <MessageCircle size={16} className="text-green-600" />;
+      return <Image src={timelineWp} alt="WhatsApp" width={16} height={16} className="text-green-600" />;
     case "status_change":
-      return <CheckCircle2 size={16} className="text-blue-600" />;
+      return <Image src={editStatus} alt="Edit Status" width={16} height={16} className="text-blue-600" />;
     case "visit":
       return <Calendar size={16} className="text-blue-600" />;
     case "follow_up":
@@ -404,7 +407,7 @@ export default function LeadCRMSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent className="w-full lg:w-[420px] p-0 overflow-hidden flex flex-col">
+        <SheetContent className="w-full lg:w-[420px] p-0 overflow-hidden flex flex-col bg-white">
           <SheetHeader className="border-b px-4 py-3 bg-white">
             <SheetTitle>
               <div className="flex items-center justify-between">
@@ -488,7 +491,7 @@ export default function LeadCRMSheet({
                   Details
                 </h3>
 
-                <div className="space-y-4 text-sm bg-[#FBFBFF] ps-4">
+                <div className="space-y-4 text-sm bg-[#FBFBFF] py-4 px-5 rounded-lg">
                   <div>
                     <p className="text-xs font-semibold text-gray-500 mb-1">
                       Phone Number
@@ -586,7 +589,7 @@ export default function LeadCRMSheet({
               {/* Next Follow Up Button */}
               <button
                 onClick={() => setFollowUpOpen(true)}
-                className="mb-6 flex items-center justify-center gap-2 rounded-lg border border-[#FBFBFF] px-4 py-2.5 text-sm font-medium text-[#3A59A6] transition-colors w-full"
+                className="mb-6 flex items-center justify-center gap-2 rounded-lg border border-[#FBFBFF] px-4 text-sm font-medium text-[#3A59A6] transition-colors w-full"
               >
                 <Calendar size={16} /> Next Follow up
               </button>
@@ -597,7 +600,7 @@ export default function LeadCRMSheet({
                   Timeline
                 </h3>
 
-                <div className="space-y-6 text-sm px-6">
+                <div className="space-y-6 text-sm px-5">
                   {selected.timeline && selected.timeline.length > 0 ? (
                     selected.timeline.map((item: TimelineItem, index: number) => {
                       const isLast = index === selected.timeline.length - 1;

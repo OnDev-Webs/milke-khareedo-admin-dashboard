@@ -14,7 +14,7 @@ export default function Page() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0 bg-[#F5F5FA] md:bg-transparent">
+        <div className="flex flex-1 flex-col gap-4 p-2 md:p-4 pt-0 bg-[#F5F5FA] md:bg-transparent">
           <Settings />
         </div>
       </SidebarInset>

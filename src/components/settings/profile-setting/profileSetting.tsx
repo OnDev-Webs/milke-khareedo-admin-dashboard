@@ -9,6 +9,7 @@ import logoutIcon from "@/assets/logoutIcon.png"
 import mail from "@/assets/mail.svg"
 import call from "@/assets/call.svg"
 import camera from "@/assets/camera.svg"
+import { resetAuth } from "@/lib/features/auth/adminAuthSlice";
 
 function Field({
   label,
@@ -162,6 +163,15 @@ export default function ProfileSettings() {
     }
   };
 
+  const handleLogout = () => {
+    dispatch(resetAuth());
+
+    if (typeof window !== "undefined") {
+      window.location.href = "/";
+    }
+  };
+
+
   return (
     <div className="bg-[#F5F5FA] md:bg-white">
 
@@ -171,7 +181,7 @@ export default function ProfileSettings() {
           Setting
         </h2>
 
-        <div className="bg-white rounded-xl border p-4">
+        <div className="bg-white rounded-xl border py-4 px-5">
 
           {/* PROFILE IMAGE */}
           <div className="flex justify-center my-2">
@@ -210,13 +220,13 @@ export default function ProfileSettings() {
             {phoneNumber && (
               <a
                 href={`tel:${countryCode}${phoneNumber}`}
-                className="h-9 w-9 flex items-center justify-center rounded-full bg-[#F5F5FA]"
+                className="h-10 w-10 flex items-center justify-center rounded-full bg-[#F5F5FA]"
               >
                 <img
                   src={call.src}
                   alt="notification"
-                  width={16}
-                  height={16}
+                  width={18}
+                  height={18}
                 />
               </a>
             )}
@@ -233,13 +243,13 @@ export default function ProfileSettings() {
 
             <a
               href={`mailto:${email}`}
-              className="h-9 w-9 flex items-center justify-center rounded-full bg-[#F5F5FA]"
+              className="h-10 w-10 flex items-center justify-center rounded-full bg-[#F5F5FA]"
             >
               <img
                 src={mail.src}
                 alt="notification"
-                width={16}
-                height={16}
+                width={18}
+                height={18}
               />
             </a>
           </div>
@@ -256,7 +266,9 @@ export default function ProfileSettings() {
 
 
         {/* LOGOUT */}
-        <button className="mt-10 w-full flex items-center justify-center gap-2 rounded-lg bg-[#CA111A] py-3 text-sm font-semibold text-white">
+        <button
+          onClick={handleLogout}
+          className="mt-12 w-full flex items-center justify-center gap-2 rounded-lg bg-[#CA111A] py-3 text-sm font-semibold text-white">
           Logout
           <img
             src={logoutIcon.src}

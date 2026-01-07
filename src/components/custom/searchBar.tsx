@@ -135,7 +135,7 @@ export default function CustomTableSearchBar<T extends Record<string, any>>({
       </div>
 
       {addButton?.url && (
-        <button className="px-2 py-1 border rounded bg-foreground text-white hover:bg-foreground/90 transition-colors">
+        <button className="px-2 py-1 border-[#000000] rounded-[5px] bg-foreground text-white hover:bg-foreground/90 transition-colors">
           <a href={addButton.url} className="whitespace-nowrap px-1">
             {addButton.buttonName}
           </a>
@@ -145,9 +145,9 @@ export default function CustomTableSearchBar<T extends Record<string, any>>({
       {mode && (
         <button
           onClick={() => mode && setSheetOpen?.((open) => !open)}
-          className="px-2 py-1 border rounded bg-foreground text-white hover:bg-foreground/90 transition-colors"
+          className="px-2 py-1 rounded-[5px] bg-foreground text-white hover:bg-foreground/90 transition-colors"
         >
-          {addButton?.buttonName}
+          <span className="whitespace-nowrap px-1">{addButton?.buttonName}</span>
         </button>
       )}
     </div>

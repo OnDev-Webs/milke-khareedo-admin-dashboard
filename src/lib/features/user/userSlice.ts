@@ -7,6 +7,7 @@ import {
   updateUser,
   deleteUser,
   User,
+  toggleUserStatus,
 } from "./userApi";
 
 interface UserState {
@@ -98,7 +99,41 @@ const userSlice = createSlice({
         state.users = state.users.filter(
           (u) => u._id !== action.payload
         );
+      })
+
+      /* ===== TOGGLE USER STATUS ===== */
+      .addCase(toggleUserStatus.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(toggleUserStatus.fulfilled, (state, action) => {
+        state.loading = false;
+
+        const updatedUser = action.payload.user;
+
+        // update users list
+        const index = state.users.findIndex(
+          (u) => u._id === updatedUser._id
+        );
+        if (index !== -1) {
+          state.users[index] = {
+            ...state.users[index],
+            isActive: updatedUser.isActive,
+          };
+        }
+
+        // update selected user if open
+        if (state.selectedUser?._id === updatedUser._id) {
+          state.selectedUser = {
+            ...state.selectedUser,
+            isActive: updatedUser.isActive,
+          };
+        }
+      })
+      .addCase(toggleUserStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Toggle user status failed";
       });
+
   },
 });
 

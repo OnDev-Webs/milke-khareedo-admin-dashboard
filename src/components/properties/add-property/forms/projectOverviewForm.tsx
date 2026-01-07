@@ -373,39 +373,6 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
           />
         </Field>
 
-        {/* <div className=" ">
-          {!reraFileImg?.state ? (
-            <Field
-              label="RERA QR Code"
-              description="Upload project’s RERA QR"
-              error={errors.reraQrImage}
-            >
-              <input
-                type="file"
-                className="w-full outline-none"
-                onChange={(e) => handleReraFile(e.target.files)}
-              />
-            </Field>
-          ) : (
-            <div className=" px-4 py-4 mt-2 rounded-md bg-gray-100 border border-gray-400 border-dashed flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <img
-                    src={file.src}
-                    className="size-5 fill-[#373737] text-white"
-                  />
-                  <span className="absolute text-[6px] top-2 left-1 font-bold text-white">
-                    PNG
-                  </span>
-                </div>
-                <div className="w-40  truncate">{`${reraFileImg?.filename}`}</div>
-              </div>
-
-              <X onClick={() => removeReraFile()} size={16} />
-            </div>
-          )}
-        </div> */}
-
         <div className=" ">
           {!reraFileImg?.state ? (
             <Field
@@ -451,7 +418,6 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
           )}
         </div>
 
-
         <Field
           label={`Possession Status`}
           description="Project stage"
@@ -474,7 +440,7 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
 
       <div className="mt-5">
         <Field
-          label="description "
+          label="Description "
           description="Explain the project in 3–5 lines"
           error={errors.description}
         >

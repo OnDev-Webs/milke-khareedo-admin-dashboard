@@ -2,13 +2,13 @@
 
 import * as React from "react"
 import { usePathname, useRouter } from "next/navigation"
-import { Settings2,SquareTerminal,Settings,} from "lucide-react"
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
-import { Sidebar,SidebarContent,SidebarFooter,SidebarHeader,SidebarRail,} from "@/components/ui/sidebar"
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail, useSidebar, } from "@/components/ui/sidebar"
 import { useAppSelector } from "@/lib/store/hooks"
 import Image from "next/image"
-import logo from "@/assets/logo.png"
+import logo from "@/assets/logo.svg"
+import sidebarLogo from "@/assets/sidebarLogo.svg";
 import clsx from "clsx"
 import dashboard from "@/assets/dashboard.svg"
 import property from "@/assets/property.svg"
@@ -16,6 +16,37 @@ import developer from "@/assets/developer.svg"
 import leadCRM from "@/assets/leadCRM.svg"
 import blog from "@/assets/blog.svg"
 import setting from "@/assets/setting.svg"
+import CRMDashboard from "@/assets/crmDashboard.svg";
+import CRMLead from "@/assets/crmLead.svg";
+import CRMSetting from "@/assets/crmSetting.svg";
+
+function SidebarLogo() {
+  const { state } = useSidebar()
+
+  return (
+    <div className="flex items-center justify-center h-14">
+      {state === "expanded" ? (
+        <Image
+          src={logo}
+          alt="logo"
+          width={136}
+          height={56}
+          priority
+          className="-ms-8 mt-2 object-contain"
+        />
+      ) : (
+        <Image
+          src={sidebarLogo}
+          alt="logo icon"
+          width={36}
+          height={36}
+          priority
+          className="object-contain"
+        />
+      )}
+    </div>
+  )
+}
 
 const navMain = [
   {
@@ -53,6 +84,12 @@ const navSetting = [
   },
 ]
 
+const mobileNavItems = [
+  { title: "Dashboard", url: "/dashboard", icon: CRMDashboard, noInvert: true, },
+  { title: "Lead / CRM", url: "/lead-crm", icon: CRMLead },
+  { title: "Setting", url: "/settings", icon: CRMSetting },
+]
+
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const router = useRouter()
@@ -76,12 +113,6 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
     isActive: pathname.startsWith(item.url),
   }))
 
-  const mobileNavItems = [
-    { title: "Dashboard", url: "/dashboard", icon: SquareTerminal },
-    { title: "Lead / CRM", url: "/lead-crm", icon: Settings2 },
-    { title: "Setting", url: "/settings", icon: Settings },
-  ]
-
   return (
     <>
       <Sidebar
@@ -89,14 +120,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
         className="hidden lg:flex"
         {...props}>
         <SidebarHeader>
-          <Image
-            src={logo}
-            alt="logo"
-            width={136}
-            height={56}
-            priority
-            className="mx-2 object-contain"
-          />
+          <SidebarLogo />
         </SidebarHeader>
 
         <div className="px-3 py-2.5">
@@ -127,13 +151,26 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
               <button
                 key={item.title}
                 onClick={() => router.push(item.url)}
-                className={clsx(
-                  "flex-1 flex flex-col items-center justify-center text-xs gap-1",
-                  isActive ? "text-black" : "text-gray-400"
-                )}
-              >
-                <Icon size={20} />
-                {item.title}
+                className="flex-1 flex flex-col items-center justify-center gap-1 text-[11px]">
+                <Image
+                  src={item.icon}
+                  alt={item.title}
+                  width={20}
+                  height={20}
+                  className={clsx(
+                    "object-contain transition",
+                    item.noInvert
+                      ? isActive
+                        ? "opacity-100 scale-110"
+                        : "opacity-50"
+                      : isActive
+                        ? "invert-0 brightness-0 opacity-100 scale-110"
+                        : "invert opacity-50"
+                  )}
+                />
+                <span className={isActive ? "text-black" : "text-gray-400"}>
+                  {item.title}
+                </span>
               </button>
             )
           })}

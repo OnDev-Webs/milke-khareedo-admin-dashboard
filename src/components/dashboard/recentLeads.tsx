@@ -2,6 +2,7 @@ import { useAppSelector } from "@/lib/store/hooks";
 import { RootState } from "@/lib/store/store";
 import { useState } from "react";
 import more from "@/assets/more.png";
+import { useRouter } from "next/navigation";
 
 type FollowUpItem = {
   _id: string;
@@ -20,6 +21,7 @@ type FollowUpItem = {
 
 
 export default function RecentLeads() {
+  const router = useRouter();
   const { recentLeads } = useAppSelector((state: RootState) => state.dashboard);
   const { crmDashboardData } = useAppSelector(
     (state: RootState) => state.leadcrm
@@ -70,7 +72,10 @@ export default function RecentLeads() {
           <h3 className="text-[18px] text-[#000000] font-bold ">Recent Leads</h3>
 
           <div className="flex items-center gap-4 font-medium text-[17px] text-[#3A59A6]">
-            <button>View All</button>
+            <button onClick={() => router.push("/lead-crm")} className="hover:underline">
+              View All
+            </button>
+
           </div>
         </div>
 
@@ -157,7 +162,7 @@ export default function RecentLeads() {
           </span>
 
           {/* RIGHT ARROW */}
-          <svg className="h-4 w-4 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <svg className="h-4 w-4 ml-2 -mr-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         </button>

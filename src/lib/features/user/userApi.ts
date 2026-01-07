@@ -15,6 +15,7 @@ export interface User {
   countryCode?: string;
   profileImage?: string;
   role: Role | string;
+  isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -137,3 +138,24 @@ export const deleteUser = createAsyncThunk<
     );
   }
 });
+
+
+/* ================= TOGGLE USER STATUS ================= */
+// PUT /admin/toggle_user_status/:id
+export const toggleUserStatus = createAsyncThunk<
+  { user: User },
+  { id: string; isActive: boolean },
+  { rejectValue: string }
+>(
+  "users/toggleUserStatus",
+  async ({ id, isActive }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.put(`/admin/toggle_user_status/${id}`,{ isActive });
+      return res.data.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to toggle user status"
+      );
+    }
+  }
+);

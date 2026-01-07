@@ -47,7 +47,7 @@ export default function AddAmenitiesForm() {
 
   return (
     <div className="bg-white p-3">
-      <div className="mx-auto max-w-6xl border-b border-gray-400 pb-2">
+      <div className="mx-auto border-b border-gray-400 pb-2">
         <fieldset className="rounded-md border bg-white px-3 pt-1 pb-2">
           <legend className="text-xs font-semibold text-gray-700">
             Add Amenities*
@@ -91,7 +91,7 @@ export default function AddAmenitiesForm() {
       </div>
 
       {amenities.length > 0 && (
-        <div className="mx-auto mt-4 max-w-6xl">
+        <div className="mx-auto mt-4">
           <div className="flex flex-wrap gap-2">
             {amenities.map((item) => (
               <span

@@ -33,28 +33,34 @@ export default function Login() {
     },
   });
 
+  const desktopForm = useForm<loginFrom>({
+    resolver: zodResolver(loginSchema),
+    mode: "onSubmit",
+  });
+
+  const mobileForm = useForm<loginFrom>({
+    resolver: zodResolver(loginSchema),
+    mode: "onSubmit",
+  });
+
   // Check for remember me data on component mount
   useEffect(() => {
     const rememberedEmail = getRememberMeEmail();
     const rememberedData = getRememberMe();
 
-    // Pre-fill email if available
     if (rememberedEmail) {
       setValue("email", rememberedEmail);
       setRememberMeChecked(true);
     }
 
-    // If valid remember me token exists, auto-login
     if (rememberedData && rememberedData.token) {
       // Restore session token
       localStorage.setItem("token", rememberedData.token);
       localStorage.setItem("user", rememberedData.userData);
 
-      // Try to parse user data and restore auth state
       try {
         const userData = JSON.parse(rememberedData.userData);
         if (userData?.id && userData?.email) {
-          // Redirect to dashboard - AuthHydrator will handle state restoration
           router.replace("/dashboard");
         }
       } catch (error) {
@@ -64,49 +70,49 @@ export default function Login() {
     }
   }, [setValue, router]);
 
-  const onSubmit = useCallback(
-    async (payload: loginFrom) => {
-      const response = await dispatch(adminLogin(payload));
-      if (adminLogin.fulfilled.match(response)) {
-        const token = response?.payload?.token;
-        const user = response?.payload;
+  const onSubmit = useCallback(async (payload: loginFrom) => {
+    const response = await dispatch(adminLogin(payload));
+    if (adminLogin.fulfilled.match(response)) {
+      const token = response?.payload?.token;
+      const user = response?.payload;
 
-        // Ensure we have valid user data before storing
-        if (!user?.id || !user?.email) {
-          console.error("Invalid user data received from login API");
-          return;
-        }
-
-        // Create user data object matching IAdmin interface structure
-        const userData = JSON.stringify({
-          id: user.id,
-          name: user.name || "",
-          email: user.email,
-          role: user.role || { id: "", name: "" },
-          permissions: user.role?.permissions || undefined,
-          profileImage: user.profileImage || null,
-        });
-
-        // Store session token (always stored)
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", userData);
-        localStorage.setItem("userId", JSON.stringify(user?.id || ""));
-
-        // If remember me is checked, store with 30-day expiry
-        if (rememberMe) {
-          setRememberMe(token, userData);
-          setRememberMeEmail(payload.email);
-        } else {
-          // Clear remember me if unchecked
-          clearRememberMe();
-        }
-
-        // Redirect immediately - dashboard will fetch its own data
-        router.replace("/dashboard");
+      // Ensure we have valid user data before storing
+      if (!user?.id || !user?.email) {
+        console.error("Invalid user data received from login API");
+        return;
       }
-    },
+
+      // Create user data object matching IAdmin interface structure
+      const userData = JSON.stringify({
+        id: user.id,
+        name: user.name || "",
+        email: user.email,
+        role: user.role || { id: "", name: "" },
+        permissions: user.role?.permissions || undefined,
+        profileImage: user.profileImage || null,
+      });
+
+      // Store session token (always stored)
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", userData);
+      localStorage.setItem("userId", JSON.stringify(user?.id || ""));
+
+      // If remember me is checked, store with 30-day expiry
+      if (rememberMe) {
+        setRememberMe(token, userData);
+        setRememberMeEmail(payload.email);
+      } else {
+        // Clear remember me if unchecked
+        clearRememberMe();
+      }
+
+      // Redirect immediately - dashboard will fetch its own data
+      router.replace("/dashboard");
+    }
+  },
     [dispatch, rememberMe, router]
   );
+
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
@@ -130,9 +136,9 @@ export default function Login() {
         <div className="z-20 w-full h-full absolute bottom-0 bg-linear-to-t from-black/50  to-transparent"></div>
       </div>
 
-      <div className="bg-[#F5F5FA] w-full h-full lg:w-1/3 lg:px-12 lg:py-8 flex items-center justify-center overflow-auto">
+      <div className="hidden lg:flex bg-[#F5F5FA] w-full h-full lg:w-1/3 lg:px-12 lg:py-8 flex items-center justify-center overflow-auto">
         <div className="w-full max-w-md bg-white border border-gray-200 rounded-3xl p-8 text-black flex flex-col shadow-lg box-border">
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col space-y-6 w-full">
+          <form onSubmit={desktopForm.handleSubmit(onSubmit)} className="flex flex-col space-y-6 w-full">
             {/* Logo */}
             <div className="flex justify-center mb-2">
               <img src={logo.src} alt="login-img" className="h-16 w-auto" />
@@ -146,7 +152,7 @@ export default function Login() {
               <input
                 type="email"
                 id="email"
-                {...register("email")}
+                {...desktopForm.register("email")}
                 placeholder="Enter email"
                 className="w-full outline-none pt-1 pb-1 text-base placeholder:text-gray-400"
               />
@@ -161,7 +167,7 @@ export default function Login() {
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
-                  {...register("password")}
+                  {...desktopForm.register("password")}
                   placeholder="Enter password"
                   className="w-full outline-none pt-1 pb-1 pr-8 text-base placeholder:text-gray-400"
                 />
@@ -201,12 +207,65 @@ export default function Login() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={desktopForm.formState.isSubmitting}
               className="bg-black w-full text-white rounded-md py-3 px-4 font-medium text-base disabled:opacity-60 disabled:cursor-not-allowed transition-colors hover:bg-black/90 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 mt-2"
             >
               {isSubmitting ? "Submitting..." : "Continue"}
             </button>
           </form>
+        </div>
+      </div>
+
+      {/* ================= MOBILE VIEW ================= */}
+      <div className="block lg:hidden w-full h-full bg-[#F5F5FA] px-5 py-10">
+        <div className="flex flex-col items-center justify-center h-full">
+          <div className="w-full h-full bg-white flex flex-col justify-between rounded-2xl p-6 shadow-md">
+            {/* LOGO TOP */}
+            <div className="mb-10">
+              <img src={logo.src} alt="logo" className="h-24 mx-auto" />
+            </div>
+
+            <form onSubmit={mobileForm.handleSubmit(onSubmit)} className="space-y-5">
+              {/* EMAIL */}
+              <fieldset className="border border-[#262626] px-3 py-2 rounded-md">
+                <legend className="text-sm">
+                  Email Address <span className="text-[#DA1414]">*</span>
+                </legend>
+
+                <input {...mobileForm.register("email")} className="w-full outline-none placeholder:text-[#BABABA]" placeholder="Enter here" />
+              </fieldset>
+
+              {/* PASSWORD */}
+              <fieldset className="border border-[#262626] px-3 py-2 rounded-md relative">
+                <legend className="text-sm">
+                  Password <span className="text-[#DA1414]">*</span>
+                </legend>
+
+                <input
+                  type={showPassword ? "text" : "password"}
+                  {...mobileForm.register("password")}
+                  className="w-full outline-none pr-8 placeholder:text-[#BABABA]"
+                  placeholder="Enter here"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </fieldset>
+
+              {/* BUTTON */}
+              <button
+                type="submit"
+                disabled={mobileForm.formState.isSubmitting}
+                className="w-full bg-[#17171D] text-[#FFFFFF] text-[16px] py-3 rounded-md"
+              >
+                {isSubmitting ? "Submitting..." : "Continue"}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

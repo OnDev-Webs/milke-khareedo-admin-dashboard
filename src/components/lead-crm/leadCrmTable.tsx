@@ -310,7 +310,7 @@ export default function LeadCRMTable({
           <div
             key={row._id}
             onClick={() => handleViewLead(row._id)}
-            className="bg-white border border-white rounded-xl p-4 shadow"
+            className="bg-white border border-white rounded-xl px-4 py-3 shadow"
           >
             {/* Top Row */}
             <div className="flex justify-between items-start">
@@ -318,7 +318,7 @@ export default function LeadCRMTable({
                 <p className="text-[15px] font-bold text-black">
                   {row.userName || "N/A"}
                 </p>
-                <p className="text-[11px] text-[#929292] mt-1">
+                <p className="text-[11px] text-[#929292]">
                   {row.dateTime || "N/A"}
                 </p>
               </div>
@@ -341,7 +341,7 @@ export default function LeadCRMTable({
                 >
                   <img
                     src={more.src}
-                    alt="notification"
+                    alt="Details"
                     width={14}
                     height={14}
                   />
@@ -351,7 +351,7 @@ export default function LeadCRMTable({
             </div>
 
             {/* Details */}
-            <div className="mt-3 space-y-3 text-sm text-gray-700">
+            <div className="mt-1.5 space-y-1.5 text-sm text-gray-700">
               {/* Phone Number */}
               <div>
                 <p className="text-[12px] font-medium text-[#929292]">
@@ -362,7 +362,7 @@ export default function LeadCRMTable({
                 </p>
               </div>
 
-              <div className="grid grid-cols-[1.5fr_1fr] gap-4">
+              <div className="grid grid-cols-[1.5fr_1fr] gap-3">
                 {/* PROJECT ID */}
                 <div className="min-w-0">
                   <p className="text-[12px] font-medium text-[#929292]">
