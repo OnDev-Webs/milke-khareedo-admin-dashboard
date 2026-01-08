@@ -1,17 +1,15 @@
 "use client";
 
-import {
-  ChevronLeft,
-  ChevronRight,
-  EllipsisVertical,
-  X,
-} from "lucide-react";
+import { EllipsisVertical} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import DeletePopUp from "../custom/popups/delete";
 import { Blog } from "@/lib/features/blogs/blogSlice";
-import { useAppDispatch } from "@/lib/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { deleteBlog, fetchBlogs } from "@/lib/features/blogs/blogApi";
 import { useRouter } from "next/navigation";
+import { hasPermission } from "@/lib/permissions/hasPermission";
+import { RootState } from "@/lib/store/store";
+import { PERMISSIONS } from "@/lib/permissions/permissionKeys";
 
 interface BlogTableProps {
   blogs: Blog[];
@@ -35,18 +33,10 @@ const headers = [
 
 export default function BlogTable({
   blogs,
-  currentPage,
-  totalPages,
-  onPageChange,
-  getPageNumbers,
-  dataLength,
-  indexOfFirstItem,
-  indexOfLastItem,
   onRefreshBlogs,
 }: BlogTableProps) {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const pageNumbers = getPageNumbers();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
   const [deleteBlogId, setDeleteBlogId] = useState<string | null>(null);
@@ -60,8 +50,6 @@ export default function BlogTable({
   const LOAD_MORE_COUNT = 6;
 
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
-
-
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -114,6 +102,19 @@ export default function BlogTable({
       return dateString;
     }
   };
+
+  const canViewBlog = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.BLOGS.VIEW)
+  );
+
+  const canEditBlog = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.BLOGS.EDIT)
+  );
+
+  const canDeleteBlog = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.BLOGS.DELETE)
+  );
+
 
   return (
     <div className="w-full bg-white p-4">
@@ -212,7 +213,6 @@ export default function BlogTable({
                           <EllipsisVertical size={16} />
                         </button>
 
-
                         {openMenuId === row._id && menuPosition && (
                           <div
                             className="fixed z-[9999] w-36 rounded-lg overflow-hidden border bg-white shadow"
@@ -223,33 +223,42 @@ export default function BlogTable({
                             onClick={(e) => e.stopPropagation()}
                           >
                             <button
+                              disabled={!canViewBlog}
                               onClick={(e) => {
+                                if (!canViewBlog) return;
                                 e.stopPropagation();
                                 router.push(`/blogs/${openMenuId}`);
                                 setOpenMenuId(null);
                               }}
-                              className="block w-full px-4 py-2 text-left text-xs hover:bg-gray-50"
+                              className={`block w-full px-4 py-2 text-left text-xs
+                              ${canViewBlog ? "hover:bg-gray-50" : "opacity-50 cursor-not-allowed"}`}
                             >
                               View
                             </button>
 
                             <button
+                              disabled={!canEditBlog}
                               onClick={(e) => {
+                                if (!canEditBlog) return;
                                 e.stopPropagation();
                                 router.push(`/blogs/${openMenuId}/edit`);
                                 setOpenMenuId(null);
                               }}
-                              className="block w-full px-4 py-2 text-left text-xs hover:bg-gray-50"
+                              className={`block w-full px-4 py-2 text-left text-xs
+                              ${canEditBlog ? "hover:bg-gray-50" : "opacity-50 cursor-not-allowed"}`}
                             >
                               Edit
                             </button>
 
                             <button
+                              disabled={!canDeleteBlog}
                               onClick={(e) => {
+                                if (!canDeleteBlog) return;
                                 e.stopPropagation();
-                                handleDeleteClick(openMenuId)
+                                handleDeleteClick(openMenuId);
                               }}
-                              className="block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 text-red-600"
+                              className={`block w-full px-4 py-2 text-left text-xs text-red-600
+                              ${canDeleteBlog ? "hover:bg-gray-50" : "opacity-50 cursor-not-allowed"}`}
                             >
                               Delete
                             </button>

@@ -1,15 +1,15 @@
 "use client";
-import { User, Users } from "lucide-react";
 import SettingsHeader from "./settingsBannner";
 import ProfileSettings from "./profile-setting/profileSetting";
 import UserAndRoles from "./user-roles/userAndRoles";
 import AccessControl from "./access-control/accessControl";
-import { use, useState } from "react";
+import { useState } from "react";
 import acSvg from "@/assets/notification-status.svg";
-import UserAndRolesSheet from "./user-roles/userRoleSheet";
 import Image from "next/image";
 import user from "@/assets/user.svg";
 import userRole from "@/assets/userRole.svg";
+import { useAppSelector } from "@/lib/store/hooks";
+import { RootState } from "@/lib/store/store";
 
 function ACSVG({ active }: { active: boolean }) {
   return (
@@ -35,43 +35,44 @@ function TabIcon({
       alt="tab-icon"
       width={16}
       height={16}
-      className={`transition ${
-        active
+      className={`transition ${active
           ? "brightness-0 invert"
-          : "brightness-0"        
-      }`}
+          : "brightness-0"
+        }`}
     />
   );
 }
 
 export default function Settings() {
+  const roleName = useAppSelector((state: RootState) => state.auth.role?.name);
+
   const settingTab = [
     {
       id: 1,
       title: "Profile Setting",
-      isActive: true,
       icon: (active: boolean) => (
         <TabIcon src={user.src} active={active} />
       ),
       component: <ProfileSettings />,
+      allow: true,
     },
     {
       id: 2,
       title: "Access Control",
-      isActive: true,
       icon: (active: boolean) => <ACSVG active={active} />,
       component: <AccessControl />,
+      allow: roleName === "Super Admin", 
     },
     {
       id: 3,
       title: "User & Roles",
-      isActive: true,
       icon: (active: boolean) => (
         <TabIcon src={userRole.src} active={active} />
       ),
       component: <UserAndRoles />,
+      allow: true,
     },
-  ];
+  ].filter(tab => tab.allow); 
 
   const [activeTabId, setActiveTabId] = useState<number>(1);
 
@@ -82,7 +83,6 @@ export default function Settings() {
       <div className="hidden md:block">
         <SettingsHeader />
       </div>
-
 
       <div className="flex md:border h-full ">
         <div className="hidden md:flex md:w-1/6 flex-col bg-[#F3F6FF] p-4">
@@ -108,7 +108,6 @@ export default function Settings() {
             );
           })}
         </div>
-
         <div className="p-4 w-full md:w-5/6">{currentTab?.component}</div>
       </div>
 

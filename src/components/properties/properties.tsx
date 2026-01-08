@@ -8,6 +8,8 @@ import { RootState } from "@/lib/store/store";
 import { Property } from "@/lib/features/properties/propertiesSlice";
 import { fetchProperties } from "@/lib/features/properties/propertiesApi";
 import Loader from "../ui/loader";
+import { hasPermission } from "@/lib/permissions/hasPermission";
+import { PERMISSIONS } from "@/lib/permissions/permissionKeys";
 
 type Iproperties = {
   id: number | string;
@@ -32,7 +34,7 @@ type SortState<T> = {
 
 export default function Properties() {
 
-  const {PropertiesList,totalPages,loading,} = useAppSelector((state: RootState) => state.properties);
+  const { PropertiesList, totalPages, loading, } = useAppSelector((state: RootState) => state.properties);
 
   const [filteredData, setFilteredData] = useState<Property[]>([]);
 
@@ -95,6 +97,10 @@ export default function Properties() {
     return pageNumbers;
   };
 
+  const canAddProperty = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.PROPERTY.ADD)
+  );
+
   return (
     <div>
       <CustomTableSearchBar<Property>
@@ -102,10 +108,14 @@ export default function Properties() {
         setFilteredData={setFilteredData}
         searchKeys={searchKeys}
         placeholder="Search by property, developer, city, amount or status"
-        addButton={{
-          buttonName: "Add New Property",
-          url: "/properties/add-property",
-        }}
+        addButton={
+          canAddProperty
+            ? {
+              buttonName: "Add New Property",
+              url: "/properties/add-property",
+            }
+            : undefined
+        }
       />
 
       <div className="h-full p-4">

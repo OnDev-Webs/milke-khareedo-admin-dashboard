@@ -1,15 +1,18 @@
 "use client";
 
-import { Dot,EllipsisVertical,} from "lucide-react";
+import { Dot, EllipsisVertical, } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import LeadCRMSheet, { SheetMode } from "./leadCrmSheet";
 import DeletePopUp from "../custom/popups/delete";
 import { Lead } from "@/lib/features/lead-crm/leadcrmSlice";
 import { User } from "lucide-react";
-import { useAppDispatch } from "@/lib/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { deleteLead } from "@/lib/features/lead-crm/leadcrmApi";
 import { useRouter } from "next/navigation";
 import more from "@/assets/more.png"
+import { RootState } from "@/lib/store/store";
+import { PERMISSIONS } from "@/lib/permissions/permissionKeys";
+import { hasPermission } from "@/lib/permissions/hasPermission";
 
 interface LeadCRMTableProps {
   leads: Lead[];
@@ -140,6 +143,14 @@ export default function LeadCRMTable({
     }
   };
 
+  const canViewLead = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.CRM.VIEW)
+  );
+
+  const canDeleteLead = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.CRM.DELETE)
+  );
+
   return (
     <div className="w-full bg-[#F5F5FA] md:bg-white">
       <LeadCRMSheet
@@ -256,23 +267,28 @@ export default function LeadCRMTable({
                                 left: menuPosition.left,
                               }}
                               onClick={(e) => e.stopPropagation()}>
-
                               <button
+                                disabled={!canViewLead}
                                 onClick={(e) => {
+                                  if (!canViewLead) return;
                                   e.stopPropagation();
-                                  handleViewLead(row._id)
+                                  handleViewLead(row._id);
                                 }}
-                                className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
-                            `}
+                                className={`block w-full px-4 py-2 text-left text-xs
+                                ${canViewLead ? "hover:bg-gray-50" : "opacity-50 cursor-not-allowed"}`}
                               >
                                 View
                               </button>
+
                               <button
+                                disabled={!canDeleteLead}
                                 onClick={(e) => {
+                                  if (!canDeleteLead) return;
                                   e.stopPropagation();
-                                  handleDeleteClick(row._id)
+                                  handleDeleteClick(row._id);
                                 }}
-                                className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 text-red-600`}
+                                className={`block w-full px-4 py-2 text-left text-xs text-red-600
+                                ${canDeleteLead ? "hover:bg-gray-50" : "opacity-50 cursor-not-allowed"}`}
                               >
                                 Delete
                               </button>
@@ -336,15 +352,16 @@ export default function LeadCRMTable({
 
                 {/* View button */}
                 <button
-                  onClick={() => handleViewLead(row._id)}
-                  className="h-8 w-8 rounded-full bg-[#EEF0FB] flex items-center justify-center"
+                  disabled={!canViewLead}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!canViewLead) return;
+                    handleViewLead(row._id);
+                  }}
+                  className={`h-8 w-8 rounded-full bg-[#EEF0FB] flex items-center justify-center
+                  ${!canViewLead ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  <img
-                    src={more.src}
-                    alt="Details"
-                    width={14}
-                    height={14}
-                  />
+                  <img src={more.src} alt="Details" width={14} height={14} />
                 </button>
               </div>
 

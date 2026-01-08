@@ -8,6 +8,8 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchDevelopers } from "@/lib/features/developers/developerApi";
 import { RootState } from "@/lib/store/store";
 import { Developer } from "@/lib/features/developers/developerSlice";
+import { hasPermission } from "@/lib/permissions/hasPermission";
+import { PERMISSIONS } from "@/lib/permissions/permissionKeys";
 
 interface IDeveloper extends Developer { }
 
@@ -50,6 +52,10 @@ export default function Developers() {
     }
   };
 
+  const canAddDeveloper = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.DEVELOPER.ADD)
+  );
+
   return (
     <div>
       <CustomTableSearchBar<IDeveloper>
@@ -57,14 +63,17 @@ export default function Developers() {
         setFilteredData={setData}
         searchKeys={searchKeys}
         placeholder="Search by developer name, city or status"
-        addButton={{
-          buttonName: "Add New Developer",
-          url: "",
-        }}
-        setSheetOpen={setOpen}
-        mode={mode}
+        addButton={
+          canAddDeveloper
+            ? {
+              buttonName: "Add New Developer",
+              url: "",
+            }
+            : undefined
+        }
+        setSheetOpen={canAddDeveloper ? setOpen : undefined}
+        mode={canAddDeveloper ? mode : undefined}
       />
-
       <div className="p-4">
         {data?.length === 0 ? (
           <NotFound />

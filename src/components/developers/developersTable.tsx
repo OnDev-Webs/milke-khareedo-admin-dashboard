@@ -4,7 +4,10 @@ import DeveloperSheet, { SheetMode } from "./developersSheet";
 import DeletePopUp from "../custom/popups/delete";
 import { Developer } from "@/lib/features/developers/developerSlice";
 import { deleteDeveloper } from "@/lib/features/developers/developerApi";
-import { useAppDispatch } from "@/lib/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { RootState } from "@/lib/store/store";
+import { hasPermission } from "@/lib/permissions/hasPermission";
+import { PERMISSIONS } from "@/lib/permissions/permissionKeys";
 interface DevelopersTableProps {
   developers: Developer[];
   onLoadMore: () => void;
@@ -64,6 +67,19 @@ export default function DevelopersTable({
       console.error("Delete failed:", error);
     }
   };
+
+  const canEditDeveloper = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.DEVELOPER.EDIT)
+  );
+
+  const canViewDeveloper = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.DEVELOPER.VIEW)
+  );
+
+  const canDeleteDeveloper = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.DEVELOPER.DELETE)
+  );
+
 
   return (
     <div className="w-full bg-white">
@@ -151,44 +167,50 @@ export default function DevelopersTable({
                             }}
                             onClick={(e) => e.stopPropagation()}
                           >
-
                             <button
+                              disabled={!canEditDeveloper}
                               onClick={(e) => {
+                                if (!canEditDeveloper) return;
                                 e.stopPropagation();
                                 setOpenMenuId(null);
                                 setData(row);
                                 setMode("edit");
                                 setOpen(true);
                               }}
-                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 `}
+                              className={`block w-full px-4 py-2 text-left text-xs
+                              ${canEditDeveloper ? "hover:bg-gray-50" : "opacity-50 cursor-not-allowed"}`}
                             >
                               Edit
                             </button>
                             <button
+                              disabled={!canViewDeveloper}
                               onClick={(e) => {
+                                if (!canViewDeveloper) return;
                                 e.stopPropagation();
                                 setOpenMenuId(null);
                                 setData(row);
                                 setMode("view");
                                 setOpen(true);
                               }}
-                              className={`block w-full px-4 py-2 text-left text-xs hover:bg-gray-50 
-                            
-                        `}>
-                              Veiw
+                              className={`block w-full px-4 py-2 text-left text-xs
+                              ${canViewDeveloper ? "hover:bg-gray-50" : "opacity-50 cursor-not-allowed"}`}
+                            >
+                              View
                             </button>
                             <button
+                              disabled={!canDeleteDeveloper}
                               onClick={(e) => {
+                                if (!canDeleteDeveloper) return;
                                 e.stopPropagation();
                                 setOpenMenuId(null);
                                 setDeleteId(row._id);
                                 setIsDeleteOpen(true);
                               }}
-                              className="block w-full px-4 py-2 text-left text-xs text-red-600 hover:bg-gray-50"
+                              className={`block w-full px-4 py-2 text-left text-xs text-red-600
+                              ${canDeleteDeveloper ? "hover:bg-gray-50" : "opacity-50 cursor-not-allowed"}`}
                             >
                               Delete
                             </button>
-
                           </div>
                         )}
                       </div>

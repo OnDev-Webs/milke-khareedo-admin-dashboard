@@ -17,8 +17,8 @@ import {
 import { useAppDispatch } from "@/lib/store/hooks";
 import { exportLeadsCSV } from "@/lib/features/lead-crm/leadcrmApi";
 import { Download } from "lucide-react";
-import notification from "@/assets/notification.png"
-import exportCsv from "@/assets/exportCsv.png"
+import notification from "@/assets/notification.svg"
+import exportCsv from "@/assets/exportCsv.svg";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
