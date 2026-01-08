@@ -8,6 +8,8 @@ import { fetchBlogs } from "@/lib/features/blogs/blogApi";
 import { RootState } from "@/lib/store/store";
 import { Blog } from "@/lib/features/blogs/blogSlice";
 import Loader from "../ui/loader";
+import { hasPermission } from "@/lib/permissions/hasPermission";
+import { PERMISSIONS } from "@/lib/permissions/permissionKeys";
 
 export type HeaderBlog = {
   key: keyof Blog | "actions";
@@ -107,6 +109,11 @@ export default function Blogs() {
   const indexOfFirstItem = (currentPage - 1) * limit;
   const indexOfLastItem = Math.min(currentPage * limit, total);
 
+  const canAddBlog = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.BLOGS.ADD)
+  );
+
+
   return (
     <div>
       <CustomTableSearchBar<Blog>
@@ -114,11 +121,16 @@ export default function Blogs() {
         onSearch={handleSearch}
         searchKeys={searchKeys}
         placeholder="Search by developer name, email, or phone number"
-        addButton={{
-          buttonName: "Add New Blog",
-          url: "/blogs/add",
-        }}
+        addButton={
+          canAddBlog
+            ? {
+              buttonName: "Add New Blog",
+              url: "/blogs/add",
+            }
+            : undefined
+        }
       />
+
       {loading ? (
         <div className="flex items-center justify-center h-64">
           <div className="text-gray-500"><Loader size={38} /></div>

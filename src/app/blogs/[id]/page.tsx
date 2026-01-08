@@ -20,12 +20,17 @@ import { RootState } from "@/lib/store/store";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Loader from "@/components/ui/loader";
+import { hasPermission } from "@/lib/permissions/hasPermission";
+import { PERMISSIONS } from "@/lib/permissions/permissionKeys";
 
 export default function BlogDetailPage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const params = useParams();
   const blogId = params.id as string;
+  const canEditBlog = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.BLOGS.EDIT)
+  );
   const { selectedBlog, loadingDetails } = useAppSelector(
     (state: RootState) => state.blogs
   );
@@ -55,13 +60,14 @@ export default function BlogDetailPage() {
     }
   };
 
+
   if (loadingDetails) {
     return (
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset className="p-2 bg-[#F5F5FA] overflow-hidden">
           <div className="border rounded-sm bg-background h-full w-full overflow-hidden flex items-center justify-center">
-            <div className="text-gray-500"><Loader size={38}/></div>
+            <div className="text-gray-500"><Loader size={38} /></div>
           </div>
         </SidebarInset>
       </SidebarProvider>
@@ -101,16 +107,22 @@ export default function BlogDetailPage() {
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                 </div>
-                {!isEditing && (
-                  <div className="flex items-center">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => router.back()}
+                    className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-gray-100 transition"
+                  >
+                    Back
+                  </button>
+                  {!isEditing && canEditBlog && (
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="flex items-center gap-2 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                      className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition"
                     >
                       Update
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </BreadcrumbList>
             </Breadcrumb>
           </header>

@@ -8,6 +8,9 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchUsers, deleteUser, toggleUserStatus } from "@/lib/features/user/userApi";
 import { fetchRoles } from "@/lib/features/role/roleApi";
 import Loader from "@/components/ui/loader";
+import { RootState } from "@/lib/store/store";
+import { hasPermission } from "@/lib/permissions/hasPermission";
+import { PERMISSIONS } from "@/lib/permissions/permissionKeys";
 
 export type SheetMode = "view" | "edit" | "create";
 
@@ -16,6 +19,23 @@ export default function UserAndRoles() {
 
   const { users, loading } = useAppSelector((state) => state.user);
   const { roles } = useAppSelector((state) => state.roles);
+
+  const canAddUser = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.TEAM.ADD)
+  );
+
+  const canEditUser = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.TEAM.EDIT)
+  );
+
+  const canViewUser = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.TEAM.VIEW)
+  );
+
+  const canDeleteUser = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.TEAM.DELETE)
+  );
+
 
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -86,16 +106,19 @@ export default function UserAndRoles() {
           User & Roles
         </h2>
 
-        <button
-          onClick={() => {
-            setMode("create");
-            setData(null);
-            setOpen(true);
-          }}
-          className="rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white"
-        >
-          Add New User
-        </button>
+        {canAddUser && (
+          <button
+            onClick={() => {
+              setMode("create");
+              setData(null);
+              setOpen(true);
+            }}
+            className="rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white"
+          >
+            Add New User
+          </button>
+        )}
+
       </div>
 
       {/* ===== TABLE ===== */}
@@ -190,36 +213,45 @@ export default function UserAndRoles() {
                         }`}
                     >
                       <button
+                        disabled={!canEditUser}
                         onClick={() => {
+                          if (!canEditUser) return;
                           setOpenMenuId(null);
                           setData(user);
                           setMode("edit");
                           setOpen(true);
                         }}
-                        className="block w-full px-4 py-2 text-left text-xs hover:bg-gray-50"
+                        className={`block w-full px-4 py-2 text-left text-xs
+                        ${canEditUser ? "hover:bg-gray-50" : "opacity-50 cursor-not-allowed"}`}
                       >
                         Edit
                       </button>
 
                       <button
+                        disabled={!canViewUser}
                         onClick={() => {
+                          if (!canViewUser) return;
                           setOpenMenuId(null);
                           setData(user);
                           setMode("view");
                           setOpen(true);
                         }}
-                        className="block w-full px-4 py-2 text-left text-xs hover:bg-gray-50"
+                        className={`block w-full px-4 py-2 text-left text-xs
+                        ${canViewUser ? "hover:bg-gray-50" : "opacity-50 cursor-not-allowed"}`}
                       >
                         View
                       </button>
 
                       <button
+                        disabled={!canDeleteUser}
                         onClick={() => {
+                          if (!canDeleteUser) return;
                           setOpenMenuId(null);
                           setDeleteUserId(user._id);
                           setIsDeleteOpen(true);
                         }}
-                        className="block w-full px-4 py-2 text-left text-xs text-red-600 hover:bg-gray-50"
+                        className={`block w-full px-4 py-2 text-left text-xs text-red-600
+                        ${canDeleteUser ? "hover:bg-gray-50" : "opacity-50 cursor-not-allowed"}`}
                       >
                         Delete
                       </button>

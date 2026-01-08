@@ -4,7 +4,11 @@ export const hasPermission = (
   state: RootState,
   permission: string
 ): boolean => {
-  const permissions = state.auth.permissions;
+  const { permissions, role } = state.auth;
+
+  if (role?.name === "Super Admin") {
+    return true;
+  }
 
   if (!permissions) return false;
 

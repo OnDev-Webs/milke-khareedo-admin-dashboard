@@ -19,6 +19,9 @@ import setting from "@/assets/setting.svg"
 import CRMDashboard from "@/assets/crmDashboard.svg";
 import CRMLead from "@/assets/crmLead.svg";
 import CRMSetting from "@/assets/crmSetting.svg";
+import { RootState } from "@/lib/store/store"
+import { PERMISSIONS } from "@/lib/permissions/permissionKeys"
+import { hasPermission } from "@/lib/permissions/hasPermission"
 
 function SidebarLogo() {
   const { state } = useSidebar()
@@ -93,7 +96,23 @@ const mobileNavItems = [
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const router = useRouter()
-  const { name, email, profileImage } = useAppSelector((state) => state.auth)
+  const { name, email, profileImage } = useAppSelector((state) => state.auth);
+
+  const canViewProperty = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.PROPERTY.VIEW)
+  );
+
+  const canViewDeveloper = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.DEVELOPER.VIEW)
+  );
+
+  const canViewCRM = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.CRM.VIEW)
+  );
+
+  const canViewBlogs = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.BLOGS.VIEW)
+  );
 
   const user = {
     name: name || "",
@@ -101,12 +120,46 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
     profileImage: profileImage || null,
   }
 
-  const navMainWithActive = navMain.map((item) => ({
-    ...item,
-    isActive:
-      pathname === item.url ||
-      pathname.startsWith(item.url + "/"),
-  }))
+  const navMainWithActive = [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: <Image src={dashboard} alt="Dashboard" width={18} height={18} />,
+      allow: true,
+    },
+    {
+      title: "Properties",
+      url: "/properties",
+      icon: <Image src={property} alt="Properties" width={18} height={18} />,
+      allow: canViewProperty,
+    },
+    {
+      title: "Developers",
+      url: "/developers",
+      icon: <Image src={developer} alt="Developers" width={18} height={18} />,
+      allow: canViewDeveloper,
+    },
+    {
+      title: "Lead / CRM",
+      url: "/lead-crm",
+      icon: <Image src={leadCRM} alt="Lead CRM" width={18} height={18} />,
+      allow: canViewCRM,
+    },
+    {
+      title: "Blogs",
+      url: "/blogs",
+      icon: <Image src={blog} alt="Blogs" width={18} height={18} />,
+      allow: canViewBlogs,
+    },
+  ]
+    .filter(item => item.allow)
+    .map(item => ({
+      ...item,
+      isActive:
+        pathname === item.url ||
+        pathname.startsWith(item.url + "/"),
+    }));
+
 
   const navSettingWithActive = navSetting.map((item) => ({
     ...item,

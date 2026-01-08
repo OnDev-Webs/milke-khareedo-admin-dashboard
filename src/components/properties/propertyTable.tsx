@@ -11,8 +11,11 @@ import { useEffect, useRef, useState } from "react";
 import DeletePopUp from "../custom/popups/delete";
 import { Property } from "@/lib/features/properties/propertiesSlice";
 import { deletePropertyById, fetchProperties } from "@/lib/features/properties/propertiesApi";
-import { useAppDispatch } from "@/lib/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { useRouter } from "next/navigation";
+import { RootState } from "@/lib/store/store";
+import { PERMISSIONS } from "@/lib/permissions/permissionKeys";
+import { hasPermission } from "@/lib/permissions/hasPermission";
 
 
 interface PropertiesTableProps {
@@ -71,6 +74,19 @@ export default function PropertiesTable({
   const formatCount = (count: number) => {
     return count < 10 ? `0${count}` : `${count}`;
   };
+
+
+  const canEdit = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.PROPERTY.EDIT)
+  );
+
+  const canView = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.PROPERTY.VIEW)
+  );
+
+  const canDelete = useAppSelector((state: RootState) =>
+    hasPermission(state, PERMISSIONS.PROPERTY.DELETE)
+  );
 
 
   return (
@@ -176,37 +192,39 @@ export default function PropertiesTable({
                             }}
                             onClick={(e) => e.stopPropagation()}>
                             <button
+                              disabled={!canEdit}
                               onClick={(e) => {
+                                if (!canEdit) return;
                                 e.stopPropagation();
-                                router.push(
-                                  `/properties/add-property?id=${row._id}&mode=edit`
-                                )
+                                router.push(`/properties/add-property?id=${row._id}&mode=edit`);
                               }}
-                              className="block w-full px-4 py-2 text-left text-xs hover:bg-gray-50"
+                              className={`block w-full px-4 py-2 text-left text-xs ${canEdit ? "hover:bg-gray-50" : "opacity-50 cursor-not-allowed"}`}
                             >
                               Edit
                             </button>
 
                             <button
+                              disabled={!canView}
                               onClick={(e) => {
+                                if (!canView) return;
                                 e.stopPropagation();
-                                router.push(
-                                  `/properties/add-property?id=${row._id}&mode=view`
-                                )
+                                router.push(`/properties/add-property?id=${row._id}&mode=view`);
                               }}
-                              className="block w-full px-4 py-2 text-left text-xs hover:bg-gray-50"
+                              className={`block w-full px-4 py-2 text-left text-xs ${canView ? "hover:bg-gray-50" : "opacity-50 cursor-not-allowed"}`}
                             >
                               View
                             </button>
 
                             <button
+                              disabled={!canDelete}
                               onClick={(e) => {
+                                if (!canDelete) return;
                                 e.stopPropagation();
                                 setDeleteId(row._id);
                                 setIsDeleteOpen(true);
                                 setOpenMenuId(null);
                               }}
-                              className="block w-full px-4 py-2 text-left text-xs text-red-600 hover:bg-gray-50"
+                              className={`block w-full px-4 py-2 text-left text-xs text-red-600 ${canDelete ? "hover:bg-gray-50" : "opacity-50 cursor-not-allowed"}`}
                             >
                               Delete
                             </button>
