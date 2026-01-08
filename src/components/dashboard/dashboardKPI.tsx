@@ -8,7 +8,7 @@ import totalbooking from "@/assets/totalbooking.png";
 import totalLiveProjectImg from "@/assets/liveproject.png";
 import { useEffect, useState } from "react";
 import { fetchCRMDashboard } from "@/lib/features/lead-crm/leadcrmApi";
-import notification from "@/assets/notification.png"
+import notification from "@/assets/notification.svg";
 import { useRouter } from "next/navigation";
 import { Sheet, SheetContent, SheetTitle } from "../ui/sheet";
 
@@ -195,12 +195,12 @@ export default function DashboardKPI() {
         </div>
 
         <div className="w-1/8 flex justify-end">
-          <button onClick={() => router.push("/notification")} className="p-2.5 rounded-full border border-white bg-white">
+          <button onClick={() => router.push("/notification")} className="p-2 rounded-full border border-white bg-white">
             <img
               src={notification.src}
               alt="notification"
-              width={12}
-              height={12}
+              width={16}
+              height={16}
             />
           </button>
         </div>
