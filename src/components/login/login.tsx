@@ -11,6 +11,56 @@ import { adminLogin } from "@/lib/features/auth/adminAuthApi";
 import { useRouter } from "next/navigation";
 import { setRememberMe, setRememberMeEmail, getRememberMeEmail, getRememberMe, clearRememberMe } from "@/utils/rememberMe";
 import { Eye, EyeOff } from "lucide-react";
+import { PERMISSIONS } from "@/lib/permissions/permissionKeys";
+
+const SIDEBAR_ORDER = [
+  {
+    url: "/dashboard",
+    onlySuperAdmin: true,
+  },
+  {
+    url: "/properties",
+    permission: PERMISSIONS.PROPERTY.VIEW,
+  },
+  {
+    url: "/developers",
+    permission: PERMISSIONS.DEVELOPER.VIEW,
+  },
+  {
+    url: "/lead-crm",
+    permission: PERMISSIONS.CRM.VIEW,
+  },
+  {
+    url: "/blogs",
+    permission: PERMISSIONS.BLOGS.VIEW,
+  },
+  {
+    url: "/settings", 
+    permission: PERMISSIONS.TEAM.VIEW,
+  },
+];
+const getFirstAllowedRoute = (
+  roleName: string,
+  permissions?: Record<string, any>
+) => {
+  if (roleName === "Super Admin") {
+    return "/dashboard";
+  }
+  for (const item of SIDEBAR_ORDER) {
+    if (item.onlySuperAdmin) continue;
+
+    if (item.permission) {
+      const [module, action] = item.permission.split(".");
+      if (permissions?.[module]?.[action]) {
+        return item.url;
+      }
+    }
+    if (!item.permission) {
+      return item.url;
+    }
+  }
+  return "/settings";
+};
 
 export default function Login() {
   const dispatch = useAppDispatch<AppDispatch>();
@@ -54,14 +104,16 @@ export default function Login() {
     }
 
     if (rememberedData && rememberedData.token) {
-      // Restore session token
       localStorage.setItem("token", rememberedData.token);
       localStorage.setItem("user", rememberedData.userData);
 
       try {
         const userData = JSON.parse(rememberedData.userData);
         if (userData?.id && userData?.email) {
-          router.replace("/dashboard");
+          const roleName = userData?.role?.name;
+          const permissions = userData?.permissions;
+          const redirectUrl = getFirstAllowedRoute(roleName, permissions);
+          router.replace(redirectUrl);
         }
       } catch (error) {
         console.error("Error parsing remembered user data:", error);
@@ -76,13 +128,11 @@ export default function Login() {
       const token = response?.payload?.token;
       const user = response?.payload;
 
-      // Ensure we have valid user data before storing
       if (!user?.id || !user?.email) {
         console.error("Invalid user data received from login API");
         return;
       }
 
-      // Create user data object matching IAdmin interface structure
       const userData = JSON.stringify({
         id: user.id,
         name: user.name || "",
@@ -102,12 +152,13 @@ export default function Login() {
         setRememberMe(token, userData);
         setRememberMeEmail(payload.email);
       } else {
-        // Clear remember me if unchecked
         clearRememberMe();
       }
 
-      // Redirect immediately - dashboard will fetch its own data
-      router.replace("/dashboard");
+      const roleName = user?.role?.name;
+      const permissions = user?.role?.permissions;
+      const redirectUrl = getFirstAllowedRoute(roleName, permissions);
+      router.replace(redirectUrl);
     }
   },
     [dispatch, rememberMe, router]

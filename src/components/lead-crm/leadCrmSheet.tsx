@@ -428,7 +428,7 @@ export default function LeadCRMSheet({
               <div className="text-gray-500"><Loader size={38} /></div>
             </div>
           ) : selected ? (
-            <div className="flex-1 overflow-y-auto bg-white px-4 py-4">
+            <div className="flex-1 overflow-y-auto bg-white px-4 pt-4">
               {/* Lead Header */}
               <div className="mb-5 flex items-start gap-3">
                 <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -634,7 +634,7 @@ export default function LeadCRMSheet({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-3 pt-2 border-t">
+              <div className="flex items-center gap-3 border-t sticky bottom-0 z-30 bg-white border-t px-4 py-3 flex items-center gap-3">
                 <button
                   onClick={() => setUpdateStatusOpen(true)}
                   className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-black py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800"

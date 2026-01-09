@@ -235,15 +235,12 @@ export default function AddNewProperty() {
 
       methods.reset({
         ...property,
-
         images: property.images?.map((img: any) => img.url) || [],
-
         relationshipManager: property.relationshipManager?._id || null,
         leadDistributionAgents: Array.isArray(property.leadDistributionAgents)
           ? property.leadDistributionAgents.map((a: any) => a._id)
           : [],
       });
-
 
       if (property.developer?._id) {
         methods.setValue("developer", property.developer._id);
@@ -257,7 +254,6 @@ export default function AddNewProperty() {
         methods.setValue("configurations", property.configurations);
       }
 
-      // 🔥 SET LAYOUT IMAGES (VERY IMPORTANT)
       const layoutsData: Record<string, string[]> = {};
 
       property.configurations?.forEach((config: any) => {
@@ -270,13 +266,11 @@ export default function AddNewProperty() {
 
       methods.setValue("layouts", layoutsData);
 
-
       if (property.connectivity) {
         methods.setValue("connectivity", property.connectivity);
       }
     });
   }, [propertyId]);
-
 
   const { handleSubmit } = methods;
 
@@ -354,7 +348,6 @@ export default function AddNewProperty() {
                   />
                 </div>
 
-
                 <ul className=" mb-4 space-y-2 text-xs text-gray-500 list-disc pl-4">
                   <li>{currentStep?.description}</li>
                 </ul>
@@ -376,13 +369,14 @@ export default function AddNewProperty() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex items-center gap-3 w-full">
                 {/* Back */}
                 {activeStep > 1 && (
                   <button
                     type="button"
                     onClick={handleBack}
-                    className="border px-8 rounded py-1 bg-white text-black"
+                    className={`border rounded py-2 bg-white text-black
+                    ${activeStep < totalSteps ? "w-1/2" : "w-full"}`}
                   >
                     Back
                   </button>
@@ -393,7 +387,8 @@ export default function AddNewProperty() {
                   <button
                     type="button"
                     onClick={handleNext}
-                    className="border px-8 rounded py-1 bg-black text-white"
+                    className={`border rounded py-2 bg-black text-white
+                    ${activeStep > 1 ? "w-1/2" : "w-full"}`}
                   >
                     Next
                   </button>
@@ -403,13 +398,12 @@ export default function AddNewProperty() {
                 {!isViewMode && activeStep === totalSteps && (
                   <button
                     type="submit"
-                    className="border px-4 rounded py-1 bg-black text-white"
+                    className="border rounded py-2 bg-black text-white w-full"
                   >
                     {isEditMode ? "Edit Property" : "Save Property"}
                   </button>
                 )}
               </div>
-
             </aside>
 
             <div className="col-span-19">

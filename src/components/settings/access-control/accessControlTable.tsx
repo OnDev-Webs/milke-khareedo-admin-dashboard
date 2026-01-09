@@ -217,8 +217,7 @@ export default function EditAccessControlTable({
           })
         ).unwrap();
       }
-
-      router.back();
+      router.replace("/settings?tab=2")
     } catch (error: any) {
       console.error("ROLE SAVE FAILED 👉", error);
       alert(error?.message || "Something went wrong");
@@ -315,7 +314,7 @@ export default function EditAccessControlTable({
         <div className="mt-10 flex justify-end gap-3">
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={()=>router.replace("/settings?tab=2")}
             className="rounded-lg border px-5 py-2 text-sm font-medium text-gray-700"
           >
             Cancel

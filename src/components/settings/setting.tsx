@@ -3,13 +3,13 @@ import SettingsHeader from "./settingsBannner";
 import ProfileSettings from "./profile-setting/profileSetting";
 import UserAndRoles from "./user-roles/userAndRoles";
 import AccessControl from "./access-control/accessControl";
-import { useState } from "react";
 import acSvg from "@/assets/notification-status.svg";
 import Image from "next/image";
 import user from "@/assets/user.svg";
 import userRole from "@/assets/userRole.svg";
 import { useAppSelector } from "@/lib/store/hooks";
 import { RootState } from "@/lib/store/store";
+import { useRouter, useSearchParams } from "next/navigation";
 
 function ACSVG({ active }: { active: boolean }) {
   return (
@@ -36,8 +36,8 @@ function TabIcon({
       width={16}
       height={16}
       className={`transition ${active
-          ? "brightness-0 invert"
-          : "brightness-0"
+        ? "brightness-0 invert"
+        : "brightness-0"
         }`}
     />
   );
@@ -61,7 +61,7 @@ export default function Settings() {
       title: "Access Control",
       icon: (active: boolean) => <ACSVG active={active} />,
       component: <AccessControl />,
-      allow: roleName === "Super Admin", 
+      allow: roleName === "Super Admin",
     },
     {
       id: 3,
@@ -72,9 +72,12 @@ export default function Settings() {
       component: <UserAndRoles />,
       allow: true,
     },
-  ].filter(tab => tab.allow); 
+  ].filter(tab => tab.allow);
 
-  const [activeTabId, setActiveTabId] = useState<number>(1);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const activeTabId = Number(searchParams.get("tab")) || 1;
 
   const currentTab = settingTab.find((item) => item.id === activeTabId);
 
@@ -84,15 +87,15 @@ export default function Settings() {
         <SettingsHeader />
       </div>
 
-      <div className="flex md:border h-full ">
-        <div className="hidden md:flex md:w-1/6 flex-col bg-[#F3F6FF] p-4">
+      <div className="flex md:border h-full rounded-2xl p-3">
+        <div className="hidden md:flex md:w-1/6 flex-col bg-[#F3F6FF] rounded">
           {settingTab.map((tab) => {
             const isActive = tab.id === activeTabId;
 
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTabId(tab.id)}
+                onClick={() => router.replace(`/settings?tab=${tab.id}`)}
                 className={`relative flex items-center gap-2 p-4 text-sm font-normal
                   ${isActive
                     ? "bg-black rounded-lg text-white after:absolute after:right-2 after:w-0.5 after:h-5 after:bg-white after:rounded-xl"

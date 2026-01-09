@@ -17,7 +17,6 @@ import { RootState } from "@/lib/store/store";
 import { PERMISSIONS } from "@/lib/permissions/permissionKeys";
 import { hasPermission } from "@/lib/permissions/hasPermission";
 
-
 interface PropertiesTableProps {
   properties: Property[];
   currentPage: number;
@@ -104,10 +103,10 @@ export default function PropertiesTable({
         onConfirm={deleteProperty}
       />
 
-      <div className="w-full rounded-xl border bg-white overflow-x-hidden">
-        <div className="relative overflow-x-auto overflow-y-visible">
+      <div className="w-full rounded-xl border bg-white flex flex-col h-[calc(100vh-160px)]">
+        <div className="overflow-x-auto">
           <table className="w-full text-sm ">
-            <thead className="bg-[#f3f6ff]">
+            <thead className="bg-[#f3f6ff] sticky top-0 z-10">
               <tr>
                 {/* <th className="px-4 py-3 font-bold">Property Name</th> */}
                 <th className="px-4 py-3 font-bold">
@@ -124,7 +123,6 @@ export default function PropertiesTable({
                 <th className="px-4 py-3 font-bold text-center">Actions</th>
               </tr>
             </thead>
-
             <tbody className="divide-y">
               {properties.map((row, index) => {
                 return (
@@ -239,61 +237,63 @@ export default function PropertiesTable({
           </table>
         </div>
 
-        <div className="flex items-center justify-center gap-2 border-t p-4 text-sm text-gray-600">
-          <button
-            className="border rounded-full px-3 py-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => onPageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            <ChevronLeft size={16} /> Back
-          </button>
+        <div className="sticky bottom-0 bg-white border-t z-20">
+          <div className="flex items-center justify-center gap-2 p-4 text-sm text-gray-600">
 
-          {pageNumbers.map((page) => (
             <button
-              key={page}
-              className={`rounded-full w-7 h-7 flex items-center justify-center ${currentPage === page
-                ? "bg-black text-white"
-                : "bg-gray-100 hover:bg-gray-200"
-                }`}
-              onClick={() => onPageChange(page)}
+              className="border rounded-full px-3 py-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 1}
             >
-              {page}
+              <ChevronLeft size={16} /> Back
             </button>
-          ))}
 
-          {totalPages > 5 && currentPage < totalPages - 2 && (
-            <button className="rounded-full bg-gray-100 w-7 h-7 flex items-center justify-center">
-              <EllipsisVerticalIcon size={16} className="rotate-90" />
-            </button>
-          )}
+            {pageNumbers.map((page) => (
+              <button
+                key={page}
+                className={`rounded-full w-7 h-7 flex items-center justify-center ${currentPage === page
+                  ? "bg-black text-white"
+                  : "bg-gray-100 hover:bg-gray-200"
+                  }`}
+                onClick={() => onPageChange(page)}
+              >
+                {page}
+              </button>
+            ))}
 
-          {totalPages > 5 && currentPage < totalPages - 1 && (
+            {totalPages > 5 && currentPage < totalPages - 2 && (
+              <button className="rounded-full bg-gray-100 w-7 h-7 flex items-center justify-center">
+                <EllipsisVerticalIcon size={16} className="rotate-90" />
+              </button>
+            )}
+
+            {totalPages > 5 && currentPage < totalPages - 1 && (
+              <button
+                className={`rounded-full w-7 h-7 flex items-center justify-center ${currentPage === totalPages
+                  ? "bg-black text-white"
+                  : "bg-gray-100 hover:bg-gray-200"
+                  }`}
+                onClick={() => onPageChange(totalPages)}
+              >
+                {totalPages}
+              </button>
+            )}
+
             <button
-              className={`rounded-full w-7 h-7 flex items-center justify-center ${currentPage === totalPages
-                ? "bg-black text-white"
-                : "bg-gray-100 hover:bg-gray-200"
-                }`}
-              onClick={() => onPageChange(totalPages)}
+              className="border rounded-full px-3 py-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
             >
-              {totalPages}
+              Next <ChevronRight size={16} />
             </button>
-          )}
 
-          <button
-            className="border rounded-full px-3 py-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => onPageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            Next <ChevronRight size={16} />
-          </button>
-
-          {/* <div className="ml-4 text-sm text-gray-500">
+            {/* <div className="ml-4 text-sm text-gray-500">
             Showing {indexOfFirstItem + 1} to{" "}
             {Math.min(indexOfLastItem, dataLength)} of {dataLength} entries
           </div> */}
+          </div>
         </div>
-
+        </div>
       </div>
-    </div>
-  );
+      );
 }

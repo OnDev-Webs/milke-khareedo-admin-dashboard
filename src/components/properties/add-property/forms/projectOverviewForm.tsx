@@ -1,6 +1,6 @@
 "use client";
 
-import { File, FileImage, Plus, Search, X } from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { PropertyFormValues } from "@/schema/property/propertySchema";
 import { useEffect, useState } from "react";
@@ -43,6 +43,12 @@ function Field({
   );
 }
 
+const MONTHS = [
+  "January", "February", "March", "April",
+  "May", "June", "July", "August",
+  "September", "October", "November", "December"
+];
+
 export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?: boolean }) {
   const {
     register,
@@ -50,9 +56,45 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
     watch,
     formState: { errors },
   } = useFormContext<PropertyFormValues>();
-  const developerPrice = watch("developerPrice");
-  const offerPrice = watch("offerPrice");
 
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [tempSelectedDate, setTempSelectedDate] = useState<{
+    day: number;
+    month: number;
+    year: number;
+  } | null>(null);
+  const today = new Date();
+  const todayDay = today.getDate();
+  const todayMonth = today.getMonth();
+  const todayYear = today.getFullYear();
+
+  const [calendarDate, setCalendarDate] = useState(() => {
+    const d = new Date();
+    d.setDate(1);
+    return d;
+  });
+  const currentMonth = calendarDate.getMonth();
+  const currentYear = calendarDate.getFullYear();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+  const leadingEmptyDays = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+  const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
+
+  const handlePrevMonth = () => {
+    setCalendarDate(prev => {
+      const d = new Date(prev);
+      d.setMonth(d.getMonth() - 1);
+      return d;
+    });
+  };
+
+  const handleNextMonth = () => {
+    setCalendarDate(prev => {
+      const d = new Date(prev);
+      d.setMonth(d.getMonth() + 1);
+      return d;
+    });
+  };
 
   const handleReraFile = (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -80,10 +122,8 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
   }, [dispatch]);
 
   const { developers } = useAppSelector((state: RootState) => state.developers);
-
   const [selectDeveloperId, setselectDeveloperId] = useState("");
   const { control } = useFormContext<PropertyFormValues>();
-
   const [locationSearch, setLocationSearch] = useState("");
 
   useEffect(() => {
@@ -109,19 +149,14 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
     append,
     remove,
     replace,
-  } = useFieldArray({
-    control,
-    name: "configurations",
-  });
+  } = useFieldArray({ control, name: "configurations", });
 
   useEffect(() => {
     const configs = watch("configurations");
-
     if (configs && Array.isArray(configs) && configs.length > 0) {
       replace(configs);
     }
   }, []);
-
 
   const possessionDate = watch("possessionDate");
 
@@ -133,13 +168,11 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
   }, [possessionDate]);
 
   const possessionStatus = watch("possessionStatus");
-
   const developerId = watch("developer");
 
   useEffect(() => {
     selectDeveloperId && setValue("developer", selectDeveloperId);
   }, [selectDeveloperId]);
-
 
   async function handleLocationSearch() {
     if (!locationSearch) return;
@@ -164,8 +197,6 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
     const place = data?.places?.[0];
 
     if (!place) return;
-
-    // ✅ Set form values
     setValue("location", place.formattedAddress || locationSearch, {
       shouldValidate: true,
     });
@@ -177,9 +208,40 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
     setValue("longitude", place.location.longitude, {
       shouldValidate: true,
     });
-
   }
 
+  const formatIndianNumber = (value: string) => {
+    const num = value.replace(/\D/g, "");
+    if (!num) return "";
+
+    const lastThree = num.slice(-3);
+    const rest = num.slice(0, -3);
+
+    return rest
+      ? rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + "," + lastThree
+      : lastThree;
+  };
+
+  const parseIndianPrice = (value: string | number | null | undefined): number => {
+    if (value === null || value === undefined) return 0;
+
+    if (typeof value === "number") return value;
+
+    const v = value.toString().toLowerCase().replace(/,/g, "").trim();
+
+    if (v.includes("crore")) {
+      const num = parseFloat(v.replace("crore", "").trim());
+      return isNaN(num) ? 0 : Math.round(num * 10000000);
+    }
+
+    if (v.includes("lakh")) {
+      const num = parseFloat(v.replace("lakh", "").trim());
+      return isNaN(num) ? 0 : Math.round(num * 100000);
+    }
+
+    const n = Number(v.replace(/[^0-9]/g, ""));
+    return isNaN(n) ? 0 : n;
+  };
 
   return (
     <main className="p-4 h-[84vh] pb-10  overflow-y-auto">
@@ -263,7 +325,6 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
           </div>
         </Field>
 
-
         <Field
           label="Project Size "
           description="Towers and unit count"
@@ -293,70 +354,254 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
         <Field
           label="Possession Date "
           description="Expected possession date"
-          error={errors.possessionDate}
-        >
-          <input
-            type="date"
-            className="w-full outline-none"
-            {...register("possessionDate", { required: true })}
-            readOnly={readOnly}
-            disabled={readOnly}
-          />
+          error={errors.possessionDate}>
+          <div className="relative">
+            {/* INPUT BUTTON */}
+            <button
+              type="button"
+              onClick={() => {
+                if (!readOnly) setDatePickerOpen(prev => !prev);
+              }}
+              className={`w-full text-left outline-none text-sm py-1 ${errors.possessionDate ? "border-red-500" : ""}`}
+            >
+              {possessionDate || "Select date"}
+            </button>
+
+            {datePickerOpen && (
+              <div className="absolute left-0 top-full mt-2 z-50 bg-white border rounded-xl shadow-lg p-4 w-[320px]">
+                <p className="text-sm font-semibold mb-2">Select Date</p>
+                {/* MONTH NAV */}
+                <div className="flex items-center justify-between mb-3">
+                  <button
+                    type="button"
+                    onClick={handlePrevMonth}
+                    className="bg-[#F3F8FE] px-3 py-0.5 rounded-full"
+                  >
+                    ‹
+                  </button>
+
+                  <p className="text-[16px] font-semibold">
+                    {MONTHS[currentMonth]} {currentYear}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={handleNextMonth}
+                    className="bg-[#F3F8FE] px-3 py-0.5 rounded-full"
+                  >
+                    ›
+                  </button>
+                </div>
+
+                {/* DAYS HEADER */}
+                <div className="grid grid-cols-7 gap-2 text-center text-xs mb-1">
+                  {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(d => (
+                    <span key={d} className="text-gray-400">{d}</span>
+                  ))}
+                </div>
+
+                {/* DAYS */}
+                <div className="grid grid-cols-7 gap-2 text-center text-sm">
+                  {Array.from({ length: leadingEmptyDays }).map((_, i) => {
+                    const day = prevMonthDays - leadingEmptyDays + i + 1;
+                    return (
+                      <div
+                        key={`prev-${i}`}
+                        className="h-8 w-8 flex items-center justify-center text-gray-300"
+                      >
+                        {day}
+                      </div>
+                    );
+                  })}
+
+                  {Array.from({ length: daysInMonth }).map((_, i) => {
+                    const day = i + 1;
+
+                    const isSelected =
+                      tempSelectedDate?.day === day &&
+                      tempSelectedDate?.month === currentMonth &&
+                      tempSelectedDate?.year === currentYear;
+
+                    const isToday =
+                      day === todayDay &&
+                      currentMonth === todayMonth &&
+                      currentYear === todayYear;
+
+                    return (
+                      <button
+                        key={day}
+                        type="button"
+                        onClick={() =>
+                          setTempSelectedDate({
+                            day,
+                            month: currentMonth,
+                            year: currentYear,
+                          })
+                        }
+                        className={`h-8 w-8 rounded-md transition
+                        ${isSelected
+                            ? "bg-black text-white"
+                            : isToday
+                              ? "border border-black font-semibold"
+                              : "hover:bg-black hover:text-white"
+                          }
+                        `}
+                      >
+                        {day}
+                      </button>
+                    );
+                  })}
+
+                  {Array.from({
+                    length: (7 - ((leadingEmptyDays + daysInMonth) % 7)) % 7,
+                  }).map((_, i) => (
+                    <div
+                      key={`next-${i}`}
+                      className="h-8 w-8 flex items-center justify-center text-gray-300"
+                    >
+                      {i + 1}
+                    </div>
+                  ))}
+                </div>
+
+                {/* FOOTER */}
+                <div className="flex gap-3 mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setDatePickerOpen(false)}
+                    className="flex-1 bg-gray-200 py-2 rounded-lg">
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!tempSelectedDate) {
+                        setValue("possessionDate", "", { shouldValidate: true });
+                        return;
+                      }
+
+                      const dateObj = new Date(
+                        tempSelectedDate.year,
+                        tempSelectedDate.month,
+                        tempSelectedDate.day
+                      );
+
+                      const formatted = dateObj.toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      });
+
+                      setValue("possessionDate", formatted, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      });
+
+                      setDatePickerOpen(false);
+                    }}
+                    className="flex-1 bg-black text-white py-2 rounded-lg">
+                    OK
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </Field>
 
         <Field
-          label="Developer Price "
+          label="Starting Developer Price"
           description="Official listed price"
           error={errors.developerPrice}
         >
           <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#000000] text-[16px] font-medium">
+              ₹
+            </span>
+
             <input
-              className="w-full outline-none"
+              className="w-full outline-none pl-7"
+              placeholder="0,00,00,000"
               {...register("developerPrice", { required: true })}
               readOnly={readOnly}
               disabled={readOnly}
+              onBlur={(e) => {
+                const val = e.target.value.toLowerCase().trim();
+                if (val.includes("crore") || val.includes("lakh")) return;
+                const formatted = formatIndianNumber(val);
+                if (formatted) {
+                  setValue("developerPrice", formatted, {
+                    shouldDirty: true,
+                  });
+                }
+              }}
             />
 
-            {developerPrice && (
+            {watch("developerPrice") && (
               <p className="absolute top-full mt-8 text-xs text-[#9A9A9A] truncate w-full">
-                {numberToWords(developerPrice)}
+                {numberToWords(parseIndianPrice(watch("developerPrice")))}
               </p>
             )}
           </div>
         </Field>
 
         <Field
-          label="Offer Price"
+          label="Starting Offer Price"
           description="Special negotiated price for group-buy members"
           error={errors.offerPrice}
         >
           <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#000000] text-[16px] font-medium">
+              ₹
+            </span>
+
             <input
-              className="w-full outline-none"
+              className="w-full outline-none pl-7"
+              placeholder="0,00,00,000"
               {...register("offerPrice", { required: true })}
               readOnly={readOnly}
               disabled={readOnly}
+              onBlur={(e) => {
+                const val = e.target.value.toLowerCase().trim();
+                if (val.includes("crore") || val.includes("lakh")) return;
+                const formatted = formatIndianNumber(val);
+                if (formatted) {
+                  setValue("offerPrice", formatted, {
+                    shouldDirty: true,
+                  });
+                }
+              }}
             />
 
-            {offerPrice && (
-              <p className="absolute top-full mt-8 text-xs text-[#9A9A9A] truncate w-full">
-                {numberToWords(offerPrice)}
+            {watch("offerPrice") && (
+              <p className="absolute top-full mt-12 text-xs text-[#9A9A9A] truncate w-full">
+                {numberToWords(parseIndianPrice(watch("offerPrice")))}
               </p>
             )}
           </div>
         </Field>
 
         <Field
-          label="Required Group Members "
+          label="Required Group Members"
           description="Minimum buyers needed"
           error={errors.minGroupMembers}
         >
           <input
-            type="number"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             className="w-full outline-none"
-            {...register("minGroupMembers", { required: true })}
+            placeholder="00"
             readOnly={readOnly}
             disabled={readOnly}
+            {...register("minGroupMembers", {
+              required: true,
+              min: 1,
+              valueAsNumber: true,
+              onChange: (e) => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, "");
+              },
+            })}
           />
         </Field>
 

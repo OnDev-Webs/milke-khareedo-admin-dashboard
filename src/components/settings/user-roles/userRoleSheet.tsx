@@ -143,7 +143,7 @@ function UserView({ data, onEdit }: any) {
   );
 }
 
-function UserEdit({ data }: any) {
+function UserEdit({ data, setOpen, setMode }: any) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
@@ -204,6 +204,8 @@ function UserEdit({ data }: any) {
         profileImage: imageFile || undefined,
       })
     ).unwrap();
+    setOpen(false);
+    setMode("view");
   };
 
 
@@ -352,7 +354,7 @@ function UserEdit({ data }: any) {
   );
 }
 
-function UserCreate() {
+function UserCreate({ setOpen, setMode }: { setOpen: (open: boolean) => void; setMode: (mode: string) => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -440,6 +442,9 @@ function UserCreate() {
         role: form.role,
       })
     ).unwrap();
+
+    setOpen(false);
+    setMode("view");
   };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -459,7 +464,7 @@ function UserCreate() {
             <div className="flex items-start gap-4">
               <div
                 onClick={() => fileRef.current?.click()}
-               className={`${preview ? "" : "border-dashed border-blue-400 border"} flex h-20 w-20 items-center justify-center rounded-lg  bg-blue-50  text-white`}>
+                className={`${preview ? "" : "border-dashed border-blue-400 border"} flex h-20 w-20 items-center justify-center rounded-lg  bg-blue-50  text-white`}>
                 {preview ? (
                   <img
                     src={preview}
@@ -467,7 +472,7 @@ function UserCreate() {
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                 <img src={upload.src} alt="logo" />
+                  <img src={upload.src} alt="logo" />
                 )}
               </div>
 
@@ -609,15 +614,6 @@ function UserCreate() {
   );
 }
 
-function Info({ label, value }: { label: string; value: string }) {
-  return (
-    <p className="flex justify-between gap-4">
-      <span className="text-gray-500">{label}</span>
-      <span className="font-medium">{value}</span>
-    </p>
-  );
-}
-
 export default function UserAndRolesSheet({ open, setOpen, data, mode, setMode }: any) {
   const handleClose = () => {
     setOpen(false);
@@ -661,8 +657,8 @@ export default function UserAndRolesSheet({ open, setOpen, data, mode, setMode }
             />
           )}
 
-          {mode === "edit" && <UserEdit data={selectedUser} />}
-          {mode === "create" && <UserCreate />}
+          {mode === "edit" && <UserEdit data={selectedUser} setOpen={setOpen} setMode={setMode} />}
+          {mode === "create" && <UserCreate setOpen={setOpen} setMode={setMode} />}
         </div>
       </SheetContent>
     </Sheet>
