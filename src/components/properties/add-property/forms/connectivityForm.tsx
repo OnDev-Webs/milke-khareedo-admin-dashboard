@@ -232,6 +232,12 @@ export default function ConnectivityForm() {
               setInputs((prev) => ({ ...prev, [activeCategory]: value }));
               fetchPlaceSuggestions(value);
             }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addItem(activeCategory);
+              }
+            }}
             placeholder={activeConfig.placeholder}
             className="flex-1 rounded-lg py-2 text-sm focus:outline-none"
           />
@@ -279,9 +285,9 @@ export default function ConnectivityForm() {
             type="button"
             disabled={!selectedCoords}
             onClick={() => addItem(activeCategory)}
-            className={`rounded-lg px-4 py-1 text-sm font-medium ${selectedCoords
-              ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              : "bg-gray-50 text-gray-400 cursor-not-allowed"
+            className={`rounded-lg px-4 py-1 text-[14px] font-medium border border-[#DCDCDC] ${selectedCoords
+              ? "bg-[#000000] text-[#FFFFFF]"
+              : "bg-[#E6E6E6] text-[#AFAFAF] cursor-not-allowed"
               }`}>
             Add +
           </button>

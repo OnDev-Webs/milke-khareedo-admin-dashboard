@@ -22,6 +22,7 @@ import developerWp from "@/assets/developerWp.svg"
 import call from "@/assets/call.svg"
 import mail from "@/assets/mail.svg"
 import Success from "../custom/popups/success";
+import { set } from "zod";
 
 export type Developer = {
   _id: string;
@@ -654,6 +655,7 @@ export default function DeveloperSheet({
               onSuccess={(msg) => {
                 setSuccessMessage(msg);
                 setShowSuccess(true);
+                setOpen(false);
               }}
             />
           )}

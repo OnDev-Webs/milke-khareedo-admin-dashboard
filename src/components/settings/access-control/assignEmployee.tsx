@@ -6,7 +6,14 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchUsers, updateUser } from "@/lib/features/user/userApi";
 import Loader from "@/components/ui/loader";
 
-export default function AssignEmployee({ roleId }: { roleId: string | null }) {
+export default function AssignEmployee({
+  roleId,
+  setOpen,
+}: {
+  roleId: string | null;
+  setOpen: (open: boolean) => void;
+}) {
+
   const dispatch = useAppDispatch();
   const { users, loading } = useAppSelector((state) => state.user);
 
@@ -63,6 +70,7 @@ export default function AssignEmployee({ roleId }: { roleId: string | null }) {
           ).unwrap()
         )
       );
+      setOpen(false);
     } catch (err) {
       console.error(err);
       alert("Failed to assign users");
@@ -86,7 +94,7 @@ export default function AssignEmployee({ roleId }: { roleId: string | null }) {
       <div className="flex-1 min-h-[68vh] overflow-y-auto px-4 py-4">
         {loading ? (
           <p className="text-sm text-gray-500 text-center">
-            <Loader size={38}/>
+            <Loader size={38} />
           </p>
         ) : filteredUsers.length === 0 ? (
           <div className="flex h-full items-center justify-center">
@@ -135,7 +143,7 @@ export default function AssignEmployee({ roleId }: { roleId: string | null }) {
         )}
       </div>
 
-      <div className="border-t px-4 py-4 bg-white">
+      <div className="sticky bottom-0 border-t px-4 py-4 bg-white">
         <button
           onClick={handleConfirmAssign}
           disabled={assignedUsers.length === 0}

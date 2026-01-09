@@ -123,7 +123,7 @@ export default function AddProjectPhotoUpload() {
 
           <div
             onClick={pickFiles}
-            className="cursor-pointer flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-blue-400 bg-blue-50/40 px-10 py-8 text-center hover:bg-blue-50"
+            className="h-56 w-full cursor-pointer flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-blue-400 bg-blue-50/40 px-10 py-8 text-center hover:bg-blue-50"
           >
             <img src={upload.src} alt="" className="mb-4" />
             <p className="text-sm font-medium text-gray-800">

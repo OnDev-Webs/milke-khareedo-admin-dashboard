@@ -11,6 +11,9 @@ import {
 import { FiChevronDown } from "react-icons/fi";
 import { useFormContext } from "react-hook-form";
 import Loader from "@/components/ui/loader";
+import { Trash2, X } from "lucide-react";
+import Remove from "@/assets/remove.svg";
+import Image from "next/image";
 
 export default function AddRelationshipManagerForm() {
   const dispatch = useAppDispatch();
@@ -89,7 +92,7 @@ export default function AddRelationshipManagerForm() {
 
   return (
     <div className="h-[80vh] bg-white p-6 overflow-y-auto">
-      {loading && <p><Loader size={38}/></p>}
+      {loading && <p><Loader size={38} /></p>}
 
       {/* ================= RELATIONSHIP MANAGER ================= */}
       <div className="mb-6 relative" ref={rmRef}>
@@ -156,12 +159,25 @@ export default function AddRelationshipManagerForm() {
 
             <div className="absolute -bottom-px rounded-2xl overflow-hidden p-px bg-linear-to-r from-white via-neutral-400/40 to-white w-full">
               <div className="bg-neutral-400/40 px-4 py-3 backdrop-blur-[55px] text-white rounded-2xl">
-                <p className="text-lg font-semibold">
-                  {relationshipManager.name}
-                </p>
-                <p className="text-base">
-                  {relationshipManager.email || "-"}
-                </p>
+                <div>
+                  <p className="text-lg font-semibold">
+                    {relationshipManager.name}
+                  </p>
+                  <p className="text-base">
+                    {relationshipManager.email || "-"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRelationshipManager(null);
+                    setValue("relationshipManager", "", { shouldDirty: true });
+                  }}
+
+                  className="absolute top-5 right-4 z-10 rounded-[5px] bg-[#FFFFFF] p-2 transition"
+                  title="Remove Manager">
+                  <Image src={Remove} alt="Remove" width={18} height={18} />
+                </button>
               </div>
             </div>
           </div>
@@ -243,10 +259,32 @@ export default function AddRelationshipManagerForm() {
                 alt="Agent"
                 className="h-72 w-full object-cover"
               />
-              <div className="absolute -bottom-px rounded-2xl overflow-hidden p-px bg-linear-to-r from-white via-neutral-400/40 to-white w-full">
-                <div className="bg-neutral-400/40 px-4 py-3 backdrop-blur-[55px] text-white rounded-2xl">
-                  <p className="text-lg font-semibold">{agent.name}</p>
-                  <p className="text-base">{agent.email || "-"}</p>
+              {/* INFO OVERLAY */}
+              <div className="absolute -bottom-px rounded-[15px] overflow-hidden p-px bg-linear-to-r from-white via-neutral-400/40 to-white w-full">
+                <div className="bg-neutral-400/40 px-4 py-3 backdrop-blur-[60px] text-white rounded-2xl">
+                  <div>
+                    <p className="text-lg font-semibold">{agent.name}</p>
+                    <p className="text-base max-w-[230px] truncate">
+                      {agent.email || "-"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = selectedAgents.filter(
+                        (a) => a._id !== agent._id
+                      );
+                      setSelectedAgents(updated);
+                      setValue(
+                        "leadDistributionAgents",
+                        updated.map((a) => a._id),
+                        { shouldDirty: true }
+                      );
+                    }}
+                    className="absolute top-5 right-4 z-10 rounded-[5px] bg-[#FFFFFF] p-2 transition"
+                    title="Remove agent">
+                    <Image src={Remove} alt="Remove" width={18} height={18} />
+                  </button>
                 </div>
               </div>
             </div>

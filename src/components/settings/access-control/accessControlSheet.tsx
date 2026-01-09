@@ -41,7 +41,7 @@ export default function AccessControlSheet({ open, setOpen, data, mode , roleId 
         </div>
 
         <div className="px-2">
-          <AssignEmployee roleId={roleId}  />
+          <AssignEmployee roleId={roleId} setOpen={setOpen} />
         </div>
       </SheetContent>
     </Sheet>
