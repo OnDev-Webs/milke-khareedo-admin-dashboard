@@ -48,6 +48,35 @@ export function ConfigurationCard({
     "7 BHK",
   ];
 
+
+  function formatPriceShort(value: number | string): string {
+    if (!value) return "";
+
+    const num = Number(
+      value.toString().replace(/,/g, "").replace(/[^0-9]/g, "")
+    );
+
+    if (!num) return "";
+
+    if (num >= 10000000) {
+      const crore = num / 10000000;
+      return `${crore % 1 === 0 ? crore : crore.toFixed(1)} crore`;
+    }
+
+    if (num >= 100000) {
+      const lakh = num / 100000;
+      return `${lakh % 1 === 0 ? lakh : lakh.toFixed(1)} lakh`;
+    }
+
+    if (num >= 1000) {
+      const thousand = num / 1000;
+      return `${thousand % 1 === 0 ? thousand : thousand.toFixed(1)} thousand`;
+    }
+
+    return num.toString();
+  }
+
+
   return (
     <div className="mt-5 border rounded-xl p-4 space-y-4">
       <div className="flex justify-between items-center">
@@ -128,9 +157,12 @@ export function ConfigurationCard({
                   <IndianRupee size={15} className="" />
                 </div>
 
-                <p className="absolute  top-12 w-44 text-[#9A9A9A] text-xs mt-1.5 truncate">
-                  {numberToWords(`${price[subIndex]?.price ?? ""}`)}
-                </p>
+                {price[subIndex]?.price && (
+                  <p className="absolute top-12 w-44 text-[#9A9A9A] text-xs mt-1.5 truncate">
+                    {formatPriceShort(price[subIndex].price)}
+                  </p>
+                )}
+
               </div>
             </div>
 

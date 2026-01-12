@@ -196,7 +196,14 @@ export default function LeadCRMTable({
                 {leads.slice(0, visibleCount).map((row, index) => {
 
                   return (
-                    <tr key={row._id} className="hover:bg-gray-50">
+                    <tr
+                      key={row._id}
+                      className="hover:bg-gray-50 cursor-pointer"
+                      onClick={() => {
+                        if (!canViewLead) return;
+                        handleViewLead(row._id);
+                      }}
+                    >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">

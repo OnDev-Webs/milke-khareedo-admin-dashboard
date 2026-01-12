@@ -23,6 +23,7 @@ import call from "@/assets/call.svg"
 import mail from "@/assets/mail.svg"
 import Success from "../custom/popups/success";
 import { set } from "zod";
+import CitySelect from "../ui/citySelect";
 
 export type Developer = {
   _id: string;
@@ -154,7 +155,7 @@ function DeveloperEdit({
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(developer.logo || null);
 
-  const { register, handleSubmit, formState: { isSubmitting }, } = useForm<DeveloperForm>({
+  const { register, handleSubmit, control, formState: { isSubmitting }, } = useForm<DeveloperForm>({
     defaultValues: {
       name: developer.developerName,
       description: developer.description,
@@ -272,7 +273,6 @@ function DeveloperEdit({
             </div>
           </div>
 
-
           <Field label="Developer Name*">
             <input
               {...register("name")}
@@ -289,10 +289,7 @@ function DeveloperEdit({
           </Field>
 
           <Field label="City">
-            <input
-              {...register("city")}
-              className="w-full rounded-lg text-sm outline-none"
-            />
+            <CitySelect control={control} />
           </Field>
 
           <Field label="Established Year">
@@ -378,6 +375,7 @@ function AddNewDeveloper({
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<DeveloperForm>({
     resolver: zodResolver(DeveloperSchema),
@@ -509,11 +507,7 @@ function AddNewDeveloper({
           </Field>
 
           <Field label="City">
-            <input
-              placeholder="Enter city"
-              {...register("city")}
-              className="w-full  outline-none text-sm"
-            />
+            <CitySelect control={control} />
           </Field>
 
           <Field label="Established Year">
