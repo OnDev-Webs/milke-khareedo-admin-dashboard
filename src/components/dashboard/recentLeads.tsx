@@ -79,7 +79,7 @@ export default function RecentLeads() {
           </div>
         </div>
 
-        <div className="mt-1">
+        <div className="mt-1 max-h-[220px] overflow-y-auto hide-scrollbar">
           {recentLeads.map((lead) => (
             <div
               key={lead.id}
