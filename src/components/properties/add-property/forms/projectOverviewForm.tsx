@@ -79,6 +79,35 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
   const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
   const leadingEmptyDays = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
   const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
+  const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const hasDeveloperPrice = !!watch("developerPrice");
+  const hasOfferPrice = !!watch("offerPrice");
+
+  async function fetchLocationSuggestions(text: string) {
+    if (!text) {
+      setLocationSuggestions([]);
+      return;
+    }
+
+    const res = await fetch(
+      "https://places.googleapis.com/v1/places:autocomplete",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+        },
+        body: JSON.stringify({
+          input: text,
+        }),
+      }
+    );
+
+    const data = await res.json();
+    setLocationSuggestions(data.suggestions || []);
+    setShowSuggestions(true);
+  }
 
   const handlePrevMonth = () => {
     setCalendarDate(prev => {
@@ -243,6 +272,27 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
     return isNaN(n) ? 0 : n;
   };
 
+  function formatPriceShort(value: number): string {
+    if (!value || value <= 0) return "";
+
+    if (value >= 10000000) {
+      const crore = value / 10000000;
+      return `${crore % 1 === 0 ? crore : crore.toFixed(1)} crore`;
+    }
+
+    if (value >= 100000) {
+      const lakh = value / 100000;
+      return `${lakh % 1 === 0 ? lakh : lakh.toFixed(1)} lakh`;
+    }
+
+    if (value >= 1000) {
+      const thousand = value / 1000;
+      return `${thousand % 1 === 0 ? thousand : thousand.toFixed(1)} thousand`;
+    }
+
+    return value.toString();
+  }
+
   return (
     <main className="p-4 h-[84vh] pb-10  overflow-y-auto">
       <div className="grid gap-6 md:grid-cols-3">
@@ -296,32 +346,59 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
               className="w-full outline-none pr-10"
               value={locationSearch}
               placeholder="Search location"
-              onChange={(e) => setLocationSearch(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleLocationSearch();
+              onChange={(e) => {
+                const value = e.target.value;
+                setLocationSearch(value);
+
+                if (!value) {
+                  setShowSuggestions(false);
+                  return;
                 }
+
+                fetchLocationSuggestions(value);
+                setShowSuggestions(true);
               }}
               disabled={readOnly}
-              readOnly={readOnly}
             />
 
             <button
               type="button"
-              onClick={handleLocationSearch}
-              className="absolute right-8 top-1/2 -translate-y-1/2"
+              onClick={() => {
+                if (locationSearch) {
+                  setLocationSearch("");
+                  setValue("location", "");
+                  setShowSuggestions(false);
+                } else {
+                  handleLocationSearch();
+                }
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
             >
-              <Search size={16} />
+              {locationSearch ? <X size={16} /> : <Search size={16} />}
             </button>
 
-            <button
-              type="button"
-              onClick={() => setLocationSearch("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2"
-            >
-              <X size={16} />
-            </button>
+            {showSuggestions && locationSuggestions.length > 0 && (
+              <div className="absolute z-50 mt-1 w-full bg-white border rounded-lg shadow-md max-h-56 overflow-auto">
+                {locationSuggestions.map((item, index) => {
+                  const text = item.placePrediction?.text?.text;
+                  if (!text) return null;
+
+                  return (
+                    <div
+                      key={index}
+                      className="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100"
+                      onClick={() => {
+                        setLocationSearch(text);
+                        setValue("location", text, { shouldValidate: true });
+                        setShowSuggestions(false);
+                      }}
+                    >
+                      {text}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </Field>
 
@@ -511,11 +588,15 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
 
         <Field
           label="Starting Developer Price"
-          description="Official listed price"
+          description={
+            !hasDeveloperPrice
+              ? "Official listed price"
+              : undefined
+          }
           error={errors.developerPrice}
         >
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#000000] text-[16px] font-medium">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-black text-[16px] font-medium">
               ₹
             </span>
 
@@ -530,16 +611,14 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
                 if (val.includes("crore") || val.includes("lakh")) return;
                 const formatted = formatIndianNumber(val);
                 if (formatted) {
-                  setValue("developerPrice", formatted, {
-                    shouldDirty: true,
-                  });
+                  setValue("developerPrice", formatted, { shouldDirty: true });
                 }
               }}
             />
 
-            {watch("developerPrice") && (
-              <p className="absolute top-full mt-8 text-xs text-[#9A9A9A] truncate w-full">
-                {numberToWords(parseIndianPrice(watch("developerPrice")))}
+            {hasDeveloperPrice && (
+              <p className="absolute top-full mt-4 text-xs text-[#9A9A9A]">
+                {formatPriceShort(parseIndianPrice(watch("developerPrice")))}
               </p>
             )}
           </div>
@@ -547,11 +626,15 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
 
         <Field
           label="Starting Offer Price"
-          description="Special negotiated price for group-buy members"
+          description={
+            !hasOfferPrice
+              ? "Special negotiated price for group-buy members"
+              : undefined
+          }
           error={errors.offerPrice}
         >
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#000000] text-[16px] font-medium">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-black text-[16px] font-medium">
               ₹
             </span>
 
@@ -566,16 +649,14 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
                 if (val.includes("crore") || val.includes("lakh")) return;
                 const formatted = formatIndianNumber(val);
                 if (formatted) {
-                  setValue("offerPrice", formatted, {
-                    shouldDirty: true,
-                  });
+                  setValue("offerPrice", formatted, { shouldDirty: true });
                 }
               }}
             />
 
-            {watch("offerPrice") && (
-              <p className="absolute top-full mt-12 text-xs text-[#9A9A9A] truncate w-full">
-                {numberToWords(parseIndianPrice(watch("offerPrice")))}
+            {hasOfferPrice && (
+              <p className="absolute top-full mt-4 text-xs text-[#9A9A9A]">
+                {formatPriceShort(parseIndianPrice(watch("offerPrice")))}
               </p>
             )}
           </div>

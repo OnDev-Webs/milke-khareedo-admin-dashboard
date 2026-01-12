@@ -3,6 +3,14 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
 
+const ICON_BY_TYPE = {
+  schools: "/map-icon/school.svg",
+  hospitals: "/map-icon/hospital.svg",
+  restaurants: "/map-icon/restaurant.svg",
+  transportation: "/map-icon/hotels.svg",
+} as const;
+type IconType = keyof typeof ICON_BY_TYPE;
+
 const defaultCenter = {
   lat: 28.6139,
   lng: 77.209,
@@ -17,6 +25,7 @@ interface GoogleMapProps {
     lng: number;
     title?: string;
     label?: string;
+    type?: "main" | "schools" | "hospitals" | "transportation" | "restaurants"; 
   }>;
   onMapClick?: (coords: { lat: number; lng: number }) => void;
   className?: string;
@@ -155,14 +164,38 @@ export default function GoogleMapComponent({
         <Marker position={selectedPoint} title="Selected Location" />
       )}
 
-      {markers.map((marker, index) => (
+      {/* {markers.map((marker, index) => (
         <Marker
           key={marker.id ?? `${marker.lat}-${marker.lng}-${index}`}
           position={{ lat: marker.lat, lng: marker.lng }}
           title={marker.title}
           label={marker.label}
         />
-      ))}
+      ))} */}
+
+      {markers.map((marker, index) => {
+  const iconUrl =
+    marker.type && marker.type !== "main"
+      ? ICON_BY_TYPE[marker.type as IconType]
+      : undefined;
+
+  return (
+    <Marker
+      key={marker.id ?? `${marker.lat}-${marker.lng}-${index}`}
+      position={{ lat: marker.lat, lng: marker.lng }}
+      title={marker.title}
+      icon={
+        iconUrl
+          ? {
+              url: iconUrl,
+              scaledSize: new google.maps.Size(28, 28),
+            }
+          : undefined // 👈 "main" ke liye default Google pin
+      }
+    />
+  );
+})}
+
     </GoogleMap>
   );
 }

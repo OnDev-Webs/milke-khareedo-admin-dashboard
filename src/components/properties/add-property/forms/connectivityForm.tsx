@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import GoogleMapComponent from "./map/googleMap";
 
+
 type ConnectivityItem = {
   name: string;
   latitude: number;
@@ -154,11 +155,14 @@ export default function ConnectivityForm() {
   }, [projectLocation, selectedCoords]);
 
   const mapMarkers = useMemo(() => {
-    const categoryMarkers = connectivity[activeCategory].map((item: ConnectivityItem) => ({
-      lat: item.latitude,
-      lng: item.longitude,
-      title: item.name,
-    }));
+    const categoryMarkers = connectivity[activeCategory].map(
+      (item: ConnectivityItem) => ({
+        lat: item.latitude,
+        lng: item.longitude,
+        title: item.name,
+        type: activeCategory, 
+      })
+    );
 
     const mainMarker =
       projectLocation?.latitude && projectLocation?.longitude
@@ -169,12 +173,11 @@ export default function ConnectivityForm() {
             title: "Project Location",
             type: "main",
           },
-        ] : [];
+        ]
+        : [];
 
     return [...mainMarker, ...categoryMarkers];
   }, [connectivity, activeCategory, projectLocation]);
-
-  console.log("markers", mapMarkers);
 
   const activeConfig = CONNECTIVITY_CATEGORIES.find(
     (c) => c.key === activeCategory

@@ -174,7 +174,7 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
   return (
     <div className="grid grid-cols-12 gap-4">
       {/* Left Column - Posting Guide */}
-      <aside className="col-span-12 lg:col-span-3 border-r bg-white">
+      <aside className="col-span-12 lg:col-span-3 border-r bg-white relative">
         <div className="h-full pe-4 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -207,7 +207,7 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
                 handleSubmit(new Event("submit") as any);
               }
             }}
-            className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg"
+            className="fixed bottom-4 left-56 w-70 px-4 py-2 bg-primary text-primary-foreground rounded-lg"
           >
             {isSubmitting ? "Publishing..." : "Publish Post"}
           </button>

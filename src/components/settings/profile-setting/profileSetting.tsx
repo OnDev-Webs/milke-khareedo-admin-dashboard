@@ -14,21 +14,39 @@ import { resetAuth } from "@/lib/features/auth/adminAuthSlice";
 function Field({
   label,
   error,
+  disabled = false,
   children,
 }: {
   label: string;
   error?: any;
+  disabled?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <fieldset className="border px-4 pb-1.5 rounded-md">
-        <legend className="text-xs px-1 font-semibold text-gray-700">
+    <div
+      className={`rounded-md transition
+        ${disabled ? "opacity-60 cursor-not-allowed" : ""}
+      `}
+    >
+      <fieldset
+        className={`border px-4 pb-1.5 rounded-md
+          ${disabled ? "bg-gray-100 border-gray-200" : ""}
+        `}
+      >
+        <legend
+          className={`text-xs px-1 font-semibold
+            ${disabled ? "text-gray-400" : "text-gray-700"}
+          `}
+        >
           {label}
         </legend>
-        {children}
+
+        <div className={disabled ? "pointer-events-none" : ""}>
+          {children}
+        </div>
       </fieldset>
-      {error && (
+
+      {error && !disabled && (
         <p className="text-[11px] text-red-500">This field is required</p>
       )}
     </div>
@@ -62,12 +80,10 @@ export default function ProfileSettings() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Fetch profile on mount
   useEffect(() => {
     dispatch(getAdminProfile());
   }, [dispatch]);
 
-  // Update form data when profile is loaded
   useEffect(() => {
     if (firstName || lastName || email || phoneNumber) {
       setFormData({
@@ -79,7 +95,6 @@ export default function ProfileSettings() {
     }
   }, [firstName, lastName, email, phoneNumber]);
 
-  // Update preview when profile image changes
   useEffect(() => {
     if (profileImage && profileImage.trim() !== "") {
       setPreview(profileImage);
@@ -331,9 +346,6 @@ export default function ProfileSettings() {
                 <span className="whitespace-nowrap">Edit Profile</span>
               </button>
 
-
-
-
               <input
                 ref={fileRef}
                 type="file"
@@ -368,7 +380,7 @@ export default function ProfileSettings() {
               />
             </Field>
 
-            <Field label="Email Address*">
+            <Field label="Email Address*" disabled>
               <input
                 name="email"
                 type="email"
@@ -380,7 +392,7 @@ export default function ProfileSettings() {
               />
             </Field>
 
-            <Field label="Phone Number*">
+            <Field label="Phone Number*" disabled>
               <input
                 name="phoneNumber"
                 value={formData.phoneNumber}
@@ -391,7 +403,7 @@ export default function ProfileSettings() {
               />
             </Field>
 
-            <Field label="Role">
+            <Field label="Role" disabled>
               <input
                 name="role"
                 value={role?.name || "Admin"}
