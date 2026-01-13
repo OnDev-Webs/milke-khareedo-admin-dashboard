@@ -16,7 +16,11 @@ export interface Blog {
   bannerImage?: string;
   galleryImages?: string[];
   content: string;
-  category?: string;
+  category?: {
+    id: string;
+    name: string;
+    isActive?: boolean;
+  };
   isPublished?: boolean;
   createdAt: string;
   updatedAt: string;

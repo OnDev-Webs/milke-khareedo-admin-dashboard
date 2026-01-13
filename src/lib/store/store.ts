@@ -11,6 +11,7 @@ import developers from "@/lib/features/developers/developerSlice"
 import roles from "@/lib/features/role/roleSlice";
 import leadcrm from "@/lib/features/lead-crm/leadcrmSlice";
 import blogs from "@/lib/features/blogs/blogSlice";
+import category from "@/lib/features/category/categorySlice";
 import user from "@/lib/features/user/userSlice";
 
 const rootReducer = combineSlices({
@@ -21,6 +22,7 @@ const rootReducer = combineSlices({
   roles: roles,
   leadcrm: leadcrm,
   blogs: blogs,
+  category : category,
   user : user,
 });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { EllipsisVertical} from "lucide-react";
+import { EllipsisVertical } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import DeletePopUp from "../custom/popups/delete";
 import { Blog } from "@/lib/features/blogs/blogSlice";
@@ -26,6 +26,7 @@ interface BlogTableProps {
 const headers = [
   { key: "title", label: "Title", minW: "min-w-[250px]" },
   { key: "author", label: "Author", minW: "min-w-[150px]" },
+  { key: "category", label: "Category", minW: "min-w-[150px]" },
   { key: "tags", label: "Tags", minW: "min-w-[200px]" },
   { key: "date", label: "Date", minW: "min-w-[140px]" },
   { key: "actions", label: "Actions", minW: "min-w-[100px]" },
@@ -163,6 +164,18 @@ export default function BlogTable({
 
                     <td className="px-4 py-3 font-semibold text-gray-800">
                       {row.authorName || row.author || "N/A"}
+                    </td>
+
+                    <td className="px-4 py-3">
+                      {row.category?.name ? (
+                        <span className="px-2 py-1 text-xs font-medium bg-[#F4F8FF] text-[#000000] rounded">
+                          {row.category.name.startsWith("#")
+                            ? row.category.name
+                            : `${row.category.name}`}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-xs">No category</span>
+                      )}
                     </td>
 
                     <td className="px-4 py-3">

@@ -5,6 +5,8 @@ import { X, Upload, Bold, Italic, Underline, List, ListOrdered, Quote, Link as L
 import Image from "next/image";
 import upload from "@/assets/upload.svg";
 import { Blog } from "@/lib/features/blogs/blogSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { fetchCategories } from "@/lib/features/category/categoryApi";
 
 interface BlogFormProps {
   blog?: Blog | null;
@@ -21,9 +23,23 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
   const [bannerImage, setBannerImage] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(blog?.bannerImage || null);
   const [isPublished, setIsPublished] = useState(blog?.isPublished ?? true);
+  const dispatch = useAppDispatch();
+  const { categories, loading: categoryLoading } = useAppSelector(
+    (state) => state.category);
+
+  const [categoryId, setCategoryId] = useState<string>("");
+  const [categoryInput, setCategoryInput] = useState("");
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+
+
 
   const contentRef = useRef<HTMLDivElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    dispatch(fetchCategories({ isActive: true }));
+  }, [dispatch]);
+
 
   useEffect(() => {
     if (blog) {
@@ -32,6 +48,12 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
       setContent(blog.content || "");
       setBannerPreview(blog.bannerImage || null);
       setIsPublished((blog as any).isPublished ?? true);
+    }
+    if (blog?.category) {
+      if (typeof blog.category === "object") {
+        setCategoryId((blog.category as any).id || "");
+        setCategoryInput((blog.category as any).name || "");
+      }
     }
   }, [blog]);
 
@@ -145,21 +167,27 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
     console.log("SUBMIT TRIGGERED");
     if (readOnly) return;
 
-    // Ensure content is updated from editor
+    if (!categoryId && !categoryInput.trim()) {
+      alert("Category is required");
+      return;
+    }
+
     if (contentRef.current) {
       setContent(contentRef.current.innerHTML);
     }
 
     const formData = new FormData();
     formData.append("title", title);
-    // Use the latest content from the editor
     const finalContent = contentRef.current?.innerHTML || content;
     formData.append("content", finalContent);
+    if (categoryId) {
+      formData.append("categoryId", categoryId);
+    } else {
+      formData.append("categoryName", categoryInput.trim());
+    }
     formData.append("isPublished", isPublished.toString());
 
-    // Append tags as array - format: tags[] for each tag
     tags.forEach((tag) => {
-      // Remove # if present before sending
       const cleanTag = tag.startsWith("#") ? tag.slice(1) : tag;
       formData.append("tags", cleanTag);
     });
@@ -293,6 +321,69 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
                   className="w-full outline-none pt-1 pb-1 text-base placeholder:text-gray-400 disabled:bg-transparent"
                 />
               </fieldset>
+              
+              {/* Category */}
+              <fieldset className="border border-gray-300 px-3 py-2 rounded-md min-h-[56px] relative">
+                <legend className="px-1 text-sm text-gray-700 font-medium">
+                  Category <span className="text-red-500">*</span>
+                </legend>
+
+                <input
+                  type="text"
+                  value={
+                    categoryInput ||
+                    categories.find((c: any) => c._id === categoryId)?.name ||
+                    ""
+                  }
+                  disabled={readOnly}
+                  placeholder="Select or type category"
+                  onFocus={() => setShowCategoryDropdown(true)}
+                  onClick={() => setShowCategoryDropdown(true)}
+                  onChange={(e) => {
+                    setCategoryInput(e.target.value);
+                    setCategoryId("");
+                    setShowCategoryDropdown(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      setShowCategoryDropdown(false);
+                    }
+                  }}
+                  className="w-full outline-none pt-1 pb-1 text-sm placeholder:text-gray-400"
+                />
+
+                {showCategoryDropdown && (
+                  <div className="absolute left-0 right-0 top-full mt-1 z-[9999] max-h-48 overflow-auto rounded-md border bg-white shadow">
+                    {categories
+                      .filter((cat: any) =>
+                        cat.name
+                          .toLowerCase()
+                          .includes(
+                            (
+                              categoryInput ||
+                              categories.find((c: any) => c._id === categoryId)?.name ||
+                              ""
+                            ).toLowerCase()
+                          )
+                      )
+                      .map((cat: any) => (
+                        <div
+                          key={cat._id}
+                          onMouseDown={() => {
+                            setCategoryId(cat._id);
+                            setCategoryInput("");
+                            setShowCategoryDropdown(false);
+                          }}
+                          className="cursor-pointer px-3 py-2 text-sm hover:bg-[#F4F8FF]"
+                        >
+                          {cat.name}
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </fieldset>
+
               {/* Tags */}
               <fieldset className="border border-gray-300 px-3 py-2 rounded-md min-h-[56px]">
                 <legend className="px-1 text-sm text-gray-700 font-medium">
