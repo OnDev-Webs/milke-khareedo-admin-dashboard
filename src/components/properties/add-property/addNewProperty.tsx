@@ -18,7 +18,6 @@ import { useSearchParams } from "next/navigation";
 import { fetchPropertyById, updateProperty } from "@/lib/features/properties/propertiesApi";
 import Image from "next/image";
 
-
 type Step = {
   id: number;
   step: number;
@@ -235,20 +234,14 @@ export default function AddNewProperty() {
 
       methods.reset({
         ...property,
+        developer: property.developer?._id || "",
+        possessionStatus: property.possessionStatus || "",
         images: property.images?.map((img: any) => img.url) || [],
         relationshipManager: property.relationshipManager?._id || null,
         leadDistributionAgents: Array.isArray(property.leadDistributionAgents)
           ? property.leadDistributionAgents.map((a: any) => a._id)
           : [],
       });
-
-      if (property.developer?._id) {
-        methods.setValue("developer", property.developer._id);
-      }
-
-      if (property.location) {
-        methods.setValue("location", property.location);
-      }
 
       if (property.configurations?.length) {
         methods.setValue("configurations", property.configurations);
@@ -430,7 +423,11 @@ export default function AddNewProperty() {
 
               {/* Step Content */}
               <div className="">
-                <div className="">{currentStep?.component}</div>
+                {currentStep && (
+                  <div key={activeStep}>
+                    {currentStep.component}
+                  </div>
+                )}
               </div>
             </div>
           </div>

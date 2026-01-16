@@ -6,20 +6,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import {
-  ArrowUp,
-  Calendar,
-  Clock,
-  Mail,
-  Phone,
-  CheckCircle2,
-  User,
-  X,
-  MessageCircle,
-  AlertCircle,
-  Edit2,
-  Save,
-} from "lucide-react";
+import { ArrowUp, Calendar, Clock, User, X, AlertCircle, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import {
@@ -29,7 +16,7 @@ import {
   updateLeadRemark,
 } from "@/lib/features/lead-crm/leadcrmApi";
 import { RootState } from "@/lib/store/store";
-import { LeadDetails, TimelineItem } from "@/lib/features/lead-crm/leadcrmSlice";
+import { TimelineItem } from "@/lib/features/lead-crm/leadcrmSlice";
 import {
   Dialog,
   DialogContent,
@@ -407,7 +394,7 @@ export default function LeadCRMSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent className="w-full lg:w-[420px] p-0 overflow-hidden flex flex-col bg-white">
+        <SheetContent className="!max-w-none sm:!max-w-[300px] md:!max-w-[450px] lg:!max-w-[420px] w-full p-0 overflow-hidden flex flex-col bg-white">
           <SheetHeader className="border-b px-4 py-3 bg-white">
             <SheetTitle>
               <div className="flex items-center justify-between">

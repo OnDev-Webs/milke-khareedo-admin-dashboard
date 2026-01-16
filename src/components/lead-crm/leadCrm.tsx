@@ -1,9 +1,7 @@
 "use client";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import CustomTableSearchBar from "../custom/searchBar";
-import NotFound from "@/app/lead-crm/not-found";
 import LeadCRMTable from "./leadCrmTable";
-import LeadCRMSheet from "./leadCrmSheet";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchLeads } from "@/lib/features/lead-crm/leadcrmApi";
 import { RootState } from "@/lib/store/store";
@@ -20,12 +18,10 @@ export default function LeadCRM({
 }: {
   dateRange: "past_24_hours" | "past_7_days" | "past_30_days";
 }) {
-
   const dispatch = useAppDispatch();
   const { leads, loading, page, limit, total, totalPages } = useAppSelector(
     (state: RootState) => state.leadcrm
   );
-
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
 

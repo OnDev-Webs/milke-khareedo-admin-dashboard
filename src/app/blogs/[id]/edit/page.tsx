@@ -76,20 +76,13 @@ export default function EditBlogPage() {
             <Breadcrumb className="w-full">
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/blogs">Blogs</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href={`/blogs/${blogId}`}>View Blog</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="#">Edit Blog</BreadcrumbLink>
+                  <BreadcrumbLink href={`/blogs/${blogId}`}>Edit Blog</BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           </header>
           <div className="w-full h-full overflow-auto bg-white">
             <div className="p-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Blog</h1>
               <BlogForm
                 blog={selectedBlog}
                 onSubmit={handleUpdate}
