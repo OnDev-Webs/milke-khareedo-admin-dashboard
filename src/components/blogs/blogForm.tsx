@@ -7,6 +7,7 @@ import upload from "@/assets/upload.svg";
 import { Blog } from "@/lib/features/blogs/blogSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchCategories } from "@/lib/features/category/categoryApi";
+import toast from "react-hot-toast";
 
 interface BlogFormProps {
   blog?: Blog | null;
@@ -30,8 +31,6 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
   const [categoryId, setCategoryId] = useState<string>("");
   const [categoryInput, setCategoryInput] = useState("");
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-
-
 
   const contentRef = useRef<HTMLDivElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -168,7 +167,7 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
     if (readOnly) return;
 
     if (!categoryId && !categoryInput.trim()) {
-      alert("Category is required");
+     toast.error("Category is required");
       return;
     }
 
