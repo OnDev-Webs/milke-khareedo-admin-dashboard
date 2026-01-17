@@ -24,6 +24,7 @@ import mail from "@/assets/mail.svg"
 import Success from "../custom/popups/success";
 import { set } from "zod";
 import CitySelect from "../ui/citySelect";
+import toast from "react-hot-toast";
 
 export type Developer = {
   _id: string;
@@ -51,6 +52,36 @@ type DeveloperSheetProps = {
   data?: Developer;
   mode: SheetMode;
 };
+
+function Field({
+  label,
+  error,
+  children,
+}: {
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      {/* <fieldset className="rounded-md border-1 border-black px-4 pb-1 "> */}
+      <fieldset
+        className={`rounded-md px-4 pb-1 border ${error ? "border-red-500" : "border-black"
+          }`}
+      >
+
+        <legend className="px-1 text-xs font-semibold text-gray-700">
+          {label}
+        </legend>
+        {children}
+      </fieldset>
+      {error && (
+        <p className="text-[11px] text-red-500">{error}</p>
+      )}
+
+    </div>
+  );
+}
 
 function DeveloperView({ developer }: { developer: Developer }) {
   return (
@@ -376,6 +407,7 @@ function AddNewDeveloper({
     register,
     handleSubmit,
     control,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<DeveloperForm>({
     resolver: zodResolver(DeveloperSchema),
@@ -394,6 +426,48 @@ function AddNewDeveloper({
   const dispatch = useAppDispatch();
 
   const onSubmit = async (data: DeveloperForm) => {
+    let hasError = false;
+
+    if (!data.name) {
+      setError("name", { message: "Developer name is required" });
+      hasError = true;
+    }
+
+    if (!data.city) {
+      setError("city", { message: "City is required" });
+      hasError = true;
+    }
+
+    if (!data.establishedYear) {
+      setError("establishedYear", { message: "Established year is required" });
+      hasError = true;
+    }
+
+    if (!data.totalProjects) {
+      setError("totalProjects", { message: "TotalProjects  is required" });
+      hasError = true;
+    }
+
+    if (!data.contactName) {
+      setError("contactName", { message: "Contact person name is required" });
+      hasError = true;
+    }
+
+    if (!data.phone) {
+      setError("phone", { message: "Phone number is required" });
+      hasError = true;
+    }
+
+    if (!data.email) {
+      setError("email", { message: "Email is required" });
+      hasError = true;
+    }
+
+    if (hasError) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
     const formData = new FormData();
 
     formData.append("developerName", data.name);
@@ -486,15 +560,12 @@ function AddNewDeveloper({
             </div>
           </div>
 
-          <Field label="Developer Name*">
+          <Field label="Developer Name*" error={errors.name?.message}>
             <input
               {...register("name")}
               placeholder="Enter name"
               className="w-full outline-none text-sm"
             />
-            {errors.name && (
-              <p className="text-xs text-red-500">{errors.name.message}</p>
-            )}
           </Field>
 
           <Field label="Description">
@@ -506,11 +577,11 @@ function AddNewDeveloper({
             />
           </Field>
 
-          <Field label="City">
+          <Field label="City" error={errors.city?.message}>
             <CitySelect control={control} />
           </Field>
 
-          <Field label="Established Year">
+          <Field label="Established Year" error={errors.establishedYear?.message}>
             <input
               placeholder="Enter established year"
               {...register("establishedYear")}
@@ -518,7 +589,7 @@ function AddNewDeveloper({
             />
           </Field>
 
-          <Field label="Total Projects">
+          <Field label="Total Projects" error={errors.totalProjects?.message}>
             <input
               placeholder="Total projects"
               {...register("totalProjects")}
@@ -540,7 +611,7 @@ function AddNewDeveloper({
             </h3>
 
             <div className="space-y-4">
-              <Field label="Contact Person Name">
+              <Field label="Contact Person Name" error={errors.contactName?.message}>
                 <input
                   placeholder="Enter contact name"
                   {...register("contactName")}
@@ -548,7 +619,7 @@ function AddNewDeveloper({
                 />
               </Field>
 
-              <Field label="Phone Number">
+              <Field label="Phone Number" error={errors.phone?.message}>
                 <input
                   placeholder="Enter phone number"
                   {...register("phone")}
@@ -556,7 +627,7 @@ function AddNewDeveloper({
                 />
               </Field>
 
-              <Field label="Email ID">
+              <Field label="Email ID" error={errors.email?.message}>
                 <input
                   placeholder="Enter email"
                   {...register("email")}
@@ -578,30 +649,6 @@ function AddNewDeveloper({
           </button>
         </form>
       </div>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <fieldset className="rounded-md border-1 border-black px-4 pb-1">
-        <legend className="px-1 text-xs font-semibold text-gray-700">
-          {label}
-        </legend>
-        {children}
-      </fieldset>
-      {error && (
-        <p className="text-[11px] text-red-500">This field is required</p>
-      )}
     </div>
   );
 }

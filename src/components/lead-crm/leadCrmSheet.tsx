@@ -33,6 +33,7 @@ import TimelineCall from "@/assets/TimelineCall.svg"
 import Loader from "../ui/loader";
 import editStatus from "@/assets/editStatus.svg";
 import call from "@/assets/call.svg";
+import toast from "react-hot-toast";
 
 export type SheetMode = "view" | "edit" | "";
 
@@ -271,7 +272,10 @@ export default function LeadCRMSheet({
         nextFollowUpDate: dateTime,
       })
     ).then(() => {
+      toast.success("Follow-up scheduled successfully");
       dispatch(fetchLeadById(leadId));
+    }).catch(() => {
+      toast.error("Failed to schedule follow-up");
     });
   };
 
@@ -341,7 +345,10 @@ export default function LeadCRMSheet({
   const handleUpdateStatus = (status: string) => {
     if (!leadId) return;
     dispatch(updateLeadStatus({ leadId, status })).then(() => {
+      toast.success("Lead status updated");
       dispatch(fetchLeadById(leadId));
+    }).catch(() => {
+      toast.error("Failed to update lead status");
     });
   };
 
@@ -360,11 +367,12 @@ export default function LeadCRMSheet({
     setIsSavingRemark(true);
     dispatch(updateLeadRemark({ leadId, remark: remarkValue }))
       .then(() => {
+        toast.success("Remark updated successfully");
         dispatch(fetchLeadById(leadId));
         setIsEditingRemark(false);
       })
-      .catch((error) => {
-        console.error("Failed to update remark:", error);
+      .catch(() => {
+        toast.error("Failed to update remark");
       })
       .finally(() => {
         setIsSavingRemark(false);
