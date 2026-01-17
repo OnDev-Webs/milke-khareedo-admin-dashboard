@@ -12,6 +12,7 @@ type DropdownItem =
 
 type DropdownProps = {
   items: DropdownItem[];
+  value?: string;
   placeholder?: string;
   defaultValue?: string;
   onSelect?: (item: DropdownItem) => void;
@@ -22,6 +23,7 @@ type DropdownProps = {
 
 export default function CustomDropdown({
   items,
+  value,
   placeholder = "Select option",
   defaultValue,
   onSelect,
@@ -31,11 +33,26 @@ export default function CustomDropdown({
 }: DropdownProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [selectedLabel, setSelectedLabel] = useState(
-    defaultValue || placeholder
-  );
+  const [selectedLabel, setSelectedLabel] = useState(placeholder);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+  if (!value) {
+    setSelectedLabel(placeholder);
+    return;
+  }
+
+  const found = items.find((item) =>
+    typeof item === "string"
+      ? item === value
+      : item.value === value
+  );
+
+  if (found) {
+    setSelectedLabel(typeof found === "string" ? found : found.label);
+  }
+}, [value, items, placeholder]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

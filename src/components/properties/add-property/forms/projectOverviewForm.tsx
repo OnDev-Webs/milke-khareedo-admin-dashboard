@@ -146,8 +146,9 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
 
   const [configuration, setConfiguration] = useState(false);
   const dispatch = useAppDispatch();
+
   useEffect(() => {
-    dispatch(fetchDevelopers({ page: 1, limit: 10 }));
+    dispatch(fetchDevelopers({ page: 1, limit: 1000 }));
   }, [dispatch]);
 
   const { developers } = useAppSelector((state: RootState) => state.developers);
@@ -314,25 +315,23 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
           description="Select Registered Developer"
           error={errors.developer}
         >
-          <div>
-            <CustomDropdown
-              items={developers.map((d) => ({
-                label: d.developerName,
-                value: d._id,
-              }))}
-              onSelect={(item) => {
-                if (typeof item !== "string") {
-                  setselectDeveloperId(item.value);
-                  setValue("developer", item.value);
-                }
-              }}
-              placeholder={
-                developers.find((d) => d._id === developerId)?.developerName
-                || "Select Developer"
+          <CustomDropdown
+            items={developers.map(d => ({
+              label: d.developerName,
+              value: d._id,
+            }))}
+            value={developerId || ""}
+            onSelect={(item) => {
+              if (typeof item !== "string") {
+                setValue("developer", item.value, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
               }
-              bordernone={true}
-            />
-          </div>
+            }}
+            placeholder="Select Developer"
+            bordernone
+          />
         </Field>
 
         <Field
@@ -745,22 +744,24 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
         </div>
 
         <Field
-          label={`Possession Status`}
+          label="Possession Status"
           description="Project stage"
           error={errors.possessionStatus}
         >
           <CustomDropdown
             items={["Ready To Move", "Under Construction"]}
-            placeholder={possessionStatus || "Select status"}
+            value={possessionStatus || ""}
             onSelect={(item) => {
-              if (readOnly) return;
               if (typeof item === "string") {
-                setValue("possessionStatus", item);
+                setValue("possessionStatus", item, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
               }
             }}
-            bordernone={true}
+            placeholder="Select status"
+            bordernone
           />
-
         </Field>
       </div>
 

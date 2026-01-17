@@ -99,9 +99,6 @@ export default function BlogDetailPage() {
               <BreadcrumbList className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <BreadcrumbItem>
-                    <BreadcrumbLink href="/blogs">Blogs</BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbItem>
                     <BreadcrumbLink href="#">
                       {isEditing ? "Edit Blog" : "View Blog"}
                     </BreadcrumbLink>
@@ -130,7 +127,6 @@ export default function BlogDetailPage() {
             <div className="p-6">
               {isEditing ? (
                 <>
-                  <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Blog</h1>
                   <BlogForm
                     blog={selectedBlog}
                     onSubmit={handleUpdate}
@@ -140,7 +136,6 @@ export default function BlogDetailPage() {
                 </>
               ) : (
                 <>
-                  <h1 className="text-2xl font-bold text-gray-900 mb-6">View Blog</h1>
                   <BlogForm
                     blog={selectedBlog}
                     onSubmit={handleUpdate}

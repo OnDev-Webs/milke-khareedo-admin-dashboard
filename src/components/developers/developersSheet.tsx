@@ -347,7 +347,7 @@ function DeveloperEdit({
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`w-full rounded-lg py-3 text-sm font-semibold text-white transition ${isSubmitting
+            className={`w-full rounded-lg py-3 mb-2 text-sm font-semibold text-white transition ${isSubmitting
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-black hover:bg-gray-900"
               }`}
