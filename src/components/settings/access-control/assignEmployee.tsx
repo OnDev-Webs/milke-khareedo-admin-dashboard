@@ -93,14 +93,14 @@ export default function AssignEmployee({
 
       <div className="flex-1 min-h-[68vh] overflow-y-auto px-4 py-4">
         {loading ? (
-          <p className="text-sm text-gray-500 text-center">
+          <div className="text-sm text-gray-500 text-center">
             <Loader size={38} />
-          </p>
+          </div>
         ) : filteredUsers.length === 0 ? (
           <div className="flex h-full items-center justify-center">
-            <p className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500">
               No users found
-            </p>
+            </div>
           </div>
         ) : (
           <div className="space-y-3">

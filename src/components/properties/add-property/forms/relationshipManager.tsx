@@ -92,7 +92,7 @@ export default function AddRelationshipManagerForm() {
 
   return (
     <div className="h-[80vh] bg-white p-6 overflow-y-auto">
-      {loading && <p><Loader size={38} /></p>}
+      {loading && <div><Loader size={38} /></div>}
 
       {/* ================= RELATIONSHIP MANAGER ================= */}
       <div className="mb-6 relative" ref={rmRef}>
