@@ -4,20 +4,14 @@ import { useMemo, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import GoogleMapComponent from "./map/googleMap";
 
-
 type ConnectivityItem = {
   name: string;
   latitude: number;
   longitude: number;
 };
 
-type ConnectivityCategoryKey =
-  | "schools"
-  | "hospitals"
-  | "transportation"
-  | "restaurants";
-
-
+type ConnectivityCategoryKey = | "schools" | "hospitals" | "transportation" | "restaurants";
+ 
 const CONNECTIVITY_CATEGORIES = [
   {
     key: "schools",
@@ -61,7 +55,9 @@ export default function ConnectivityForm() {
     },
   });
 
-  const projectLocation = watch("location");
+  const latitude = watch("latitude");
+  const longitude = watch("longitude");
+
   const [activeCategory, setActiveCategory] = useState<ConnectivityCategoryKey>("schools");
 
   const [inputs, setInputs] = useState<Record<ConnectivityCategoryKey, string>>({
@@ -137,22 +133,15 @@ export default function ConnectivityForm() {
   };
 
   const mapCenter = useMemo(() => {
-    if (selectedCoords) {
+    if (latitude && longitude) {
       return {
-        lat: selectedCoords.latitude,
-        lng: selectedCoords.longitude,
-      };
-    }
-
-    if (projectLocation?.latitude && projectLocation?.longitude) {
-      return {
-        lat: projectLocation.latitude,
-        lng: projectLocation.longitude,
+        lat: latitude,
+        lng: longitude,
       };
     }
 
     return { lat: 28.6139, lng: 77.209 };
-  }, [projectLocation, selectedCoords]);
+  }, [latitude, longitude]);
 
   const mapMarkers = useMemo(() => {
     const categoryMarkers = connectivity[activeCategory].map(
@@ -160,16 +149,16 @@ export default function ConnectivityForm() {
         lat: item.latitude,
         lng: item.longitude,
         title: item.name,
-        type: activeCategory, 
+        type: activeCategory,
       })
     );
 
     const mainMarker =
-      projectLocation?.latitude && projectLocation?.longitude
+      latitude && longitude
         ? [
           {
-            lat: projectLocation.latitude,
-            lng: projectLocation.longitude,
+            lat: latitude,
+            lng: longitude,
             title: "Project Location",
             type: "main",
           },
@@ -177,7 +166,7 @@ export default function ConnectivityForm() {
         : [];
 
     return [...mainMarker, ...categoryMarkers];
-  }, [connectivity, activeCategory, projectLocation]);
+  }, [connectivity, activeCategory, latitude, longitude]);
 
   const activeConfig = CONNECTIVITY_CATEGORIES.find(
     (c) => c.key === activeCategory
@@ -191,16 +180,9 @@ export default function ConnectivityForm() {
         <h1 className="font-medium text-sm mb-2">Project Location</h1>
         <div className="h-[220px] w-full rounded-lg relative overflow-hidden">
           <GoogleMapComponent
-            key={`${mapKey}-${activeCategory}`}
+            key={`${latitude}-${longitude}`}
             center={mapCenter}
             markers={mapMarkers}
-            onMapClick={({ lat, lng }) => {
-              setValue(
-                "location",
-                { latitude: lat, longitude: lng },
-                { shouldDirty: true }
-              );
-            }}
           />
         </div>
       </div>
@@ -261,14 +243,6 @@ export default function ConnectivityForm() {
                       longitude: place.location.longitude,
                     });
 
-                    setValue(
-                      "location",
-                      projectLocation ?? {
-                        latitude: place.location.latitude,
-                        longitude: place.location.longitude,
-                      },
-                      { shouldDirty: true }
-                    );
                     setMapKey((prev) => prev + 1);
                     setSuggestions([]);
                   }}
