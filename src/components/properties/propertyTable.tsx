@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  ChevronLeft,
-  ChevronRight,
-  Dot,
-  EllipsisVertical,
-  EllipsisVerticalIcon,
-} from "lucide-react";
+import {ChevronLeft, ChevronRight, Dot, EllipsisVertical, EllipsisVerticalIcon} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import DeletePopUp from "../custom/popups/delete";
 import { Property } from "@/lib/features/properties/propertiesSlice";
@@ -36,11 +30,7 @@ export default function PropertiesTable({
   const [openMenuId, setOpenMenuId] = useState<number | string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [menuPosition, setMenuPosition] = useState<{
-    top: number;
-    left: number;
-  } | null>(null);
-
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number;} | null>(null);
 
   const actionMenuRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
@@ -74,7 +64,6 @@ export default function PropertiesTable({
     return count < 10 ? `0${count}` : `${count}`;
   };
 
-
   const canEdit = useAppSelector((state: RootState) =>
     hasPermission(state, PERMISSIONS.PROPERTY.EDIT)
   );
@@ -87,6 +76,32 @@ export default function PropertiesTable({
     hasPermission(state, PERMISSIONS.PROPERTY.DELETE)
   );
 
+  const extractLocalityWithCity = (fullAddress?: string) => {
+    if (!fullAddress || typeof fullAddress !== "string") return "-";
+
+    const parts = fullAddress
+      .split(",")
+      .map(p => p.trim())
+      .filter(Boolean);
+
+    if (parts.length < 2) return parts[0] || "-";
+
+    const countryIndex = parts.findIndex(p => p.toLowerCase() === "india");
+    const cityIndex = countryIndex > 1 ? countryIndex - 2 : parts.length - 3;
+    const city = parts[cityIndex];
+    const propertyKeywords = ["residency", "villa", "tower", "apartments", "complex", "society", "park", "heights", "enclave", "estate", "plaza", "mall", "center", "centre", "road", "rd"];
+
+    let localityIndex = cityIndex - 1;
+    let locality = parts[localityIndex];
+    while (
+      localityIndex > 0 &&
+      propertyKeywords.some(k => locality.toLowerCase().includes(k))
+    ) {
+      localityIndex--;
+      locality = parts[localityIndex];
+    }
+    return locality && city ? `${locality}, ${city}` : city || locality || "-";
+  };
 
   return (
     <div className="w-full bg-white">
@@ -140,11 +155,8 @@ export default function PropertiesTable({
                     </td>
 
                     <td className="px-4 py-3">{row.developer?.developerName}</td>
-                    <td className="px-4 py-3">{row.location}</td>
-
-                    <td className="px-4 py-3 text-center">
-                      {formatCount(row.joinedGroupCount)} / {formatCount(row.minGroupMembers)}
-                    </td>
+                    <td className="px-4 py-3">{extractLocalityWithCity(row.location)}</td>
+                    <td className="px-4 py-3 text-center">{formatCount(row.joinedGroupCount)} / {formatCount(row.minGroupMembers)}</td>
 
                     <td className="px-4 py-3 text-center whitespace-nowrap">
                       <span
@@ -166,14 +178,11 @@ export default function PropertiesTable({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-
                             const rect = e.currentTarget.getBoundingClientRect();
-
                             setMenuPosition({
                               top: rect.bottom + 8,
                               left: rect.right - 144,
                             });
-
                             setOpenMenuId(openMenuId === row._id ? null : row._id);
                           }}
                           className="rounded-full bg-gray-100 p-2"
@@ -293,7 +302,7 @@ export default function PropertiesTable({
           </div> */}
           </div>
         </div>
-        </div>
       </div>
-      );
+    </div>
+  );
 }

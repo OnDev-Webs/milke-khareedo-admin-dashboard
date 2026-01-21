@@ -152,7 +152,13 @@ export default function BlogTable({
               {blogs.slice(0, visibleCount).map((row, index) => {
 
                 return (
-                  <tr key={row._id} className="relative hover:bg-gray-50" style={{ zIndex: openMenuId === row._id ? 50 : 1 }}>
+                  <tr key={row._id} className="relative hover:bg-gray-50"
+                    style={{ zIndex: openMenuId === row._id ? 50 : 1 }}
+                    onClick={() => {
+                      if (!canViewBlog) return;
+                      router.push(`/blogs/${row._id}`);
+                    }}
+                  >
                     <td className="px-4 py-3">
                       <span
                         className="block max-w-[280px] truncate font-semibold text-gray-800"
@@ -213,12 +219,10 @@ export default function BlogTable({
                           onClick={(e) => {
                             e.stopPropagation();
                             const rect = e.currentTarget.getBoundingClientRect();
-
                             setMenuPosition({
                               top: rect.bottom + 8,
                               left: rect.right - 144,
                             });
-
                             setOpenMenuId(openMenuId === row._id ? null : row._id);
                           }}
                           className="rounded-full bg-gray-100 p-2"

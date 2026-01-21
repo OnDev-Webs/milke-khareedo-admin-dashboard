@@ -36,7 +36,6 @@ export default function UserAndRoles() {
     hasPermission(state, PERMISSIONS.TEAM.DELETE)
   );
 
-
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -66,6 +65,12 @@ export default function UserAndRoles() {
       console.error("Failed to toggle user status", error);
     }
   };
+
+  const getRoleName = (role: string | { name: string } | null | undefined) => {
+    if (typeof role === "object" && role?.name) return role.name;
+    return "—";
+  };
+
 
   return (
     <div className="bg-white">
@@ -118,7 +123,6 @@ export default function UserAndRoles() {
             Add New User
           </button>
         )}
-
       </div>
 
       {/* ===== TABLE ===== */}
@@ -131,9 +135,9 @@ export default function UserAndRoles() {
 
         {/* ===== LOADING ===== */}
         {loading && (
-          <p className="p-4 text-sm text-gray-500">
+          <div className="p-4 text-sm text-gray-500">
             <Loader size={38} />
-          </p>
+          </div>
         )}
 
         {/* ===== USERS LIST ===== */}
@@ -169,7 +173,7 @@ export default function UserAndRoles() {
                 {/* ===== ROLE ===== */}
                 <div className="col-span-4">
                   <span className="inline-flex rounded-full bg-blue-100 px-4 py-2 text-xs font-semibold text-blue-700">
-                    {typeof user.role === "object" ? user.role.name : "—"}
+                    {getRoleName(user.role)}
                   </span>
                 </div>
 
@@ -180,8 +184,7 @@ export default function UserAndRoles() {
                     onClick={() => handleToggleUserStatus(user._id, active)}
                     title={active ? "Active" : "Inactive"}
                     className={`relative inline-flex h-5 w-9 items-center rounded-full transition-all duration-200
-                    ${active ? "bg-green-600" : "bg-gray-300"}`}
-                  >
+                    ${active ? "bg-green-600" : "bg-gray-300"}`}>
                     <span
                       className={`inline-flex h-4 w-4 items-center justify-center rounded-full bg-white shadow transform transition-all duration-200
                       ${active ? "translate-x-4.5" : "translate-x-0.5"}`}
@@ -193,7 +196,6 @@ export default function UserAndRoles() {
                       )}
                     </span>
                   </button>
-
 
                   {/* ELLIPSIS */}
                   <button
@@ -208,10 +210,7 @@ export default function UserAndRoles() {
                   </button>
 
                   {openMenuId === user._id && (
-                    <div
-                      className={`absolute right-0 z-10 w-36 rounded-lg border bg-white shadow ${isLastTwo ? "bottom-8" : "top-8"
-                        }`}
-                    >
+                    <div className={`absolute right-0 z-10 w-36 rounded-lg border bg-white shadow ${isLastTwo ? "bottom-8" : "top-8"}`}>
                       <button
                         disabled={!canEditUser}
                         onClick={() => {
@@ -236,9 +235,7 @@ export default function UserAndRoles() {
                           setMode("view");
                           setOpen(true);
                         }}
-                        className={`block w-full px-4 py-2 text-left text-xs
-                        ${canViewUser ? "hover:bg-gray-50" : "opacity-50 cursor-not-allowed"}`}
-                      >
+                        className={`block w-full px-4 py-2 text-left text-xs ${canViewUser ? "hover:bg-gray-50" : "opacity-50 cursor-not-allowed"}`}>
                         View
                       </button>
 

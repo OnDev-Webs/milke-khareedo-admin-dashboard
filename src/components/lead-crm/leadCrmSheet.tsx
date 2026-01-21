@@ -169,6 +169,11 @@ function UpdateStatusDialog({
   currentStatus?: string;
 }) {
   const [selectedStatus, setSelectedStatus] = useState("");
+  useEffect(() => {
+    if (open && currentStatus) {
+      setSelectedStatus(currentStatus);
+    }
+  }, [open, currentStatus]);
 
   const handleSelect = (item: string | { label: string; value: string }) => {
     if (typeof item === "string") {
@@ -198,9 +203,9 @@ function UpdateStatusDialog({
             <CustomDropdown
               items={statusOptions.map((s) => ({ label: s.label, value: s.value }))}
               placeholder="Choose a status"
-              defaultValue={currentStatus ? statusOptions.find(s => s.value === currentStatus)?.label : undefined}
+              value={selectedStatus}
               onSelect={handleSelect}
-              searchable={true}
+              searchable
             />
           </div>
           <div className="flex gap-3 justify-end pt-2">

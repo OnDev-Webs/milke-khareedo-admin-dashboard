@@ -240,6 +240,39 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
     });
   }
 
+  async function setLocationFromSuggestion(text: string) {
+    const response = await fetch(
+      "https://places.googleapis.com/v1/places:searchText",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+          "X-Goog-FieldMask": "places.formattedAddress,places.location",
+        },
+        body: JSON.stringify({
+          textQuery: text,
+        }),
+      }
+    );
+
+    const data = await response.json();
+    const place = data?.places?.[0];
+    if (!place) return;
+
+    setValue("location", place.formattedAddress || text, {
+      shouldValidate: true,
+    });
+
+    setValue("latitude", place.location.latitude, {
+      shouldDirty: true,
+    });
+
+    setValue("longitude", place.location.longitude, {
+      shouldDirty: true,
+    });
+  }
+
   const formatIndianNumber = (value: string) => {
     const num = value.replace(/\D/g, "");
     if (!num) return "";
@@ -386,10 +419,10 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
                     <div
                       key={index}
                       className="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100"
-                      onClick={() => {
+                      onClick={async () => {
                         setLocationSearch(text);
-                        setValue("location", text, { shouldValidate: true });
                         setShowSuggestions(false);
+                        setLocationFromSuggestion(text);
                       }}
                     >
                       {text}
