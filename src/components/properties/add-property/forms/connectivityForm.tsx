@@ -11,7 +11,7 @@ type ConnectivityItem = {
 };
 
 type ConnectivityCategoryKey = | "schools" | "hospitals" | "transportation" | "restaurants";
- 
+
 const CONNECTIVITY_CATEGORIES = [
   {
     key: "schools",
@@ -233,16 +233,13 @@ export default function ConnectivityForm() {
                 <div
                   key={place.id}
                   onClick={() => {
-                    setInputs((prev) => ({
-                      ...prev,
-                      [activeCategory]: place.displayName?.text || "",
-                    }));
-
-                    setSelectedCoords({
-                      latitude: place.location.latitude,
-                      longitude: place.location.longitude,
-                    });
-
+                    const lat = place.location.latitude;
+                    const lng = place.location.longitude;
+                    setInputs((prev) => ({...prev, [activeCategory]: place.displayName?.text || "",}));
+                    setSelectedCoords({ latitude: lat, longitude: lng, });
+                    setValue("location", place.formattedAddress || place.displayName?.text, {shouldDirty: true,shouldValidate: true,});
+                    setValue("latitude", lat, {shouldDirty: true, shouldValidate: true,});
+                    setValue("longitude", lng, {shouldDirty: true, shouldValidate: true,});
                     setMapKey((prev) => prev + 1);
                     setSuggestions([]);
                   }}
