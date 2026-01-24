@@ -91,3 +91,51 @@ export const deleteBlog = createAsyncThunk<
   }
 });
 
+
+// ---- BLOG COMMENTS (ADMIN) ----
+
+export interface BlogComment {
+  _id: string;
+  content: string;
+  createdAt: string;
+
+  author: {
+    _id: string;
+    name: string;
+    email?: string;
+    profileImage?: string;
+  };
+
+  likedBy: {
+    _id: string;
+    name: string;
+    email?: string;
+  }[];
+
+  replies: BlogComment[];
+}
+
+export interface BlogCommentsResponse {
+  success: boolean;
+  data: BlogComment[];
+}
+
+export const fetchBlogComments = createAsyncThunk<
+  BlogCommentsResponse,
+  string,
+  { rejectValue: string }
+>(
+  "blogs/fetchComments",
+  async (blogId, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        `admin/blog/${blogId}/comments`
+      );
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch blog comments"
+      );
+    }
+  }
+);

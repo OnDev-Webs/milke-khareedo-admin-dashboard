@@ -5,6 +5,7 @@ import {
   createBlog,
   updateBlog,
   deleteBlog,
+  fetchBlogComments,
 } from "./blogApi";
 
 export interface Blog {
@@ -25,6 +26,26 @@ export interface Blog {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface BlogComment {
+  _id: string;
+  content: string;
+  createdAt: string;
+
+  author: {
+    _id: string;
+    name: string;
+    profileImage?: string;
+  };
+
+  likedBy: {
+    _id: string;
+    name: string;
+  }[];
+
+  replies: BlogComment[];
+}
+
 
 export interface BlogResponse {
   success: boolean;
@@ -47,6 +68,8 @@ export interface BlogDetailsResponse {
 export interface BlogState {
   blogs: Blog[];
   selectedBlog: Blog | null;
+  comments: BlogComment[];
+  loadingComments: boolean;
   loading: boolean;
   loadingDetails: boolean;
   error: string | null;
@@ -59,6 +82,8 @@ export interface BlogState {
 const initialState: BlogState = {
   blogs: [],
   selectedBlog: null,
+  comments: [],
+  loadingComments: false,
   loading: false,
   loadingDetails: false,
   error: null,
@@ -67,6 +92,8 @@ const initialState: BlogState = {
   total: 0,
   totalPages: 0,
 };
+
+
 
 const blogSlice = createSlice({
   name: "blogs",
@@ -114,6 +141,18 @@ const blogSlice = createSlice({
       })
       .addCase(deleteBlog.fulfilled, (state) => {
         // Blog deleted successfully
+      })
+      .addCase(fetchBlogComments.pending, (state) => {
+        state.loadingComments = true;
+        state.error = null;
+      })
+      .addCase(fetchBlogComments.fulfilled, (state, action) => {
+        state.loadingComments = false;
+        state.comments = action.payload?.data || [];
+      })
+      .addCase(fetchBlogComments.rejected, (state, action) => {
+        state.loadingComments = false;
+        state.error = action.payload || "Failed to fetch comments";
       });
   },
 });
