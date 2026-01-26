@@ -10,8 +10,12 @@ import { useCallback, useEffect, useState } from "react";
 import { adminLogin } from "@/lib/features/auth/adminAuthApi";
 import { useRouter } from "next/navigation";
 import { setRememberMe, setRememberMeEmail, getRememberMeEmail, getRememberMe, clearRememberMe } from "@/utils/rememberMe";
-import { Eye, EyeOff } from "lucide-react";
+import { Calculator, Eye, EyeOff } from "lucide-react";
 import { PERMISSIONS } from "@/lib/permissions/permissionKeys";
+import Mobile_url from "@/assets/mobile_url.svg";
+import Phone from "@/assets/phone.svg";
+import Sms from "@/assets/sms.svg";
+import Image from "next/image";
 
 const SIDEBAR_ORDER = [
   {
@@ -35,7 +39,7 @@ const SIDEBAR_ORDER = [
     permission: PERMISSIONS.BLOGS.VIEW,
   },
   {
-    url: "/settings", 
+    url: "/settings",
     permission: PERMISSIONS.TEAM.VIEW,
   },
 ];
@@ -93,6 +97,22 @@ export default function Login() {
     mode: "onSubmit",
   });
 
+
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileBlocked, setMobileBlocked] = useState(false);
+
+  useEffect(() => {
+    const checkScreen = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
+
+
   // Check for remember me data on component mount
   useEffect(() => {
     const rememberedEmail = getRememberMeEmail();
@@ -124,45 +144,46 @@ export default function Login() {
 
   const onSubmit = useCallback(async (payload: loginFrom) => {
     const response = await dispatch(adminLogin(payload));
-    if (adminLogin.fulfilled.match(response)) {
-      const token = response?.payload?.token;
-      const user = response?.payload;
 
-      if (!user?.id || !user?.email) {
-        console.error("Invalid user data received from login API");
+    if (adminLogin.fulfilled.match(response)) {
+      const user = response.payload;
+      const roleName = user?.role?.name;
+
+      // 🚫 MOBILE + ADMIN BLOCK
+      if (
+        isMobile &&
+        (roleName === "Admin" || roleName === "Super Admin")
+      ) {
+        // session clean
+        localStorage.clear();
+
+        setMobileBlocked(true); // 👈 BAS YE
         return;
       }
+
+      // ✅ NORMAL LOGIN FLOW (desktop ya allowed role)
+      const token = user.token;
 
       const userData = JSON.stringify({
         id: user.id,
         name: user.name || "",
         email: user.email,
-        role: user.role || { id: "", name: "" },
-        permissions: user.role?.permissions || undefined,
-        profileImage: user.profileImage || null,
+        role: user.role,
+        permissions: user.role?.permissions,
       });
 
-      // Store session token (always stored)
       localStorage.setItem("token", token);
       localStorage.setItem("user", userData);
-      localStorage.setItem("userId", JSON.stringify(user?.id || ""));
 
-      // If remember me is checked, store with 30-day expiry
-      if (rememberMe) {
-        setRememberMe(token, userData);
-        setRememberMeEmail(payload.email);
-      } else {
-        clearRememberMe();
-      }
+      const redirectUrl = getFirstAllowedRoute(
+        roleName,
+        user.role?.permissions
+      );
 
-      const roleName = user?.role?.name;
-      const permissions = user?.role?.permissions;
-      const redirectUrl = getFirstAllowedRoute(roleName, permissions);
       router.replace(redirectUrl);
     }
-  },
-    [dispatch, rememberMe, router]
-  );
+  }, [dispatch, isMobile, router]);
+
 
 
   return (
@@ -270,52 +291,134 @@ export default function Login() {
       {/* ================= MOBILE VIEW ================= */}
       <div className="block lg:hidden w-full h-full bg-[#F5F5FA] px-5 py-10">
         <div className="flex flex-col items-center justify-center h-full">
-          <div className="w-full h-full bg-white flex flex-col justify-between rounded-2xl p-6 shadow-md">
-            {/* LOGO TOP */}
-            <div className="mb-10">
-              <img src={logo.src} alt="logo" className="h-24 mx-auto" />
-            </div>
+          <div className="w-full h-full flex flex-col justify-center rounded-2xl p-6">
 
-            <form onSubmit={mobileForm.handleSubmit(onSubmit)} className="space-y-5">
-              {/* EMAIL */}
-              <fieldset className="border border-[#262626] px-3 py-2 rounded-md">
-                <legend className="text-sm">
-                  Email Address <span className="text-[#DA1414]">*</span>
-                </legend>
+            {mobileBlocked ? (
+              <div className="w-full h-full flex flex-col rounded-2xl overflow-hidden">
 
-                <input {...mobileForm.register("email")} className="w-full outline-none placeholder:text-[#BABABA]" placeholder="Enter here" />
-              </fieldset>
+              {/* ===== TOP BAR ===== */}
+              <div className="absolute top-0 left-0 right-0 flex items-center bg-white justify-between px-5 py-4 border-b z-30">
+                <img src={logo.src} alt="logo" className="h-10" />
+          
+                <div className="w-9 h-9 flex items-center justify-center rounded-full border cursor-pointer">
+                  <span className="text-xl">☰</span>
+                </div>
+              </div>
+            
+              {/* ===== CENTER CONTENT ===== */}
+              <div className="flex flex-col items-center justify-center text-center px-6 gap-4 mt-24">
 
-              {/* PASSWORD */}
-              <fieldset className="border border-[#262626] px-3 py-2 rounded-md relative">
-                <legend className="text-sm">
-                  Password <span className="text-[#DA1414]">*</span>
-                </legend>
-
-                <input
-                  type={showPassword ? "text" : "password"}
-                  {...mobileForm.register("password")}
-                  className="w-full outline-none pr-8 placeholder:text-[#BABABA]"
-                  placeholder="Enter here"
-                />
+                {/* ICON */}
+                <div className="w-[88px] h-[88px] rounded-full bg-[#FFFFFF] flex items-center justify-center">
+                  <Image src={Mobile_url} alt="mobile url" width={40} height={40} />
+                </div>
+            
+                <h2 className="text-[22px] font-semibold text-[#000000] leading-snug mb-4">
+                  This URL is not accessible on mobile
+                </h2>
+              </div>
+            
+              {/* ===== BOTTOM ACTIONS ===== */}
+              <div className="px-6 pb-6 space-y-5">
+            
+                {/* LOGIN BUTTON */}
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  disabled
+                  className="w-full bg-[#000000] text-white py-3 rounded-md cursor-not-allowed"
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  Login
                 </button>
-              </fieldset>
+            
+                {/* OR DIVIDER */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-[#E5E5E5]" />
+                  <span className="text-[14px] font-normal text-[#000000]">or</span>
+                  <div className="flex-1 h-px bg-[#E5E5E5]" />
+                </div>
+            
+                {/* CONTACT TEXT */}
+                <p className="text-[17px] font-normal text-center text-[#000000]">
+                  Contact system administrator
+                </p>
+            
+                {/* CALL / EMAIL BUTTONS */}
+                <div className="flex gap-4">
+                  <a
+                    href="tel:+919999999999"
+                    className="flex-1 bg-[#66AE39] text-[#FFFFFF] py-2 rounded-full text-center font-medium flex items-center justify-center gap-2"
+                  >
+                    <Image src={Phone} alt="call" width={16} height={16} />
+                    Call
+                  </a>
+            
+                  <a
+                    href="mailto:admin@milkekhareedo.com"
+                    className="flex-1 bg-white border border-[#F3F3F3] text-black py-2 rounded-full text-center font-medium flex items-center justify-center gap-2"
+                  >
+                    <Image src={Sms} alt="email" width={16} height={16} />
+                    Email
+                  </a>
+                </div>
+              </div>
+            </div>
+            
 
-              {/* BUTTON */}
-              <button
-                type="submit"
-                disabled={mobileForm.formState.isSubmitting}
-                className="w-full bg-[#17171D] text-[#FFFFFF] text-[16px] py-3 rounded-md"
-              >
-                {isSubmitting ? "Submitting..." : "Continue"}
-              </button>
-            </form>
+            ) : (
+              // ✅ NORMAL MOBILE LOGIN FORM (existing)
+              <>
+                <div className="mb-10">
+                  <img src={logo.src} alt="logo" className="h-24 mx-auto" />
+                </div>
+
+                <form
+                  onSubmit={mobileForm.handleSubmit(onSubmit)}
+                  className="space-y-5"
+                >
+                  {/* EMAIL */}
+                  <fieldset className="border border-[#262626] px-3 py-2 rounded-md">
+                    <legend className="text-sm">
+                      Email Address <span className="text-[#DA1414]">*</span>
+                    </legend>
+
+                    <input
+                      {...mobileForm.register("email")}
+                      className="w-full outline-none placeholder:text-[#BABABA]"
+                      placeholder="Enter here"
+                    />
+                  </fieldset>
+
+                  {/* PASSWORD */}
+                  <fieldset className="border border-[#262626] px-3 py-2 rounded-md relative">
+                    <legend className="text-sm">
+                      Password <span className="text-[#DA1414]">*</span>
+                    </legend>
+
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      {...mobileForm.register("password")}
+                      className="w-full outline-none pr-8 placeholder:text-[#BABABA]"
+                      placeholder="Enter here"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </fieldset>
+
+                  <button
+                    type="submit"
+                    disabled={mobileForm.formState.isSubmitting}
+                    className="w-full bg-[#17171D] text-white py-3 rounded-md"
+                  >
+                    Continue
+                  </button>
+                </form>
+              </>
+            )}
           </div>
         </div>
       </div>
