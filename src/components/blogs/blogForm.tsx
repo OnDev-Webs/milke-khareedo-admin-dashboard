@@ -234,8 +234,7 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
                 handleSubmit(new Event("submit") as any);
               }
             }}
-            className="fixed bottom-4 left-56 w-70 px-4 py-2 bg-primary text-primary-foreground rounded-lg"
-          >
+            className="fixed bottom-4 left-56 w-60 px-4 py-2 bg-primary text-primary-foreground rounded-lg">
             {isSubmitting ? "Publishing..." : "Publish Post"}
           </button>
         </div>
@@ -251,8 +250,7 @@ export default function BlogForm({ blog, onSubmit, isSubmitting = false, readOnl
                 <div
                   onClick={() => !readOnly && bannerInputRef.current?.click()}
                   className={`w-full flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-[#F4F8FF] px-10 py-20 text-center transition-colors ${readOnly ? "" : "cursor-pointer"
-                    }`}
-                >
+                    }`}>
                   {bannerPreview ? (
                     <div className="relative w-full h-64 rounded-lg overflow-hidden">
                       <img
