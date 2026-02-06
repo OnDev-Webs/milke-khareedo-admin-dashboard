@@ -34,6 +34,7 @@ type List = {
 
 export default function AddNewProperty() {
   const [activeStep, setActiveStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const propertyId = searchParams.get("id");
@@ -267,59 +268,122 @@ export default function AddNewProperty() {
 
   const { handleSubmit } = methods;
 
+  // const onSubmit = async (data: PropertyFormValues) => {
+  //   if (isViewMode) return;
+  //   const formData: any = new FormData();
+
+  //   Object.entries(data).forEach(([key, value]) => {
+  //     if (
+  //       key === "images" ||
+  //       key === "layouts" ||
+  //       value === undefined ||
+  //       value === null
+  //     ) {
+  //       return;
+  //     }
+
+  //     if (value instanceof File) {
+  //       formData.append(key, value);
+  //       return;
+  //     }
+
+  //     if (typeof value === "object") {
+  //       formData.append(key, JSON.stringify(value));
+  //     } else if (value !== undefined && value !== null) {
+  //       formData.append(key, String(value));
+  //     }
+  //   });
+
+  //   if (data.images?.length) {
+  //     data.images.forEach((file: File) => {
+  //       formData.append("images", file);
+  //     });
+  //   }
+
+  //   Object.entries(data.layouts || {}).forEach(([layoutKey, files]) => {
+  //     const [unitType, carpetAreaRaw] = layoutKey.split("_");
+  //     const carpetArea = Math.floor(Number(carpetAreaRaw) / 100 || Number(carpetAreaRaw));
+  //     const finalKey = `${unitType}_${carpetArea}`;
+  //     files.forEach((file) => {
+  //       formData.append(`layout_${finalKey}`, file);
+  //     });
+  //   });
+
+  //   const resultAction = isEditMode && propertyId
+  //     ? await dispatch(updateProperty({ id: propertyId, payload: formData }))
+  //     : await dispatch(createProperty(formData));
+
+  //   if (
+  //     createProperty.fulfilled.match(resultAction) ||
+  //     updateProperty.fulfilled.match(resultAction)
+  //   ) {
+  //     dispatch(fetchProperties({ page: 1, limit: 10 }));
+  //     router.push("/properties");
+  //   }
+  // };
+
   const onSubmit = async (data: PropertyFormValues) => {
-    if (isViewMode) return;
-    const formData: any = new FormData();
+    if (isViewMode || isSubmitting) return;
 
-    Object.entries(data).forEach(([key, value]) => {
-      if (
-        key === "images" ||
-        key === "layouts" ||
-        value === undefined ||
-        value === null
-      ) {
-        return;
-      }
+    setIsSubmitting(true);
 
-      if (value instanceof File) {
-        formData.append(key, value);
-        return;
-      }
+    try {
+      const formData: any = new FormData();
 
-      if (typeof value === "object") {
-        formData.append(key, JSON.stringify(value));
-      } else if (value !== undefined && value !== null) {
-        formData.append(key, String(value));
-      }
-    });
+      Object.entries(data).forEach(([key, value]) => {
+        if (
+          key === "images" ||
+          key === "layouts" ||
+          value === undefined ||
+          value === null
+        ) {
+          return;
+        }
 
-    if (data.images?.length) {
-      data.images.forEach((file: File) => {
-        formData.append("images", file);
+        if (value instanceof File) {
+          formData.append(key, value);
+          return;
+        }
+
+        if (typeof value === "object") {
+          formData.append(key, JSON.stringify(value));
+        } else {
+          formData.append(key, String(value));
+        }
       });
-    }
 
-    Object.entries(data.layouts || {}).forEach(([layoutKey, files]) => {
-      const [unitType, carpetAreaRaw] = layoutKey.split("_");
-      const carpetArea = Math.floor(Number(carpetAreaRaw) / 100 || Number(carpetAreaRaw));
-      const finalKey = `${unitType}_${carpetArea}`;
-      files.forEach((file) => {
-        formData.append(`layout_${finalKey}`, file);
+      if (data.images?.length) {
+        data.images.forEach((file: File) => {
+          formData.append("images", file);
+        });
+      }
+
+      Object.entries(data.layouts || {}).forEach(([layoutKey, files]) => {
+        const [unitType, carpetAreaRaw] = layoutKey.split("_");
+        const carpetArea = Math.floor(
+          Number(carpetAreaRaw) / 100 || Number(carpetAreaRaw)
+        );
+        const finalKey = `${unitType}_${carpetArea}`;
+
+        files.forEach((file) => {
+          formData.append(`layout_${finalKey}`, file);
+        });
       });
-    });
 
-    const resultAction = isEditMode && propertyId
-      ? await dispatch(updateProperty({ id: propertyId, payload: formData }))
-      : await dispatch(createProperty(formData));
+      const resultAction =
+        isEditMode && propertyId
+          ? await dispatch(updateProperty({ id: propertyId, payload: formData }))
+          : await dispatch(createProperty(formData));
 
-    if (
-      createProperty.fulfilled.match(resultAction) ||
-      updateProperty.fulfilled.match(resultAction)
-    ) {
-      dispatch(fetchProperties({ page: 1, limit: 10 }));
-      router.push("/properties");
+      if (resultAction.meta.requestStatus === "fulfilled") {
+        dispatch(fetchProperties({ page: 1, limit: 10 }));
+        router.replace("/properties");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
 
   return (
     <div>
@@ -391,10 +455,17 @@ export default function AddNewProperty() {
                 {!isViewMode && activeStep === totalSteps && (
                   <button
                     type="submit"
-                    className="border rounded py-2 bg-black text-white w-full"
+                    disabled={isSubmitting}
+                    className={`border rounded py-2 w-full text-white ${isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-black"
+                      }`}
                   >
-                    {isEditMode ? "Edit Property" : "Save Property"}
+                    {isSubmitting
+                      ? "Saving..."
+                      : isEditMode
+                        ? "Edit Property"
+                        : "Save Property"}
                   </button>
+
                 )}
               </div>
             </aside>
