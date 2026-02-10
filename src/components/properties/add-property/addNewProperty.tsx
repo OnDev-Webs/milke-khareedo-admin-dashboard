@@ -268,59 +268,7 @@ export default function AddNewProperty() {
 
   const { handleSubmit } = methods;
 
-  // const onSubmit = async (data: PropertyFormValues) => {
-  //   if (isViewMode) return;
-  //   const formData: any = new FormData();
-
-  //   Object.entries(data).forEach(([key, value]) => {
-  //     if (
-  //       key === "images" ||
-  //       key === "layouts" ||
-  //       value === undefined ||
-  //       value === null
-  //     ) {
-  //       return;
-  //     }
-
-  //     if (value instanceof File) {
-  //       formData.append(key, value);
-  //       return;
-  //     }
-
-  //     if (typeof value === "object") {
-  //       formData.append(key, JSON.stringify(value));
-  //     } else if (value !== undefined && value !== null) {
-  //       formData.append(key, String(value));
-  //     }
-  //   });
-
-  //   if (data.images?.length) {
-  //     data.images.forEach((file: File) => {
-  //       formData.append("images", file);
-  //     });
-  //   }
-
-  //   Object.entries(data.layouts || {}).forEach(([layoutKey, files]) => {
-  //     const [unitType, carpetAreaRaw] = layoutKey.split("_");
-  //     const carpetArea = Math.floor(Number(carpetAreaRaw) / 100 || Number(carpetAreaRaw));
-  //     const finalKey = `${unitType}_${carpetArea}`;
-  //     files.forEach((file) => {
-  //       formData.append(`layout_${finalKey}`, file);
-  //     });
-  //   });
-
-  //   const resultAction = isEditMode && propertyId
-  //     ? await dispatch(updateProperty({ id: propertyId, payload: formData }))
-  //     : await dispatch(createProperty(formData));
-
-  //   if (
-  //     createProperty.fulfilled.match(resultAction) ||
-  //     updateProperty.fulfilled.match(resultAction)
-  //   ) {
-  //     dispatch(fetchProperties({ page: 1, limit: 10 }));
-  //     router.push("/properties");
-  //   }
-  // };
+ 
 
   const onSubmit = async (data: PropertyFormValues) => {
     if (isViewMode || isSubmitting) return;
@@ -358,17 +306,16 @@ export default function AddNewProperty() {
         });
       }
 
-      Object.entries(data.layouts || {}).forEach(([layoutKey, files]) => {
-        const [unitType, carpetAreaRaw] = layoutKey.split("_");
-        const carpetArea = Math.floor(
-          Number(carpetAreaRaw) / 100 || Number(carpetAreaRaw)
-        );
-        const finalKey = `${unitType}_${carpetArea}`;
+   Object.entries(data.layouts || {}).forEach(([layoutKey, files]) => {
+  files.forEach((file) => {
+    // already uploaded image → string → skip
+    if (typeof file === "string") return;
 
-        files.forEach((file) => {
-          formData.append(`layout_${finalKey}`, file);
-        });
-      });
+    // send EXACT key
+    formData.append(`layout_${layoutKey}`, file);
+  });
+});
+
 
       const resultAction =
         isEditMode && propertyId
