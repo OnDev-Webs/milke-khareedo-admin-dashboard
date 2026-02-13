@@ -448,6 +448,24 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
         </Field>
 
         <Field
+          label="Total Units"
+          description="Total apartments in project"
+          error={errors.totalUnits}
+        >
+          <input
+            type="number"
+            className="w-full outline-none"
+            {...register("totalUnits", {
+              required: true,
+              valueAsNumber: true,
+              min: 1,
+            })}
+            disabled={readOnly}
+          />
+        </Field>
+
+
+        <Field
           label="Land Parcel "
           description="Total land size"
           error={errors.landParcel}

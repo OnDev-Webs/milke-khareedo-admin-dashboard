@@ -31,6 +31,8 @@ export const propertySchema = z.object({
   projectSize: z.string(),
   landParcel: z.string(),
   possessionDate: z.string(),
+  totalUnits: z.number().min(1),
+
 
   developerPrice: z.string(),
   offerPrice: z.string(),
