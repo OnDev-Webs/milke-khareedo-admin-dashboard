@@ -306,15 +306,18 @@ export default function AddNewProperty() {
         });
       }
 
-   Object.entries(data.layouts || {}).forEach(([layoutKey, files]) => {
+ Object.entries(data.layouts || {}).forEach(([layoutKey, files]) => {
   files.forEach((file) => {
-    // already uploaded image → string → skip
-    if (typeof file === "string") return;
-
-    // send EXACT key
-    formData.append(`layout_${layoutKey}`, file);
+    if (typeof file === "string") {
+      // tell server user still wants this
+      formData.append(`existing_layout_${layoutKey}`, file);
+    } else {
+      // new upload
+      formData.append(`layout_${layoutKey}`, file);
+    }
   });
 });
+
 
 
       const resultAction =
