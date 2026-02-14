@@ -268,7 +268,7 @@ export default function AddNewProperty() {
 
   const { handleSubmit } = methods;
 
- 
+
 
   const onSubmit = async (data: PropertyFormValues) => {
     if (isViewMode || isSubmitting) return;
@@ -300,23 +300,26 @@ export default function AddNewProperty() {
         }
       });
 
-      if (data.images?.length) {
-        data.images.forEach((file: File) => {
+      (data.images || []).forEach((file) => {
+        if (typeof file === "string") {
+          formData.append("existing_images", file);
+        } else {
           formData.append("images", file);
-        });
-      }
+        }
+      });
 
- Object.entries(data.layouts || {}).forEach(([layoutKey, files]) => {
-  files.forEach((file) => {
-    if (typeof file === "string") {
-      // tell server user still wants this
-      formData.append(`existing_layout_${layoutKey}`, file);
-    } else {
-      // new upload
-      formData.append(`layout_${layoutKey}`, file);
-    }
-  });
-});
+
+      Object.entries(data.layouts || {}).forEach(([layoutKey, files]) => {
+        files.forEach((file) => {
+          if (typeof file === "string") {
+            // tell server user still wants this
+            formData.append(`existing_layout_${layoutKey}`, file);
+          } else {
+            // new upload
+            formData.append(`layout_${layoutKey}`, file);
+          }
+        });
+      });
 
 
 
