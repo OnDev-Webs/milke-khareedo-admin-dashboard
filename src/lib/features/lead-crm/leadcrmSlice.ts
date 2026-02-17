@@ -8,6 +8,7 @@ import {
   NotificationGroup,
   fetchNotifications,
   markAllNotificationsAsRead,
+  deleteLead
 } from "./leadcrmApi";
 
 export interface Lead {
@@ -248,6 +249,31 @@ const leadcrmSlice = createSlice({
         });
       });
     });
+
+    /* ================= DELETE LEAD ================= */
+
+
+builder
+  .addCase(deleteLead.pending, (state) => {
+    state.loading = true;
+  })
+  .addCase(deleteLead.fulfilled, (state, action) => {
+    state.loading = false; // ✅ IMPORTANT
+
+    const deletedId = action.meta.arg;
+
+    state.leads = state.leads.filter(
+      (lead) => lead._id !== deletedId
+    );
+
+    state.total = state.total > 0 ? state.total - 1 : 0;
+  })
+  .addCase(deleteLead.rejected, (state, action) => {
+    state.loading = false;
+    state.error = action.payload || "Failed to delete lead";
+  });
+
+
 
   },
 });

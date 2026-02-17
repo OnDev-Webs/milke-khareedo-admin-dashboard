@@ -72,10 +72,6 @@ export default function LeadCRMTable({
     left: number;
   } | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const INITIAL_COUNT = 7;
-  const LOAD_MORE_COUNT = 6;
-
-  const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
@@ -130,18 +126,19 @@ export default function LeadCRMTable({
     setOpenMenuId(null);
   };
 
-  const handleDeleteConfirm = async (id: string) => {
-    try {
-      await dispatch(deleteLead(id)).unwrap();
-      setIsDeleteOpen(false);
-      setDeleteLeadId(null);
-      if (onRefreshLeads) {
-        onRefreshLeads();
-      }
-    } catch (error) {
-      console.error("Failed to delete lead:", error);
-    }
-  };
+const handleDeleteConfirm = async (id: string) => {
+  try {
+    await dispatch(deleteLead(id)).unwrap();
+
+    setIsDeleteOpen(false);
+    setDeleteLeadId(null);
+    setOpenMenuId(null);
+  } catch (error) {
+    console.error("Failed to delete lead:", error);
+  }
+};
+
+
 
   const canViewLead = useAppSelector((state: RootState) =>
     hasPermission(state, PERMISSIONS.CRM.VIEW)
@@ -150,6 +147,23 @@ export default function LeadCRMTable({
   const canDeleteLead = useAppSelector((state: RootState) =>
     hasPermission(state, PERMISSIONS.CRM.DELETE)
   );
+
+  const formatDateTime = (dateString?: string) => {
+    if (!dateString) return "N/A";
+
+    const date = new Date(dateString);
+
+    return date.toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
 
   return (
     <div className="w-full bg-[#F5F5FA] md:bg-white">
@@ -193,7 +207,7 @@ export default function LeadCRMTable({
               </thead>
 
               <tbody className="divide-y">
-                {leads.slice(0, visibleCount).map((row, index) => {
+                {leads.map((row, index) => {
 
                   return (
                     <tr
@@ -227,7 +241,7 @@ export default function LeadCRMTable({
                         {row.phoneNumber || "N/A"}
                       </td>
 
-                      <td className="px-4 py-3 font-semibold">{row.dateTime || "N/A"}</td>
+                      <td className="px-4 py-3 font-semibold">{formatDateTime(row.dateTime)}</td>
 
                       <td className="px-4 py-3 font-semibold">
                         {row.projectId || "N/A"}
@@ -310,7 +324,7 @@ export default function LeadCRMTable({
             </table>
           </div>
 
-          {visibleCount < leads.length && (
+          {/* {visibleCount < leads.length && (
             <div className="flex justify-center border-t p-4">
               <button
                 onClick={() =>
@@ -323,7 +337,7 @@ export default function LeadCRMTable({
                 Learn more
               </button>
             </div>
-          )}
+          )} */}
 
         </div>
       </div>
@@ -342,7 +356,8 @@ export default function LeadCRMTable({
                   {row.userName || "N/A"}
                 </p>
                 <p className="text-[11px] text-[#929292]">
-                  {row.dateTime || "N/A"}
+                  {formatDateTime(row.dateTime)}
+
                 </p>
               </div>
 
