@@ -92,7 +92,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       title: "Dashboard",
       url: "/dashboard",
       icon: <Image src={dashboard} alt="Dashboard" width={18} height={18} />,
-      allow: isSuperAdmin,
+      allow: canViewCRM,
     },
     {
       title: "Properties",
