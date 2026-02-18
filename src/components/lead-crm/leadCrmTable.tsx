@@ -241,7 +241,7 @@ const handleDeleteConfirm = async (id: string) => {
                         {row.phoneNumber || "N/A"}
                       </td>
 
-                      <td className="px-4 py-3 font-semibold">{formatDateTime(row.dateTime)}</td>
+                      <td className="px-4 py-3 font-semibold">{formatDateTime(row.createdAt)}</td>
 
                       <td className="px-4 py-3 font-semibold">
                         {row.projectId || "N/A"}
@@ -356,7 +356,8 @@ const handleDeleteConfirm = async (id: string) => {
                   {row.userName || "N/A"}
                 </p>
                 <p className="text-[11px] text-[#929292]">
-                  {formatDateTime(row.dateTime)}
+                 {formatDateTime(row.createdAt)}
+
 
                 </p>
               </div>
