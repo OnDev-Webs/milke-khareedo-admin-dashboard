@@ -435,7 +435,7 @@ export default function AddProjectOverviewForm({ readOnly = false }: { readOnly?
         </Field>
 
         <Field
-          label="Project Size "
+          label="Towers Count"
           description="Towers and unit count"
           error={errors.projectSize}
         >
