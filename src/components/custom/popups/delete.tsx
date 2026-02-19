@@ -3,7 +3,7 @@ import { Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import Success from "./success";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type DeletePopUpProps = {
   open: boolean;
@@ -26,7 +26,12 @@ export default function DeletePopUp({
   buttonText,
   iconType,
 }: DeletePopUpProps) {
+
   const [deleted, setDeleted] = useState(false);
+
+  useEffect(() => {
+    setDeleted(false);
+  }, [id]);
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) { setDeleted(false); onClose(); } }}>
@@ -67,8 +72,13 @@ export default function DeletePopUp({
               <button
                 onClick={async () => {
                   if (!id || !onConfirm) return;
-                  await onConfirm(id);
-                  setDeleted(true);
+                  try {
+                    await onConfirm(id);
+                    setDeleted(true);
+                  } catch (e) {
+                    console.error(e);
+                  }
+
                 }}
                 className="rounded-lg bg-red-600 py-3 text-sm font-semibold text-white hover:bg-red-700"
               >

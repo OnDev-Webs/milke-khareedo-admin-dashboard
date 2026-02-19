@@ -258,16 +258,28 @@ builder
     state.loading = true;
   })
   .addCase(deleteLead.fulfilled, (state, action) => {
-    state.loading = false; // ✅ IMPORTANT
+  state.loading = false;
 
-    const deletedId = action.meta.arg;
+  const deletedId = action.meta.arg;
 
-    state.leads = state.leads.filter(
-      (lead) => lead._id !== deletedId
-    );
+  state.leads = state.leads.filter(
+    (lead) => lead._id !== deletedId
+  );
 
-    state.total = state.total > 0 ? state.total - 1 : 0;
-  })
+  state.total = Math.max(0, state.total - 1);
+
+  // ✅ recompute totalPages safely
+  state.totalPages = Math.max(
+    1,
+    Math.ceil(state.total / state.limit)
+  );
+
+  // ✅ fix invalid page edge case
+  if (state.page > state.totalPages) {
+    state.page = state.totalPages;
+  }
+})
+
   .addCase(deleteLead.rejected, (state, action) => {
     state.loading = false;
     state.error = action.payload || "Failed to delete lead";

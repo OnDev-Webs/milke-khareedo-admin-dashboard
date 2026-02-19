@@ -133,10 +133,14 @@ const handleDeleteConfirm = async (id: string) => {
     setIsDeleteOpen(false);
     setDeleteLeadId(null);
     setOpenMenuId(null);
+
+    onRefreshLeads?.();
+
   } catch (error) {
     console.error("Failed to delete lead:", error);
   }
 };
+
 
 
 
@@ -175,6 +179,7 @@ const handleDeleteConfirm = async (id: string) => {
         onClose={handleSheetClose}
       />
       <DeletePopUp
+        key={deleteLeadId ?? "delete-popup"}
         open={isDeleteOpen}
         onClose={() => {
           setIsDeleteOpen(false);
