@@ -303,6 +303,39 @@ export default function LeadDetailsMobilePage() {
         });
     };
 
+    const getTimelineDisplayDate = (item: any) => {
+  // ✅ Visit should use metadata time (source of truth)
+  if (
+    item.activityType === "visit" &&
+    item.metadata?.visitDate &&
+    item.metadata?.visitTime
+  ) {
+    try {
+      const date = new Date(item.metadata.visitDate);
+      const [h, m] = item.metadata.visitTime.split(":").map(Number);
+
+      // set IST time correctly
+      date.setHours(h, m, 0, 0);
+
+      return date.toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: "Asia/Kolkata",
+      });
+    } catch (e) {
+      console.error("Visit date parse failed", e);
+    }
+  }
+
+  // ✅ fallback chain
+  return item.formattedDate || formatDate(item.activityDate);
+};
+    
+
     const formatPhoneNumber = (phone?: string) => {
         if (!phone || phone === "N/A") return null;
         return phone.replace(/[^\d+]/g, "");
@@ -590,7 +623,7 @@ export default function LeadDetailsMobilePage() {
 
                                         <div className="flex-1">
                                             <p className="text-[11px] text-gray-500 mb-0.5">
-                                                {formatDate(item.activityDate)}
+                                                {getTimelineDisplayDate(item)}
                                             </p>
                                             <p className="text-[13px] text-gray-800 leading-snug">
                                                 {(
