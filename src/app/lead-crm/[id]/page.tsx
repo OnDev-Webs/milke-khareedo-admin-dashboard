@@ -411,7 +411,7 @@ export default function LeadDetailsMobilePage() {
                             {selected.leadName}
                         </p>
                         <p className="text-[11px] text-gray-500">
-                            {selected.date}
+                            {selected.createdAt ? formatDate(selected.createdAt) : "N/A"}
                         </p>
                     </div>
 
@@ -591,7 +591,7 @@ export default function LeadDetailsMobilePage() {
                                         <div className="flex-1">
                                             <p className="text-[11px] text-gray-500 mb-0.5">
                                                 {item.formattedDate ||
-                                                    formatDate(item.activityDate)}
+                                                    formatDate(item.createdAt)}
                                             </p>
                                             <p className="text-[13px] text-gray-800 leading-snug">
                                                 {item.description}

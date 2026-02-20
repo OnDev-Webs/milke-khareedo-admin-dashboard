@@ -54,6 +54,8 @@ export interface TimelineItem {
   oldStatus: string | null;
   newStatus: string | null;
   metadata?: any;
+    createdAt: string;
+
 }
 
 export interface User {
@@ -128,6 +130,7 @@ export interface LeadDetails {
   timeline: TimelineItem[];
   nextFollowUp: NextFollowUp | null;
   followUpNotification: any;
+
 }
 
 export interface LeadDetailsResponse {
