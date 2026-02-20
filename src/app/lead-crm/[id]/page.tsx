@@ -623,7 +623,7 @@ export default function LeadDetailsMobilePage() {
 
                                         <div className="flex-1">
                                             <p className="text-[11px] text-gray-500 mb-0.5">
-                                                {getTimelineDisplayDate(item)}
+                                                {formatDate(item.activityDate || item.createdAt)}
                                             </p>
                                             <p className="text-[13px] text-gray-800 leading-snug">
                                                 {(

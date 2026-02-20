@@ -384,20 +384,20 @@ export default function LeadCRMSheet({
       });
   };
 
-  const formatDate = (dateString: string) => {
+   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
-    try {
-      return new Date(dateString).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      });
-    } catch {
-      return dateString;
-    }
+
+    const date = new Date(dateString);
+
+    return date.toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
   };
 
   if (!selected && !loadingDetails) {
