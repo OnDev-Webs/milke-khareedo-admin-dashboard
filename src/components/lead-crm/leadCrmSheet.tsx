@@ -446,7 +446,7 @@ export default function LeadCRMSheet({
                   <p className="text-base font-semibold text-gray-900 truncate">
                     {selected.leadName || "N/A"}
                   </p>
-                  <p className="text-xs text-gray-500 mt-0.5">{selected.date}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{formatDate(selected.createdAt)}</p>
                 </div>
               </div>
 
@@ -618,7 +618,7 @@ export default function LeadCRMSheet({
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs text-gray-500 mb-1">
-                              {item.formattedDate || formatDate(item.activityDate)}
+                              {formatDate(item.activityDate)}
                             </p>
                             <p className="text-sm font-medium text-gray-800 leading-relaxed">
                               {item.description}
