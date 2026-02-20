@@ -287,21 +287,21 @@ export default function LeadDetailsMobilePage() {
         });
     };
 
-      const formatDate = (dateString?: string) => {
-    if (!dateString) return "N/A";
+    const formatDate = (dateString?: string) => {
+        if (!dateString) return "N/A";
 
-    const date = new Date(dateString);
+        const date = new Date(dateString);
 
-    return date.toLocaleString("en-IN", {
-      timeZone: "Asia/Kolkata",
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
+        return date.toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+        });
+    };
 
     const formatPhoneNumber = (phone?: string) => {
         if (!phone || phone === "N/A") return null;
@@ -590,11 +590,12 @@ export default function LeadDetailsMobilePage() {
 
                                         <div className="flex-1">
                                             <p className="text-[11px] text-gray-500 mb-0.5">
-                                                {item.formattedDate ||
-                                                    formatDate(item.createdAt)}
+                                                {formatDate(item.activityDate)}
                                             </p>
                                             <p className="text-[13px] text-gray-800 leading-snug">
-                                                {item.description}
+                                                {(
+                                                    (item.description || "").replace(/^[^-]*-\s*/, "")
+                                                )}
                                             </p>
                                         </div>
                                     </div>
